@@ -99,6 +99,7 @@ After syncing:
 
 ## First Nimbus Release Checklist
 
+- Review `docs/release-build-audit.md`.
 - Confirm repository links point at `kunolabs/Nimbus`.
 - Confirm license and upstream attribution are intact.
 - Confirm issue templates are Nimbus-branded.

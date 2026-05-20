@@ -59,10 +59,11 @@ Goal: start the client fork deliberately.
 
 ## Immediate Next Move
 
-The next engineering pass should be a read-only release/build audit:
+The next engineering pass should harden CI/release behavior before any branded
+Nimbus release:
 
-1. Add upstream remotes.
-2. Map inherited CI and release workflows.
-3. Identify required secrets, signing assumptions, and artifact names.
-4. Run or document the shortest local Windows build path.
-5. Use `docs/release-process.md` before changing release automation.
+1. Use `docs/release-build-audit.md` as the release automation baseline.
+2. Use `docs/upstream-issue-radar.md` to choose the first reliability issue.
+3. Adapt release workflows to require `nimbus-v*` tags.
+4. Disable or retarget signing, symbols, and WebRTC publishing defaults.
+5. Set up a known-good Windows build environment and record the exact command.
