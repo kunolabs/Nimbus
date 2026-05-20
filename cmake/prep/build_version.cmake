@@ -18,8 +18,8 @@ endif()
 
 # Allow forks / CI to override which GitHub repo is used for update checks.
 # Cache variables can be provided via -DSUNSHINE_REPO_OWNER=... or -DSUNSHINE_REPO_NAME=...
-set(SUNSHINE_REPO_OWNER "Nonary" CACHE STRING "GitHub repo owner for update checks")
-set(SUNSHINE_REPO_NAME "vibepollo" CACHE STRING "GitHub repo name for update checks")
+set(SUNSHINE_REPO_OWNER "kunolabs" CACHE STRING "GitHub repo owner for update checks")
+set(SUNSHINE_REPO_NAME "Nimbus" CACHE STRING "GitHub repo name for update checks")
 
 # Allow environment variables to override the cache values (useful in CI)
 if(DEFINED ENV{SUNSHINE_REPO_OWNER})
@@ -30,7 +30,7 @@ if(DEFINED ENV{SUNSHINE_REPO_NAME})
 endif()
 
 # Try to infer owner/name from the clone URL when available and the defaults are still in use
-if(DEFINED GITHUB_CLONE_URL AND (SUNSHINE_REPO_OWNER STREQUAL "Nonary" OR SUNSHINE_REPO_NAME STREQUAL "vibepollo"))
+if(DEFINED GITHUB_CLONE_URL AND (SUNSHINE_REPO_OWNER STREQUAL "kunolabs" OR SUNSHINE_REPO_NAME STREQUAL "Nimbus"))
     string(REGEX MATCH "github.com[:/]+([^/]+)/([^/]+)(\\.git)?$" _match "${GITHUB_CLONE_URL}")
     if(_match)
         set(SUNSHINE_REPO_OWNER "${CMAKE_MATCH_1}")
@@ -47,7 +47,7 @@ if((DEFINED ENV{BRANCH}) AND (DEFINED ENV{BUILD_VERSION}))  # cmake-lint: disabl
         # If BRANCH is master we are building a push/release build
         MESSAGE("Got from CI '$ENV{BRANCH}' branch and version '$ENV{BUILD_VERSION}'")
         set(PROJECT_VERSION $ENV{BUILD_VERSION})
-        string(REGEX REPLACE "^v" "" PROJECT_VERSION ${PROJECT_VERSION})  # remove the v prefix if it exists
+        string(REGEX REPLACE "^(nimbus-)?v" "" PROJECT_VERSION ${PROJECT_VERSION})  # remove the Nimbus/v prefix if it exists
         set(CMAKE_PROJECT_VERSION ${PROJECT_VERSION})  # cpack will use this to set the binary versions
     endif()
 else()
@@ -60,7 +60,7 @@ else()
             return()
         endif()
 
-        set(_tag_patterns "[0-9]*.[0-9]*.[0-9]*" "v[0-9]*.[0-9]*.[0-9]*")
+        set(_tag_patterns "nimbus-v[0-9]*.[0-9]*.[0-9]*")
         foreach(_tag_pattern IN LISTS _tag_patterns)
             execute_process(
                 COMMAND ${GIT_EXECUTABLE} tag --merged HEAD --sort=-version:refname --list "${_tag_pattern}"
@@ -74,7 +74,7 @@ else()
 
             string(REPLACE "\n" ";" _git_tag_candidates "${_git_tag_candidates_raw}")
             foreach(_git_tag_candidate IN LISTS _git_tag_candidates)
-                if(_git_tag_candidate MATCHES "^v?[0-9]+\\.[0-9]+\\.[0-9]+([.-][0-9A-Za-z.-]+)?$")
+                if(_git_tag_candidate MATCHES "^nimbus-v[0-9]+\\.[0-9]+\\.[0-9]+([.-][0-9A-Za-z.-]+)?$")
                     set(${out_var} "${_git_tag_candidate}" PARENT_SCOPE)
                     return()
                 endif()
@@ -91,7 +91,7 @@ else()
 
     if(NOT _VER_FROM_ENV STREQUAL "")
         set(PROJECT_VERSION "${_VER_FROM_ENV}")
-        string(REGEX REPLACE "^v" "" PROJECT_VERSION "${PROJECT_VERSION}")
+        string(REGEX REPLACE "^(nimbus-)?v" "" PROJECT_VERSION "${PROJECT_VERSION}")
         set(CMAKE_PROJECT_VERSION ${PROJECT_VERSION})
         message(STATUS "Using version from TAG: ${PROJECT_VERSION}")
     elseif(GIT_EXECUTABLE)
@@ -117,7 +117,7 @@ else()
 
         if(NOT GIT_NEAREST_TAG_RAW STREQUAL "")
             set(PROJECT_VERSION "${GIT_NEAREST_TAG_RAW}")
-            string(REGEX REPLACE "^v" "" PROJECT_VERSION "${PROJECT_VERSION}")
+            string(REGEX REPLACE "^(nimbus-)?v" "" PROJECT_VERSION "${PROJECT_VERSION}")
             set(CMAKE_PROJECT_VERSION ${PROJECT_VERSION})
             message(STATUS "Detected git tag version: ${PROJECT_VERSION}")
         else()
@@ -126,14 +126,14 @@ else()
                 OUTPUT_VARIABLE GIT_NEAREST_TAG_RAW
                 RESULT_VARIABLE GIT_TAG_ERROR
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
-            if(NOT GIT_TAG_ERROR)
+            if(NOT GIT_TAG_ERROR AND GIT_NEAREST_TAG_RAW MATCHES "^nimbus-v[0-9]+\\.[0-9]+\\.[0-9]+([.-][0-9A-Za-z.-]+)?$")
                 set(PROJECT_VERSION "${GIT_NEAREST_TAG_RAW}")
-                string(REGEX REPLACE "^v" "" PROJECT_VERSION "${PROJECT_VERSION}")
+                string(REGEX REPLACE "^(nimbus-)?v" "" PROJECT_VERSION "${PROJECT_VERSION}")
                 set(CMAKE_PROJECT_VERSION ${PROJECT_VERSION})
                 message(STATUS "Detected fallback git tag version: ${PROJECT_VERSION}")
             else()
-                # Fallback when no tags: leave PROJECT_VERSION as-is (from project())
-                message(WARNING "No git tags found; using default PROJECT_VERSION=${PROJECT_VERSION}")
+                # Fallback when no Nimbus tags exist: leave PROJECT_VERSION as-is (from project())
+                message(WARNING "No Nimbus git tags found; using default PROJECT_VERSION=${PROJECT_VERSION}")
             endif()
         endif()
 

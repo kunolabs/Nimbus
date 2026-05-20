@@ -10,9 +10,9 @@ param(
     [switch]$SkipSignPathIfNoToken,
     [switch]$NoInstallSignPathModuleIfMissing,
     [string]$SignPathApiToken = $env:SIGNPATH_API_TOKEN,
-    [string]$SignPathOrganizationId = $(if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_ORGANIZATION_ID)) { "1ba0e884-7ab4-43e6-aa84-9b2c7e3fba15" } else { $env:SIGNPATH_ORGANIZATION_ID }),
-    [string]$SignPathProjectSlug = $(if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_PROJECT_SLUG)) { "Vibepollo" } else { $env:SIGNPATH_PROJECT_SLUG }),
-    [string]$SignPathSigningPolicySlug = $(if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_SIGNING_POLICY_SLUG)) { "test-signing" } else { $env:SIGNPATH_SIGNING_POLICY_SLUG }),
+    [string]$SignPathOrganizationId = $env:SIGNPATH_ORGANIZATION_ID,
+    [string]$SignPathProjectSlug = $(if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_PROJECT_SLUG)) { "Nimbus" } else { $env:SIGNPATH_PROJECT_SLUG }),
+    [string]$SignPathSigningPolicySlug = $env:SIGNPATH_SIGNING_POLICY_SLUG,
     [string]$SignPathPeArtifactConfigurationSlug = $env:SIGNPATH_PE_ARTIFACT_CONFIGURATION_SLUG,
     [string]$SignPathMsiArtifactConfigurationSlug = $(if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_MSI_ARTIFACT_CONFIGURATION_SLUG)) { "msi-file" } else { $env:SIGNPATH_MSI_ARTIFACT_CONFIGURATION_SLUG })
 )
@@ -42,8 +42,7 @@ function Find-LatestMsi([string]$Directory) {
 
 function Get-GitTagVersion([string]$RepoRoot) {
     $tagPatterns = @(
-        '[0-9]*.[0-9]*.[0-9]*',
-        'v[0-9]*.[0-9]*.[0-9]*'
+        'nimbus-v[0-9]*.[0-9]*.[0-9]*'
     )
 
     try {
@@ -56,7 +55,7 @@ function Get-GitTagVersion([string]$RepoRoot) {
                 }
 
                 $rawTag = $rawTag.Trim()
-                if ($rawTag -match '^v?(\d+)\.(\d+)\.(\d+)(?:([.-][0-9A-Za-z.-]+))?$') {
+                if ($rawTag -match '^nimbus-v(\d+)\.(\d+)\.(\d+)(?:([.-][0-9A-Za-z.-]+))?$') {
                     return @{
                         Tag = $rawTag
                         Major = [int]$matches[1]
@@ -71,7 +70,7 @@ function Get-GitTagVersion([string]$RepoRoot) {
 
     try {
         $rawTag = (git -C $RepoRoot describe --tags --abbrev=0 2>$null).Trim()
-        if ($rawTag -match '^v?(\d+)\.(\d+)\.(\d+)(?:([.-][0-9A-Za-z.-]+))?$') {
+        if ($rawTag -match '^nimbus-v(\d+)\.(\d+)\.(\d+)(?:([.-][0-9A-Za-z.-]+))?$') {
             return @{
                 Tag = $rawTag
                 Major = [int]$matches[1]
@@ -230,7 +229,7 @@ if ([string]::IsNullOrWhiteSpace($OutputName)) {
     if ($UninstallOnly) {
         $OutputName = "uninstall.exe"
     } else {
-        $OutputName = "VibepolloSetup.exe"
+        $OutputName = "NimbusSetup.exe"
     }
 }
 
@@ -266,18 +265,18 @@ if ([string]::IsNullOrWhiteSpace($informationalVersion)) {
     $informationalVersion = $assemblyVersion
 }
 if ($UninstallOnly) {
-    $assemblyInfoPath = Join-Path $artifactDir "VibepolloUninstall.AssemblyInfo.cs"
-    $assemblyTitle = "Vibepollo Uninstaller"
+    $assemblyInfoPath = Join-Path $artifactDir "NimbusUninstall.AssemblyInfo.cs"
+    $assemblyTitle = "Nimbus Uninstaller"
 } else {
-    $assemblyInfoPath = Join-Path $artifactDir "VibepolloInstaller.AssemblyInfo.cs"
-    $assemblyTitle = "Vibepollo Installer"
+    $assemblyInfoPath = Join-Path $artifactDir "NimbusInstaller.AssemblyInfo.cs"
+    $assemblyTitle = "Nimbus Installer"
 }
 $assemblyInfoContent = @(
     "using System.Reflection;",
     "[assembly: AssemblyTitle(""$assemblyTitle"")]",
     "[assembly: AssemblyDescription(""$assemblyTitle"")]",
     "[assembly: AssemblyProduct(""$assemblyTitle"")]",
-    "[assembly: AssemblyCompany(""Nonary"")]",
+    "[assembly: AssemblyCompany(""Kuno Labs"")]",
     "[assembly: AssemblyVersion(""$assemblyVersion"")]",
     "[assembly: AssemblyFileVersion(""$assemblyVersion"")]",
     "[assembly: AssemblyInformationalVersion(""$informationalVersion"")]"
@@ -292,7 +291,7 @@ $shouldSignWithSignPath = -not $DisableSignPath -and (
 if ($shouldSignWithSignPath -and -not $UninstallOnly) {
     Invoke-SignPathForArtifact `
         -ArtifactPath $MsiPath `
-        -Description "Vibepollo MSI payload $informationalVersion"
+        -Description "Nimbus MSI payload $informationalVersion"
 }
 
 $references = @(
@@ -351,9 +350,9 @@ if ($LASTEXITCODE -ne 0) {
 
 if ($shouldSignWithSignPath) {
     $artifactDescription = if ($UninstallOnly) {
-        "Vibepollo uninstaller $informationalVersion"
+        "Nimbus uninstaller $informationalVersion"
     } else {
-        "Vibepollo setup executable $informationalVersion"
+        "Nimbus setup executable $informationalVersion"
     }
     Invoke-SignPathForArtifact `
         -ArtifactPath $outputPath `

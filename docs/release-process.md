@@ -68,8 +68,9 @@ git push origin nimbus-v0.1.0
 
 Release automation rejects upstream-style tags such as `1.15.5` and `v1.15.5`.
 Until the package-branding slice in `docs/packaging-identity-plan.md` is
-completed, a `nimbus-v*` tag should still be treated as unsafe for publication
-because the inherited build may produce Vibepollo-named artifacts.
+validated with a local Windows package build, a `nimbus-v*` tag should still be
+treated as unsafe for publication. The expected release artifact is
+`NimbusSetup*.exe`.
 
 ## Release Notes
 
@@ -103,6 +104,20 @@ After syncing:
 - Identify user-facing behavior changes.
 
 ## First Nimbus Release Checklist
+
+```mermaid
+flowchart TD
+  A["Package branding complete"] --> B["Local installer inspected"]
+  B --> C["Release notes written"]
+  C --> D["nimbus-v* tag"]
+  D --> E["Release upload"]
+  E --> F["Signing and symbols"]
+  F --> G["Issue automation"]
+
+  D -. "allowed only after" .-> A
+  F -. "requires Nimbus-owned secrets" .-> F1["SIGNPATH_API_TOKEN and SYMBOL_TOKEN"]
+  G -. "re-enable last" .-> G1["Support policy and labels ready"]
+```
 
 - Review `docs/release-build-audit.md`.
 - Review `docs/packaging-identity-plan.md`.

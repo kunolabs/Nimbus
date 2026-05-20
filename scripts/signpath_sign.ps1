@@ -6,9 +6,9 @@ param(
 
     [string]$OutputArtifactPath = "",
     [string]$ApiToken = $env:SIGNPATH_API_TOKEN,
-    [string]$OrganizationId = $(if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_ORGANIZATION_ID)) { "1ba0e884-7ab4-43e6-aa84-9b2c7e3fba15" } else { $env:SIGNPATH_ORGANIZATION_ID }),
-    [string]$ProjectSlug = $(if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_PROJECT_SLUG)) { "Vibepollo" } else { $env:SIGNPATH_PROJECT_SLUG }),
-    [string]$SigningPolicySlug = $(if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_SIGNING_POLICY_SLUG)) { "test-signing" } else { $env:SIGNPATH_SIGNING_POLICY_SLUG }),
+    [string]$OrganizationId = $env:SIGNPATH_ORGANIZATION_ID,
+    [string]$ProjectSlug = $(if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_PROJECT_SLUG)) { "Nimbus" } else { $env:SIGNPATH_PROJECT_SLUG }),
+    [string]$SigningPolicySlug = $env:SIGNPATH_SIGNING_POLICY_SLUG,
     [string]$ArtifactConfigurationSlug = "",
     [string]$PeArtifactConfigurationSlug = $env:SIGNPATH_PE_ARTIFACT_CONFIGURATION_SLUG,
     [string]$MsiArtifactConfigurationSlug = $(if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_MSI_ARTIFACT_CONFIGURATION_SLUG)) { "msi-file" } else { $env:SIGNPATH_MSI_ARTIFACT_CONFIGURATION_SLUG }),

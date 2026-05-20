@@ -59,13 +59,22 @@ Goal: start the client fork deliberately.
 
 ## Immediate Next Move
 
-The next engineering pass should execute the package-branding slice from
+```mermaid
+flowchart LR
+  A["Now: Phase C package branding"] --> B["Build NimbusSetup.exe"]
+  B --> C["Inspect install, upgrade, uninstall"]
+  C --> D["Prepare nimbus-v* release notes"]
+  D --> E["Re-enable release publishing"]
+  E --> F["Re-enable signing and symbols"]
+```
+
+The next engineering pass should validate the package-branding slice from
 `docs/packaging-identity-plan.md` before any branded Nimbus release:
 
 1. Use `docs/release-build-audit.md` as the release automation baseline.
 2. Use `docs/upstream-issue-radar.md` to choose the first reliability issue.
-3. Keep runtime identifiers unchanged unless the packaging identity plan says
-   the migration has a test path.
+3. Confirm runtime identifiers remained unchanged unless the packaging identity
+   plan says the migration has a test path.
 4. Produce a local Nimbus-named installer and inspect install, upgrade, and
    uninstall behavior.
 5. Set up a known-good Windows build environment and record the exact command.

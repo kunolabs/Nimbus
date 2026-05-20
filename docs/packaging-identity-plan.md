@@ -26,6 +26,18 @@ and a validation path.
 
 ## Risk Tiers
 
+```mermaid
+flowchart LR
+  A["Tier 0: Docs and GitHub text"] --> B["Tier 1: Release labels and gates"]
+  B --> C["Tier 2: Package branding"]
+  C --> D["Tier 3: Runtime migration"]
+
+  A --> A1["Safe now"]
+  B --> B1["Safe with Nimbus-owned destinations"]
+  C --> C1["Requires installer inspection"]
+  D --> D1["Requires migration tests"]
+```
+
 ### Tier 0: Safe Public Surfaces
 
 These can be updated early because they do not affect installed state:
@@ -89,23 +101,23 @@ Do not change these until there is a tested migration plan.
 
 | Area | Current inherited value | Recommendation |
 | --- | --- | --- |
-| CMake project | `project(Vibepollo ...)` | Change during the packaging identity pass, then verify generated artifacts. |
-| Project homepage | `https://github.com/Nonary/Vibepollo` | Change to `https://github.com/kunolabs/Nimbus`. |
+| CMake project | `project(Nimbus ...)` | Changed in Phase C. Verify generated artifacts. |
+| Project homepage | `https://github.com/kunolabs/Nimbus` | Changed in Phase C. |
 | Project FQDN | `dev.lizardbyte.app.Sunshine` | Defer until Linux desktop, Flatpak, and config migration are planned. |
 | Windows app model id | `Nonary.Vibepollo` | Defer until shortcut/taskbar behavior is tested. |
-| CPack package name | `Vibepollo` | Change when Nimbus package artifacts are ready. |
-| CPack vendor | `Nonary` | Change to `Kuno Labs` with package branding. |
-| CPack contact | `https://github.com/Nonary/Vibepollo/issues` | Change to Nimbus issues in the package branding pass. |
+| CPack package name | `Nimbus` | Changed in Phase C. Verify generated MSI and setup EXE names. |
+| CPack vendor | `Kuno Labs` | Changed in Phase C. |
+| CPack contact | `https://github.com/kunolabs/Nimbus/issues` | Changed in Phase C. |
 | Windows install directory | `Apollo` | Defer or migrate with explicit install-path behavior. |
 | WiX upgrade GUID | `{E3FA501A-85F8-4187-85A7-D6E6BDC7EDA1}` | Preserve unless we intentionally break upgrade lineage. |
 | WiX product-line seed | `Vibepollo-<major>.<minor>` | Treat as high-risk. Change only with upgrade testing. |
 | Bootstrapper namespace | `VibepolloInstaller` | Split cosmetic UI naming from installer detection logic. |
-| Bootstrapper output | `VibepolloSetup.exe` | Change to `NimbusSetup.exe` when packaging output is validated. |
-| Start menu folder | `Vibepollo` | Change with shortcut cleanup tests. |
+| Bootstrapper output | `NimbusSetup.exe` | Changed in Phase C. Validate with a local Windows package build. |
+| Start menu folder | `Nimbus` | Changed in Phase C. Validate shortcut cleanup tests. |
 | Service names | `ApolloService`, `SunshineService`, `VibeshineService`, `sunshinesvc` | Preserve detection and cleanup paths until migration logic is explicit. |
 | Config/state files | `sunshine.conf`, `sunshine_state.json` | Preserve for first branded release unless migration is built and tested. |
-| WebRTC release scripts | Vibepollo wording and paths | Reword only after Nimbus WebRTC artifact ownership is defined. |
-| SignPath defaults | Vibepollo organization/project | Keep disabled; retarget only when Nimbus signing exists. |
+| WebRTC release scripts | Nimbus wording and fallback repo | Publishing remains manual and confirmation-gated. |
+| SignPath defaults | Nimbus project slug, no inherited org/policy fallback | Keep disabled until Nimbus signing exists. |
 
 ## First Nimbus Release Stance
 
@@ -122,6 +134,24 @@ responsible path for existing Vibepollo and Apollo users because it avoids
 breaking installed state before Nimbus has testers.
 
 ## Phased Work
+
+```mermaid
+flowchart TD
+  A["Phase A: Public maintenance surface"] --> B["Phase B: Release safety"]
+  B --> C["Phase C: Package branding"]
+  C --> D["Phase D: Runtime identity migration"]
+  D --> E["Phase E: Platform packages"]
+
+  C --> C1["NimbusSetup.exe"]
+  C --> C2["Nimbus MSI display name"]
+  C --> C3["Kuno Labs publisher"]
+  C --> C4["Nimbus support URLs"]
+
+  D --> D1["Service names"]
+  D --> D2["Config filenames"]
+  D --> D3["App ids"]
+  D --> D4["Install paths"]
+```
 
 ### Phase A: Public Maintenance Surface
 
@@ -141,6 +171,16 @@ Status: complete enough for public repo readiness.
 Status: complete enough for normal branch work. Do not tag a release yet.
 
 ### Phase C: Package Branding
+
+```mermaid
+flowchart LR
+  A["Input: inherited Vibepollo package"] --> B["Change public package branding"]
+  B --> C["Build local Windows package"]
+  C --> D["Inspect installer surfaces"]
+  D --> E{"Upgrade behavior known?"}
+  E -- "yes" --> F["Release candidate can be prepared"]
+  E -- "no" --> G["Keep release tags blocked"]
+```
 
 - Change user-facing package metadata to Nimbus.
 - Rename generated release artifacts to Nimbus.

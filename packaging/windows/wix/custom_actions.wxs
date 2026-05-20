@@ -8,7 +8,7 @@
     - Add/remove firewall rules
     - Install/update SudoVDA virtual display driver
     - Install/uninstall service and autostart configuration
-    - Optional prompts on uninstall for SudoVDA removal, virtual gamepad removal, and factory reset of known Vibepollo app data
+    - Optional prompts on uninstall for SudoVDA removal, virtual gamepad removal, and factory reset of known Nimbus app data
     - Detect legacy Sunshine on direct MSI installs and prompt for removal
 
     Notes:
@@ -43,19 +43,19 @@
   <Fragment>
     <DirectoryRef Id="TARGETDIR">
       <Directory Id="ProgramMenuFolder">
-        <Directory Id="VIBEPOLLO_PROGRAM_MENU_FOLDER" Name="Vibepollo">
+        <Directory Id="NIMBUS_PROGRAM_MENU_FOLDER" Name="Nimbus">
           <Component Id="StartMenuShortcut" Guid="{A3B4C5D6-E7F8-4A5B-9C2D-3E4F5A6B7C8D}">
-            <Shortcut Id="VibepolloStartMenuShortcut"
-                      Name="Vibepollo"
-                      Description="Launch Vibepollo Web UI"
+            <Shortcut Id="NimbusStartMenuShortcut"
+                      Name="Nimbus"
+                      Description="Launch Nimbus Web UI"
                       Target="[INSTALL_ROOT]sunshine.exe"
                       Icon="ProductIcon.ico"
                       Arguments="--shortcut"
                       WorkingDirectory="INSTALL_ROOT">
               <ShortcutProperty Key="System.AppUserModel.ID" Value="$(var.VibepolloAppId)" />
             </Shortcut>
-            <RegistryValue Root="HKCU" Key="Software\Vibepollo\Shortcuts" Name="StartMenu" Type="integer" Value="1" KeyPath="yes" />
-            <RemoveFolder Id="RemoveVibepolloMenuFolder" Directory="VIBEPOLLO_PROGRAM_MENU_FOLDER" On="uninstall" />
+            <RegistryValue Root="HKCU" Key="Software\Nimbus\Shortcuts" Name="StartMenu" Type="integer" Value="1" KeyPath="yes" />
+            <RemoveFolder Id="RemoveNimbusMenuFolder" Directory="NIMBUS_PROGRAM_MENU_FOLDER" On="uninstall" />
           </Component>
         </Directory>
       </Directory>
@@ -223,8 +223,8 @@
     <CustomAction Id="AskUninstallLegacySunshine" BinaryKey="AskUninstallLegacySunshineVbs" VBScriptCall="AskUninstallLegacySunshine" Execute="immediate" Return="check" />
     <CustomAction Id="WaitForLegacyUninstall" BinaryKey="WaitForLegacyUninstallVbs" VBScriptCall="WaitForLegacyUninstall" Execute="immediate" Return="check" />
 
-    <CustomAction Id="BlockLegacySunshineStillPresent" Error="Legacy Sunshine is still installed. It must be removed before installing Vibepollo; click OK to start the uninstallation." />
-    <CustomAction Id="BlockUserCancelledLegacy" Error="Installation cancelled. Legacy Sunshine must be removed before installing Vibepollo." />
+    <CustomAction Id="BlockLegacySunshineStillPresent" Error="Legacy Sunshine is still installed. It must be removed before installing Nimbus; click OK to start the uninstallation." />
+    <CustomAction Id="BlockUserCancelledLegacy" Error="Installation cancelled. Legacy Sunshine must be removed before installing Nimbus." />
 
     <!-- UI-only prompt at end of a successful Repair to inform no reboot is required -->
     <CustomAction Id="RepairCompletePrompt" BinaryKey="RepairCompleteVbs" VBScriptCall="ShowRepairComplete" Execute="immediate" Return="ignore" />
@@ -237,10 +237,10 @@
     <DirectoryRef Id="INSTALL_ROOT">
       <Component Id="ArpCustomUninstallEntry" Guid="*" Win64="yes">
         <CreateFolder />
-        <RegistryKey Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Vibepollo">
-          <RegistryValue Name="DisplayName" Type="string" Value="Vibepollo" KeyPath="yes" />
+        <RegistryKey Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Nimbus">
+          <RegistryValue Name="DisplayName" Type="string" Value="Nimbus" KeyPath="yes" />
           <RegistryValue Name="DisplayVersion" Type="string" Value="[ProductVersion]" />
-          <RegistryValue Name="Publisher" Type="string" Value="Nonary" />
+          <RegistryValue Name="Publisher" Type="string" Value="Kuno Labs" />
           <RegistryValue Name="InstallLocation" Type="string" Value="[INSTALL_ROOT]" />
           <RegistryValue Name="DisplayIcon" Type="string" Value="[INSTALL_ROOT]sunshine.exe" />
           <RegistryValue Name="UninstallString" Type="string" Value="&quot;[INSTALL_ROOT]uninstall.exe&quot;" />
@@ -253,14 +253,14 @@
       <Component Id="Fw_Exceptions" Guid="{7229349C-BC66-4A1D-8019-9546CBD2620B}">
         <CreateFolder />
         <Firewall:FirewallException xmlns:Firewall="http://schemas.microsoft.com/wix/FirewallExtension"
-                                    Id="FE_VibepolloExe"
-                                    Name="Vibepollo"
+                                    Id="FE_NimbusExe"
+                                    Name="Nimbus"
                                     Program="[INSTALL_ROOT]sunshine.exe"
                                     Profile="all"
                                     Scope="any" />
         <Firewall:FirewallException xmlns:Firewall="http://schemas.microsoft.com/wix/FirewallExtension"
-                                    Id="FE_VibepolloSvcExe"
-                                    Name="Vibepollo Service"
+                                    Id="FE_NimbusSvcExe"
+                                    Name="Nimbus Service"
                                     Program="[INSTALL_ROOT]tools\sunshinesvc.exe"
                                     Profile="all"
                                     Scope="any" />

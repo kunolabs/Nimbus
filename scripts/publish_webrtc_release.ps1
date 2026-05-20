@@ -71,7 +71,7 @@ if (-not $releaseExists) {
   if ($NotesPath -and (Test-Path -LiteralPath $NotesPath)) {
     $createArgs += @("--notes-file", $NotesPath)
   } else {
-    $createArgs += @("--notes", "Pinned Windows x64 WebRTC artifacts for Vibepollo.")
+    $createArgs += @("--notes", "Pinned Windows x64 WebRTC artifacts for Nimbus.")
   }
   if ($env:GITHUB_SHA) {
     $createArgs += @("--target", $env:GITHUB_SHA)

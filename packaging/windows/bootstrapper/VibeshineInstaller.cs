@@ -29,6 +29,16 @@ namespace VibepolloInstaller {
 #endif
   }
 
+  internal static class ProductIdentity {
+    public const string Name = "Nimbus";
+    public const string LegacyName = "Vibepollo";
+    public const string Company = "Kuno Labs";
+    public const string IssuesUrl = "https://github.com/kunolabs/Nimbus/issues";
+    public const string SetupFileName = "NimbusSetup.exe";
+    public const string MsiFileName = "Nimbus.msi";
+    public const string TempRootName = "NimbusInstaller";
+  }
+
   internal static class Program {
     [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
     private static extern int SetCurrentProcessExplicitAppUserModelID(string appID);
@@ -156,7 +166,7 @@ namespace VibepolloInstaller {
       _arguments = arguments;
       _bundleVersion = Assembly.GetExecutingAssembly().GetName().Version ?? new Version(0, 0, 0, 0);
       _licenseText = LoadEmbeddedLicenseText();
-      _installedProduct = InstallerRunner.GetInstalledVibepolloProduct();
+      _installedProduct = InstallerRunner.GetInstalledNimbusProduct();
       _legacySunshineProduct = InstallerRunner.GetInstalledSunshineProduct();
       _legacySunshineRegistration = InstallerRunner.GetLegacySunshineRegistration();
       _legacyApolloRegistration = InstallerRunner.GetLegacyApolloRegistration();
@@ -169,7 +179,7 @@ namespace VibepolloInstaller {
       _uninstallUiRequested = BuildFlavor.IsUninstallOnly || arguments.UninstallUiRequested;
       var showInstallOptions = !BuildFlavor.IsUninstallOnly && _installedProduct == null;
       var displayVersion = GetTargetVersionText();
-      Title = (BuildFlavor.IsUninstallOnly ? "Vibepollo Uninstaller v" : "Vibepollo Installer v") + displayVersion;
+      Title = (BuildFlavor.IsUninstallOnly ? "Nimbus Uninstaller v" : "Nimbus Installer v") + displayVersion;
       Width = 720;
       Height = showInstallOptions ? 560 : 460;
       MinWidth = 690;
@@ -433,7 +443,7 @@ namespace VibepolloInstaller {
       });
 
       installStack.Children.Add(new TextBlock {
-        Text = "Choose where Vibepollo will be installed. The default is recommended.",
+        Text = "Choose where Nimbus will be installed. The default is recommended.",
         FontSize = 12.5,
         Foreground = new SolidColorBrush(Color.FromRgb(209, 222, 241)),
         Margin = new Thickness(0, 0, 0, 10),
@@ -455,7 +465,7 @@ namespace VibepolloInstaller {
         Foreground = new SolidColorBrush(Color.FromRgb(245, 249, 255)),
         BorderBrush = new SolidColorBrush(Color.FromRgb(96, 111, 171)),
         CaretBrush = new SolidColorBrush(Color.FromRgb(245, 249, 255)),
-        ToolTip = "Used when installing or updating Vibepollo"
+        ToolTip = "Used when installing or updating Nimbus"
       };
       pathGrid.Children.Add(_installPathTextBox);
 
@@ -518,7 +528,7 @@ namespace VibepolloInstaller {
       });
 
       tipsStack.Children.Add(new TextBlock {
-        Text = "You can install or upgrade Vibepollo while actively streaming. No system restart is required. "
+        Text = "You can install or upgrade Nimbus while actively streaming. No system restart is required. "
           + "After you click Install or Upgrade, the current streaming session will end, then you can usually "
           + "start streaming again after about 1–2 minutes without issues.",
         FontSize = 12.5,
@@ -536,7 +546,7 @@ namespace VibepolloInstaller {
       });
 
       tipsStack.Children.Add(new TextBox {
-        Text = "VibepolloSetup.exe /qn /norestart",
+        Text = "NimbusSetup.exe /qn /norestart",
         IsReadOnly = true,
         FontFamily = new FontFamily("Consolas"),
         FontSize = 12.5,
@@ -662,7 +672,7 @@ namespace VibepolloInstaller {
       buttonRow.Children.Add(_continueButton);
 
       _uninstallButton = new Button {
-        Content = "Uninstall Vibepollo",
+        Content = "Uninstall Nimbus",
         Height = 40,
         MinWidth = 152,
         Margin = new Thickness(10, 0, 0, 0),
@@ -716,13 +726,13 @@ namespace VibepolloInstaller {
       Grid.SetColumn(_closeButton, 4);
       buttonRow.Children.Add(_closeButton);
 
-      _continueButton.Content = BuildFlavor.IsUninstallOnly ? "Uninstall Vibepollo" : BuildInstallButtonLabel();
+      _continueButton.Content = BuildFlavor.IsUninstallOnly ? "Uninstall Nimbus" : BuildInstallButtonLabel();
       if (_uninstallUiRequested && _installedProduct == null) {
         SetStatus(
-          "Vibepollo is not installed.",
+          "Nimbus is not installed.",
           BuildFlavor.IsUninstallOnly
             ? "No uninstall action is required."
-            : "Uninstall is unavailable. Choose Install Vibepollo to continue.",
+            : "Uninstall is unavailable. Choose Install Nimbus to continue.",
           _statusNormalBrush);
       } else {
         SetStatus("Ready.", string.Empty, _statusNormalBrush);
@@ -814,7 +824,7 @@ namespace VibepolloInstaller {
       // installed app or temporary generic taskbar identities while WPF loads.
       ShellIdentity.TryApplyInstallerWindowIdentity(
         new WindowInteropHelper(this).Handle,
-        BuildFlavor.IsUninstallOnly ? "Vibepollo Uninstaller" : "Vibepollo Installer"
+        BuildFlavor.IsUninstallOnly ? "Nimbus Uninstaller" : "Nimbus Installer"
       );
     }
 
@@ -925,7 +935,7 @@ namespace VibepolloInstaller {
         currentPath = _preferredInstallDirectory;
       }
 
-      var selectedPath = ModernFolderPicker.TryPickFolder(this, "Select the Vibepollo install folder", currentPath);
+      var selectedPath = ModernFolderPicker.TryPickFolder(this, "Select the Nimbus install folder", currentPath);
       if (!string.IsNullOrWhiteSpace(selectedPath)) {
         _installPathTextBox.Text = selectedPath;
       }
@@ -941,8 +951,8 @@ namespace VibepolloInstaller {
 
     private async void UninstallNowClicked(object sender, RoutedEventArgs e) {
       if (_installedProduct == null) {
-        SetStatus("Uninstall not started.", "No Vibepollo installation was found on this PC.", _statusNormalBrush);
-        await ShowOverlayInfoAsync("Nothing to uninstall", "Vibepollo is not currently installed on this PC.");
+        SetStatus("Uninstall not started.", "No Nimbus installation was found on this PC.", _statusNormalBrush);
+        await ShowOverlayInfoAsync("Nothing to uninstall", "Nimbus is not currently installed on this PC.");
         return;
       }
 
@@ -973,7 +983,7 @@ namespace VibepolloInstaller {
         var proceed = await ShowOverlayConfirmAsync(
           "Sunshine ecosystem detected",
           BuildVibeshineInstallWarning(vibeshineProduct),
-          "Continue with Vibepollo",
+          "Continue with Nimbus",
           "Cancel",
           false);
         if (!proceed) {
@@ -1039,13 +1049,13 @@ namespace VibepolloInstaller {
           selectedPath,
           installVirtualDisplayDriver,
           false));
-      }, "Install", "Installing or updating Vibepollo...", "Vibepollo installation completed.");
+      }, "Install", "Installing or updating Nimbus...", "Nimbus installation completed.");
     }
 
     private async Task RunUninstallFlow() {
       if (_installedProduct == null) {
-        SetStatus("Uninstall not started.", "No Vibepollo installation was found on this PC.", _statusNormalBrush);
-        await ShowOverlayInfoAsync("Nothing to uninstall", "Vibepollo is not currently installed on this PC.");
+        SetStatus("Uninstall not started.", "No Nimbus installation was found on this PC.", _statusNormalBrush);
+        await ShowOverlayInfoAsync("Nothing to uninstall", "Nimbus is not currently installed on this PC.");
         return;
       }
 
@@ -1061,8 +1071,8 @@ namespace VibepolloInstaller {
           uninstallOptions.Value.FactoryResetAppData,
           uninstallOptions.Value.RemoveVirtualDisplayDriver)),
         "Uninstall",
-        "Removing Vibepollo...",
-        "Vibepollo uninstall completed.");
+        "Removing Nimbus...",
+        "Nimbus uninstall completed.");
     }
 
     private async Task RunOperationAsync(Func<Task<InstallerResult>> actionFactory, string actionLabel, string inProgressText, string successText) {
@@ -1078,7 +1088,7 @@ namespace VibepolloInstaller {
             if (!string.IsNullOrWhiteSpace(result.UserDetail)) {
               warningDetail += "\n" + result.UserDetail;
             }
-            SetStatus("Vibepollo installation completed with warnings.", warningDetail, _statusWarningBrush);
+            SetStatus("Nimbus installation completed with warnings.", warningDetail, _statusWarningBrush);
             await ShowInstallPartialSuccessDialogAsync(result);
             Close();
             return;
@@ -1107,10 +1117,10 @@ namespace VibepolloInstaller {
         if (result.Operation == InstallerOperation.Uninstall && result.ExitCode == 1605) {
           ProcessExitCode = 0;
           SetStatus(
-            "Vibepollo is not installed.",
+            "Nimbus is not installed.",
             "Nothing needed to be removed.",
             _statusNormalBrush);
-          await ShowOverlayInfoAsync("Nothing to uninstall", "Vibepollo is not currently installed on this PC.");
+          await ShowOverlayInfoAsync("Nothing to uninstall", "Nimbus is not currently installed on this PC.");
           return;
         }
 
@@ -1178,7 +1188,7 @@ namespace VibepolloInstaller {
 
       // Block UNC / network paths — Windows services cannot reliably run from network locations
       if (fullPath.StartsWith(@"\\", StringComparison.Ordinal)) {
-        throw new InvalidOperationException("Network paths (UNC) are not supported. Vibepollo runs as a Windows service and must be installed on a local drive.");
+        throw new InvalidOperationException("Network paths (UNC) are not supported. Nimbus runs as a Windows service and must be installed on a local drive.");
       }
 
       // Verify the drive exists
@@ -1223,9 +1233,9 @@ namespace VibepolloInstaller {
         : string.Empty;
 
       return "Vibeshine" + versionSuffix + " was detected on this PC.\n\n"
-        + "Vibepollo does not carry over Vibeshine settings.\n"
+        + "Nimbus does not carry over Vibeshine settings.\n"
         + "If you intend to stay in the Sunshine ecosystem, Vibeshine is recommended instead.\n\n"
-        + "If this is intentional, continue with Vibepollo.\n"
+        + "If this is intentional, continue with Nimbus.\n"
         + "Continuing will uninstall Vibeshine before installation.";
     }
 
@@ -1235,7 +1245,7 @@ namespace VibepolloInstaller {
         : string.Empty;
 
       return "Apollo" + versionSuffix + " was detected on this PC.\n\n"
-        + "Vibepollo replaces Apollo and cannot be installed while Apollo is installed.\n"
+        + "Nimbus replaces Apollo and cannot be installed while Apollo is installed.\n"
         + "Continuing will uninstall Apollo before installation.\n\n"
         + "Click Uninstall Apollo to proceed.";
     }
@@ -1249,7 +1259,7 @@ namespace VibepolloInstaller {
       }
 
       return "Legacy Sunshine" + versionSuffix + " was detected on this PC.\n\n"
-        + "Vibepollo replaces Sunshine. The bootstrapper will uninstall Sunshine first, then start the installation.\n"
+        + "Nimbus replaces Sunshine. The bootstrapper will uninstall Sunshine first, then start the installation.\n"
         + "No settings will be lost during this migration.\n\n"
         + "Click Uninstall Sunshine to proceed.";
     }
@@ -1261,7 +1271,7 @@ namespace VibepolloInstaller {
       }
 
       return "Legacy Apollo" + versionSuffix + " was detected on this PC.\n\n"
-        + "Vibepollo replaces legacy Apollo and will automatically uninstall it first, then install Vibepollo.\n"
+        + "Nimbus replaces legacy Apollo and will automatically uninstall it first, then install Nimbus.\n"
         + "No settings will be carried over.\n\n"
         + "Click Uninstall Apollo to proceed.";
     }
@@ -1331,13 +1341,13 @@ namespace VibepolloInstaller {
     private string BuildInstallButtonLabel() {
       switch (GetInstallActionKind()) {
         case InstallActionKind.Install:
-          return "Install Vibepollo";
+          return "Install Nimbus";
         case InstallActionKind.Upgrade:
-          return "Upgrade Vibepollo";
+          return "Upgrade Nimbus";
         case InstallActionKind.Downgrade:
-          return "Downgrade Vibepollo";
+          return "Downgrade Nimbus";
         default:
-          return "Reinstall Vibepollo";
+          return "Reinstall Nimbus";
       }
     }
 
@@ -1369,7 +1379,7 @@ namespace VibepolloInstaller {
 
       await ShowOverlayAsync(
         "License",
-        "Vibepollo software license terms:",
+        "Nimbus software license terms:",
         "Close",
         string.Empty,
         new SolidColorBrush(Color.FromRgb(99, 102, 241)),
@@ -1611,7 +1621,7 @@ namespace VibepolloInstaller {
         IsChecked = false
       };
       var deleteFolderCheckBox = new CheckBox {
-        Content = "Factory reset (deletes Vibepollo settings, preserves user-added files)",
+        Content = "Factory reset (deletes Nimbus settings, preserves user-added files)",
         FontSize = 13,
         Foreground = new SolidColorBrush(Color.FromRgb(226, 235, 250)),
         Margin = new Thickness(0, 0, 0, 0),
@@ -1619,11 +1629,11 @@ namespace VibepolloInstaller {
       };
 
       var message = "Choose what to remove during uninstall.\n\n"
-        + "Uninstall always removes the Vibepollo service, firewall rules, and MSI-installed program files. "
+        + "Uninstall always removes the Nimbus service, firewall rules, and MSI-installed program files. "
         + "Files you added after installation are preserved.";
 
       var result = await ShowOverlayAsync(
-        "Uninstall Vibepollo",
+        "Uninstall Nimbus",
         message,
         "Uninstall",
         "Cancel",
@@ -1649,7 +1659,7 @@ namespace VibepolloInstaller {
     private async Task ShowInstallFailureSupportDialogAsync(string failureDetail, InstallerResult installResult) {
       var decision = await ShowOverlayAsync(
         "Install failed",
-        failureDetail + "\n\nSave logs now, then report this issue on GitHub or Discord.",
+        failureDetail + "\n\nSave logs now, then report this issue on GitHub.",
         "Save logs",
         "Not now",
         new SolidColorBrush(Color.FromRgb(99, 102, 241)),
@@ -1671,7 +1681,7 @@ namespace VibepolloInstaller {
       var warningDetail = BuildComponentFailureDetail(installResult == null ? null : installResult.ComponentFailures);
       var decision = await ShowOverlayAsync(
         "Install completed with warnings",
-        warningDetail + "\n\nSave logs now, then report this issue on GitHub or Discord.",
+        warningDetail + "\n\nSave logs now, then report this issue on GitHub.",
         "Save logs",
         "Not now",
         new SolidColorBrush(Color.FromRgb(99, 102, 241)),
@@ -1697,7 +1707,7 @@ namespace VibepolloInstaller {
         DefaultExt = ".txt",
         AddExtension = true,
         OverwritePrompt = true,
-        FileName = "vibeshine-install-logs-" + timestamp + ".txt",
+        FileName = "nimbus-install-logs-" + timestamp + ".txt",
         InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)
       };
 
@@ -1720,8 +1730,7 @@ namespace VibepolloInstaller {
         return;
       }
 
-      var nextStep = "Attach this file on GitHub: https://github.com/Nonary/Vibepollo/issues\n"
-        + "Or Discord (#vibeshine): https://discord.com/invite/CGg5JxN";
+      var nextStep = "Attach this file on GitHub: " + ProductIdentity.IssuesUrl;
       SetStatus("Support logs saved.", outputPath, _statusSuccessBrush);
       await ShowOverlayInfoAsync(
         "Logs saved",
@@ -1736,7 +1745,7 @@ namespace VibepolloInstaller {
         DefaultExt = ".txt",
         AddExtension = true,
         OverwritePrompt = true,
-        FileName = "vibeshine-install-warnings-" + timestamp + ".txt",
+        FileName = "nimbus-install-warnings-" + timestamp + ".txt",
         InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)
       };
 
@@ -1759,8 +1768,7 @@ namespace VibepolloInstaller {
         return;
       }
 
-      var nextStep = "Attach this file on GitHub: https://github.com/Nonary/Vibepollo/issues\n"
-        + "Or Discord (#vibeshine): https://discord.com/invite/CGg5JxN";
+      var nextStep = "Attach this file on GitHub: " + ProductIdentity.IssuesUrl;
       SetStatus("Support logs saved.", outputPath, _statusSuccessBrush);
       await ShowOverlayInfoAsync(
         "Logs saved",
@@ -1769,10 +1777,10 @@ namespace VibepolloInstaller {
 
     private void WriteInstallFailureSupportReport(string outputPath, string failureDetail, InstallerResult installResult) {
       var candidateLogs = CollectSupportLogFiles(installResult == null ? null : installResult.LogPath);
-      var destination = "GitHub issue or Discord #vibeshine";
+      var destination = "GitHub issue";
       var executionVersion = _bundleVersion.ToString(3);
       using (var writer = new StreamWriter(outputPath, false)) {
-        writer.WriteLine(BuildSupportSummary(destination, executionVersion, failureDetail, installResult, candidateLogs.Count, "Vibepollo install failure report", "Failure detail:"));
+        writer.WriteLine(BuildSupportSummary(destination, executionVersion, failureDetail, installResult, candidateLogs.Count, "Nimbus install failure report", "Failure detail:"));
         writer.WriteLine();
 
         if (candidateLogs.Count == 0) {
@@ -1797,10 +1805,10 @@ namespace VibepolloInstaller {
 
     private void WriteInstallWarningSupportReport(string outputPath, string warningDetail, InstallerResult installResult) {
       var candidateLogs = CollectSupportLogFiles(installResult == null ? null : installResult.LogPath);
-      var destination = "GitHub issue or Discord #vibeshine";
+      var destination = "GitHub issue";
       var executionVersion = _bundleVersion.ToString(3);
       using (var writer = new StreamWriter(outputPath, false)) {
-        writer.WriteLine(BuildSupportSummary(destination, executionVersion, warningDetail, installResult, candidateLogs.Count, "Vibepollo install warning report", "Warning detail:"));
+        writer.WriteLine(BuildSupportSummary(destination, executionVersion, warningDetail, installResult, candidateLogs.Count, "Nimbus install warning report", "Warning detail:"));
         writer.WriteLine();
 
         if (candidateLogs.Count == 0) {
@@ -1830,6 +1838,9 @@ namespace VibepolloInstaller {
       TryAddLogFile(collected, seen, preferredLogPath);
 
       var tempPath = Path.GetTempPath();
+      TryAddRecentLogs(collected, seen, tempPath, "nimbus_install_*.log", 8);
+      TryAddRecentLogs(collected, seen, tempPath, "nimbus_preinstall_remove_*.log", 8);
+      TryAddRecentLogs(collected, seen, tempPath, "nimbus_uninstall_*.log", 4);
       TryAddRecentLogs(collected, seen, tempPath, "vibeshine_install_*.log", 8);
       TryAddRecentLogs(collected, seen, tempPath, "vibeshine_preinstall_remove_*.log", 8);
       TryAddRecentLogs(collected, seen, tempPath, "vibeshine_uninstall_*.log", 4);
@@ -1905,7 +1916,7 @@ namespace VibepolloInstaller {
       string reportTitle,
       string detailLabel) {
       var lines = new List<string> {
-        string.IsNullOrWhiteSpace(reportTitle) ? "Vibepollo install support report" : reportTitle,
+        string.IsNullOrWhiteSpace(reportTitle) ? "Nimbus install support report" : reportTitle,
         "Generated (UTC): " + DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
         "Destination: " + destination,
         "Installer version: " + installerVersion,
@@ -1917,8 +1928,7 @@ namespace VibepolloInstaller {
         detail ?? "Unknown error",
         string.Empty,
         "Next step:",
-        "Attach this file on GitHub: https://github.com/Nonary/Vibepollo/issues",
-        "Or Discord (#vibeshine): https://discord.com/invite/CGg5JxN"
+        "Attach this file on GitHub: " + ProductIdentity.IssuesUrl
       };
       return string.Join(Environment.NewLine, lines);
     }
@@ -1933,16 +1943,10 @@ namespace VibepolloInstaller {
 
       block.Inlines.Add(new Run("Open an issue on "));
       var githubLink = new Hyperlink(new Run("GitHub")) {
-        NavigateUri = new Uri("https://github.com/Nonary/Vibepollo/issues")
+        NavigateUri = new Uri(ProductIdentity.IssuesUrl)
       };
-      githubLink.Click += (sender, args) => OpenExternalUrl("https://github.com/Nonary/Vibepollo/issues");
+      githubLink.Click += (sender, args) => OpenExternalUrl(ProductIdentity.IssuesUrl);
       block.Inlines.Add(githubLink);
-      block.Inlines.Add(new Run(" or join "));
-      var discordLink = new Hyperlink(new Run("Discord (#vibeshine)")) {
-        NavigateUri = new Uri("https://discord.com/invite/CGg5JxN")
-      };
-      discordLink.Click += (sender, args) => OpenExternalUrl("https://discord.com/invite/CGg5JxN");
-      block.Inlines.Add(discordLink);
       block.Inlines.Add(new Run("."));
 
       return block;
@@ -2117,8 +2121,8 @@ namespace VibepolloInstaller {
 
     public static void WriteHelp() {
 #if UNINSTALL_ONLY
-      Console.WriteLine("Vibepollo Uninstaller");
-      Console.WriteLine("  Self-contained graphical uninstaller for Vibepollo.");
+      Console.WriteLine("Nimbus Uninstaller");
+      Console.WriteLine("  Self-contained graphical uninstaller for Nimbus.");
       Console.WriteLine();
       Console.WriteLine("Usage:");
       Console.WriteLine("  uninstall.exe          Launch graphical uninstall UI");
@@ -2131,12 +2135,12 @@ namespace VibepolloInstaller {
       Console.WriteLine("  uninstall.exe");
       Console.WriteLine("  uninstall.exe /quiet");
 #else
-      Console.WriteLine("Vibepollo Installer");
+      Console.WriteLine("Nimbus Installer");
       Console.WriteLine("  Self-hosted game streaming server — stream your PC to any device.");
       Console.WriteLine();
       Console.WriteLine("Usage:");
-      Console.WriteLine("  VibepolloSetup.exe                Launch graphical installer UI");
-      Console.WriteLine("  VibepolloSetup.exe [MSI options]  Pass options to msiexec");
+      Console.WriteLine("  NimbusSetup.exe                   Launch graphical installer UI");
+      Console.WriteLine("  NimbusSetup.exe [MSI options]     Pass options to msiexec");
       Console.WriteLine();
       Console.WriteLine("Wrapper options:");
       Console.WriteLine("  --msi <path>    Use a specific MSI payload instead of the embedded one");
@@ -2151,13 +2155,13 @@ namespace VibepolloInstaller {
       Console.WriteLine("  INSTALL_SUDOVDA=0    Skip Virtual Display Driver installation");
       Console.WriteLine();
       Console.WriteLine("Examples:");
-      Console.WriteLine("  VibepolloSetup.exe /qn");
-      Console.WriteLine("  VibepolloSetup.exe /qn INSTALL_ROOT=\"D:\\Vibepollo\"");
-      Console.WriteLine("  VibepolloSetup.exe /x {PRODUCT-CODE} /qn");
-      Console.WriteLine("  VibepolloSetup.exe /qn INSTALL_SUDOVDA=0");
-      Console.WriteLine("  VibepolloSetup.exe /uninstall");
-      Console.WriteLine("  VibepolloSetup.exe /uninstall /quiet");
-      Console.WriteLine("  VibepolloSetup.exe --msi C:\\temp\\Vibepollo.msi /passive");
+      Console.WriteLine("  NimbusSetup.exe /qn");
+      Console.WriteLine("  NimbusSetup.exe /qn INSTALL_ROOT=\"D:\\Nimbus\"");
+      Console.WriteLine("  NimbusSetup.exe /x {PRODUCT-CODE} /qn");
+      Console.WriteLine("  NimbusSetup.exe /qn INSTALL_SUDOVDA=0");
+      Console.WriteLine("  NimbusSetup.exe /uninstall");
+      Console.WriteLine("  NimbusSetup.exe /uninstall /quiet");
+      Console.WriteLine("  NimbusSetup.exe --msi C:\\temp\\Nimbus.msi /passive");
 #endif
     }
 
@@ -2187,6 +2191,7 @@ namespace VibepolloInstaller {
     };
     private static readonly InstalledProductKind[] MsiRegistrationRecoveryKinds = {
       InstalledProductKind.Vibeshine,
+      InstalledProductKind.Nimbus,
       InstalledProductKind.Vibepollo
     };
     private static readonly string[] MsiCacheFailureLogMarkers = {
@@ -2263,6 +2268,7 @@ namespace VibepolloInstaller {
 
     internal enum InstalledProductKind {
       Unknown,
+      Nimbus,
       Vibeshine,
       Vibepollo,
       Apollo,
@@ -2275,6 +2281,13 @@ namespace VibepolloInstaller {
           Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
           "Apollo");
       }
+    }
+
+    public static InstalledProductInfo GetInstalledNimbusProduct() {
+      return GetInstalledProducts(false)
+        .Where(product => IsNimbusLineProduct(product.Kind))
+        .OrderByDescending(product => product.Version ?? new Version(0, 0, 0, 0))
+        .FirstOrDefault();
     }
 
     public static InstalledProductInfo GetInstalledVibeshineProduct() {
@@ -2291,6 +2304,11 @@ namespace VibepolloInstaller {
         .FirstOrDefault();
     }
 
+    private static bool IsNimbusLineProduct(InstalledProductKind kind) {
+      return kind == InstalledProductKind.Nimbus
+        || kind == InstalledProductKind.Vibepollo;
+    }
+
     public static InstalledProductInfo GetInstalledApolloProduct() {
       return GetInstalledProducts(true)
         .Where(product => product.Kind == InstalledProductKind.Apollo)
@@ -2300,7 +2318,7 @@ namespace VibepolloInstaller {
 
     public static List<InstalledProductInfo> GetInstalledApolloFamilyProducts() {
       return GetInstalledProductRegistrations(true)
-        .Where(product => product.Kind == InstalledProductKind.Apollo || product.Kind == InstalledProductKind.Vibepollo)
+        .Where(product => product.Kind == InstalledProductKind.Apollo || IsNimbusLineProduct(product.Kind))
         .GroupBy(BuildProductRegistrationIdentity, StringComparer.OrdinalIgnoreCase)
         .Select(MergeInstalledProductGroup)
         .OrderByDescending(product => product.Version ?? new Version(0, 0, 0, 0))
@@ -2587,6 +2605,9 @@ namespace VibepolloInstaller {
 
       if (displayName.StartsWith("Vibeshine", StringComparison.OrdinalIgnoreCase)) {
         return InstalledProductKind.Vibeshine;
+      }
+      if (displayName.StartsWith("Nimbus", StringComparison.OrdinalIgnoreCase)) {
+        return InstalledProductKind.Nimbus;
       }
       if (displayName.StartsWith("Vibepollo", StringComparison.OrdinalIgnoreCase)) {
         return InstalledProductKind.Vibepollo;
@@ -2918,7 +2939,7 @@ namespace VibepolloInstaller {
         string recoveryDetail;
         if (TryRepairBustedMsiRegistration(
           uninstallCompetingProductsResult,
-          new[] { InstalledProductKind.Vibepollo },
+          new[] { InstalledProductKind.Nimbus, InstalledProductKind.Vibepollo },
           "competing product pre-uninstall",
           out recoveryDetail)) {
           recoveryDetails.Add(recoveryDetail);
@@ -3160,7 +3181,7 @@ namespace VibepolloInstaller {
         return new InstallerResult {
           Operation = InstallerOperation.Uninstall,
           ExitCode = 0,
-          Message = "Legacy Sunshine uninstall entry is stale; continuing with Vibepollo installation."
+          Message = "Legacy Sunshine uninstall entry is stale; continuing with Nimbus installation."
         };
       }
 
@@ -3274,7 +3295,7 @@ namespace VibepolloInstaller {
         return new InstallerResult {
           Operation = InstallerOperation.Uninstall,
           ExitCode = 0,
-          Message = "Legacy Apollo uninstall entry is stale; continuing with Vibepollo installation."
+          Message = "Legacy Apollo uninstall entry is stale; continuing with Nimbus installation."
         };
       }
 
@@ -3377,7 +3398,7 @@ namespace VibepolloInstaller {
 
       try {
         var fullPath = Path.GetFullPath(msiPath);
-        var tempRoot = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "VibepolloInstaller"));
+        var tempRoot = Path.GetFullPath(Path.Combine(Path.GetTempPath(), ProductIdentity.TempRootName));
         return fullPath.StartsWith(tempRoot, StringComparison.OrdinalIgnoreCase);
       } catch {
         return false;
@@ -3476,14 +3497,14 @@ namespace VibepolloInstaller {
         AppendInstallerLogMessage(
           failureResult.LogPath,
           "MSI registration repair was considered for " + (context ?? "install")
-          + ", but no validated Vibeshine/Vibepollo product registrations were found.");
+          + ", but no validated Vibeshine/Nimbus/Vibepollo product registrations were found.");
         return false;
       }
 
       AppendInstallerLogMessage(
         failureResult.LogPath,
         "Detected a broken cached MSI/source registration during " + (context ?? "install")
-        + " (exit code " + failureResult.ExitCode + "). Attempting guarded Vibeshine/Vibepollo MSI registration repair.");
+        + " (exit code " + failureResult.ExitCode + "). Attempting guarded Vibeshine/Nimbus/Vibepollo MSI registration repair.");
 
       TryStopRelatedServicesAndProcesses(failureResult.LogPath);
       var cleanupResult = CleanupMsiRegistrations(targets, failureResult.LogPath);
@@ -3561,7 +3582,7 @@ namespace VibepolloInstaller {
       if (!LooksLikeProductCode(productCode)) {
         return;
       }
-      if (product.Kind != InstalledProductKind.Vibeshine && product.Kind != InstalledProductKind.Vibepollo) {
+      if (product.Kind != InstalledProductKind.Vibeshine && !IsNimbusLineProduct(product.Kind)) {
         return;
       }
       if (seen.Contains(productCode)) {
@@ -3575,7 +3596,7 @@ namespace VibepolloInstaller {
     private static bool IsRecoveryKindAllowed(
       InstalledProductKind kind,
       IReadOnlyCollection<InstalledProductKind> allowedKinds) {
-      if (kind != InstalledProductKind.Vibeshine && kind != InstalledProductKind.Vibepollo) {
+      if (kind != InstalledProductKind.Vibeshine && !IsNimbusLineProduct(kind)) {
         return false;
       }
       if (allowedKinds == null || allowedKinds.Count == 0) {
@@ -3661,7 +3682,7 @@ namespace VibepolloInstaller {
         var encoding = DetectTextFileEncodingForAppend(logPath);
         using (var writer = new StreamWriter(logPath, true, encoding)) {
           writer.WriteLine();
-          writer.Write("[Vibepollo Bootstrapper ");
+          writer.Write("[Nimbus Bootstrapper ");
           writer.Write(DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"));
           writer.Write(" UTC] ");
           writer.WriteLine(message);
@@ -4285,7 +4306,7 @@ namespace VibepolloInstaller {
         factoryResetAppData,
         removeVirtualDisplayDriver,
         true,
-        new[] { InstalledProductKind.Vibepollo });
+        new[] { InstalledProductKind.Nimbus, InstalledProductKind.Vibepollo });
       uninstallResult.Operation = InstallerOperation.Uninstall;
       return uninstallResult;
     }
@@ -4347,13 +4368,13 @@ namespace VibepolloInstaller {
           arguments.IsCliQuietMode(),
           true);
         if (!uninstallCompetingProductsResult.Succeeded) {
-          if (ShouldRerunCliElevatedForMsiRepair(uninstallCompetingProductsResult, new[] { InstalledProductKind.Vibepollo })) {
+          if (ShouldRerunCliElevatedForMsiRepair(uninstallCompetingProductsResult, new[] { InstalledProductKind.Nimbus, InstalledProductKind.Vibepollo })) {
             return RunElevatedBootstrapperCli(arguments);
           }
           string recoveryDetail;
           if (TryRepairBustedMsiRegistration(
             uninstallCompetingProductsResult,
-            new[] { InstalledProductKind.Vibepollo },
+            new[] { InstalledProductKind.Nimbus, InstalledProductKind.Vibepollo },
             "CLI competing product pre-uninstall",
             out recoveryDetail)) {
             recoveryDetails.Add(recoveryDetail);
@@ -4759,7 +4780,7 @@ namespace VibepolloInstaller {
     }
 
     private static string BuildCompetingProductUninstallFailureMessage(string uninstallMessage) {
-      var prefix = "Failed to uninstall Apollo, Vibepollo, or Sunshine before starting Vibepollo installation.";
+      var prefix = "Failed to uninstall Apollo, Nimbus, Vibepollo, or Sunshine before starting Nimbus installation.";
       if (string.IsNullOrWhiteSpace(uninstallMessage)) {
         return prefix;
       }
@@ -4861,7 +4882,7 @@ namespace VibepolloInstaller {
       var installedProducts = GetInstalledProductRegistrations(true)
         .Where(product =>
           product.Kind == InstalledProductKind.Apollo
-          || product.Kind == InstalledProductKind.Vibepollo
+          || IsNimbusLineProduct(product.Kind)
           || product.Kind == InstalledProductKind.Sunshine)
         .GroupBy(BuildProductRegistrationIdentity, StringComparer.OrdinalIgnoreCase)
         .Select(MergeInstalledProductGroup)
@@ -4870,7 +4891,7 @@ namespace VibepolloInstaller {
         return new InstallerResult {
           Operation = InstallerOperation.Uninstall,
           ExitCode = 0,
-          Message = "No conflicting Apollo, Vibepollo, or Sunshine installation was found."
+          Message = "No conflicting Apollo, Nimbus, Vibepollo, or Sunshine installation was found."
         };
       }
 
@@ -5234,7 +5255,7 @@ namespace VibepolloInstaller {
         if (stream == null) {
           throw new InvalidOperationException(
             "No MSI payload was found. The installer may be corrupted.\n\n"
-            + "Try re-downloading the installer from the Vibepollo releases page, "
+            + "Try re-downloading the installer from the Nimbus releases page, "
             + "or use the --msi option to specify a payload manually.");
         }
 
@@ -5242,7 +5263,7 @@ namespace VibepolloInstaller {
         var extractDirectory = BuildEmbeddedMsiExtractDirectory(versionToken, forceFreshExtract);
         Directory.CreateDirectory(extractDirectory);
 
-        var msiPath = Path.Combine(extractDirectory, "Vibepollo.msi");
+        var msiPath = Path.Combine(extractDirectory, ProductIdentity.MsiFileName);
         var shouldWrite = forceFreshExtract
           || !File.Exists(msiPath)
           || new FileInfo(msiPath).Length != stream.Length
@@ -5270,7 +5291,7 @@ namespace VibepolloInstaller {
     private static string BuildEmbeddedMsiExtractDirectory(string versionToken, bool forceFreshExtract) {
       var root = Path.Combine(
         Path.GetTempPath(),
-        "VibepolloInstaller",
+        ProductIdentity.TempRootName,
         versionToken);
       if (!forceFreshExtract) {
         return root;
@@ -5594,7 +5615,7 @@ namespace VibepolloInstaller {
 
     private static string BuildLogPath(string phase) {
       var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
-      return Path.Combine(Path.GetTempPath(), "vibeshine_" + phase + "_" + timestamp + ".log");
+      return Path.Combine(Path.GetTempPath(), "nimbus_" + phase + "_" + timestamp + ".log");
     }
 
     private static List<string> CollectInstallComponentFailures(string installLogPath, bool installVirtualDisplayDriver) {
@@ -5677,7 +5698,7 @@ namespace VibepolloInstaller {
       Directory.CreateDirectory(logDirectory);
 
       var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
-      var destinationFileName = "vibeshine_" + phase + "_" + timestamp + ".log";
+      var destinationFileName = "nimbus_" + phase + "_" + timestamp + ".log";
       var destinationPath = Path.Combine(logDirectory, destinationFileName);
       File.Copy(sourceLogPath, destinationPath, true);
       return destinationPath;
@@ -5688,7 +5709,7 @@ namespace VibepolloInstaller {
       string installDirectory,
       bool installVirtualDisplayDriver,
       bool saveInstallLogs) {
-      var resultPath = Path.Combine(Path.GetTempPath(), "vibeshine_install_result_" + Guid.NewGuid().ToString("N") + ".txt");
+      var resultPath = Path.Combine(Path.GetTempPath(), "nimbus_install_result_" + Guid.NewGuid().ToString("N") + ".txt");
       var elevatedArgs = new List<string> {
         "--internal-elevated-install",
         "--internal-install-path",
@@ -5707,7 +5728,8 @@ namespace VibepolloInstaller {
 
       var exitCode = RunElevatedBootstrapper(elevatedArgs);
       var snapshot = TryReadInternalInstallResult(resultPath);
-      var installLogPath = FindMostRecentLog(Path.GetTempPath(), "vibeshine_install_*.log");
+      var installLogPath = FindMostRecentLog(Path.GetTempPath(), "nimbus_install_*.log")
+        ?? FindMostRecentLog(Path.GetTempPath(), "vibeshine_install_*.log");
       if (snapshot != null && !string.IsNullOrWhiteSpace(snapshot.LogPath)) {
         installLogPath = snapshot.LogPath;
       }
@@ -5737,7 +5759,8 @@ namespace VibepolloInstaller {
       elevatedArgs.AddRange(arguments.ForwardedArguments);
 
       var exitCode = RunElevatedBootstrapper(elevatedArgs);
-      var cliLogPath = FindMostRecentLog(Path.GetTempPath(), "vibeshine_cli*.log");
+      var cliLogPath = FindMostRecentLog(Path.GetTempPath(), "nimbus_cli*.log")
+        ?? FindMostRecentLog(Path.GetTempPath(), "vibeshine_cli*.log");
       return new InstallerResult {
         Operation = InstallerOperation.Install,
         ExitCode = exitCode,
@@ -5763,7 +5786,9 @@ namespace VibepolloInstaller {
       }
 
       var exitCode = RunElevatedBootstrapper(elevatedArgs);
-      var uninstallLogPath = FindMostRecentLog(Path.GetTempPath(), "vibeshine_uninstall_*.log")
+      var uninstallLogPath = FindMostRecentLog(Path.GetTempPath(), "nimbus_uninstall_*.log")
+        ?? FindMostRecentLog(Path.GetTempPath(), "nimbus_uninstall_remove_*.log")
+        ?? FindMostRecentLog(Path.GetTempPath(), "vibeshine_uninstall_*.log")
         ?? FindMostRecentLog(Path.GetTempPath(), "vibeshine_uninstall_remove_*.log");
       return new InstallerResult {
         Operation = InstallerOperation.Uninstall,
@@ -5998,13 +6023,13 @@ namespace VibepolloInstaller {
 
       var message = operationName + " failed (error " + exitCode + ").";
       if (exitCode == 1603) {
-        message += " A fatal error occurred during installation. Ensure no Vibepollo processes are running and try again.";
+        message += " A fatal error occurred during installation. Ensure no Nimbus processes are running and try again.";
       } else if (exitCode == 1618) {
         message += " Another installation is already in progress. Wait for it to finish, then try again.";
       } else if (exitCode == 1602) {
         message += " The installation was cancelled by the user.";
       } else if (exitCode == 1605) {
-        message += " No existing Vibepollo installation was found.";
+        message += " No existing Nimbus installation was found.";
       }
       if (!string.IsNullOrWhiteSpace(logPath)) {
         message += " Log: " + logPath;
@@ -6014,7 +6039,7 @@ namespace VibepolloInstaller {
   }
 
   internal static class ShellIdentity {
-    internal const string InstallerAppUserModelId = "Vibepollo.Installer";
+    internal const string InstallerAppUserModelId = "Nimbus.Installer";
 
     private static readonly PropertyKey AppUserModelIdKey =
       new PropertyKey(new Guid("9F4C2855-9F79-4B39-A8D0-E1D42DE1D5F3"), 5);
