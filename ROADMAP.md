@@ -59,11 +59,13 @@ Goal: start the client fork deliberately.
 
 ## Immediate Next Move
 
-The next engineering pass should harden CI/release behavior before any branded
+The next engineering pass should plan packaging identity before any branded
 Nimbus release:
 
 1. Use `docs/release-build-audit.md` as the release automation baseline.
 2. Use `docs/upstream-issue-radar.md` to choose the first reliability issue.
-3. Adapt release workflows to require `nimbus-v*` tags.
-4. Disable or retarget signing, symbols, and WebRTC publishing defaults.
+3. Inventory runtime identifiers: project name, app id, service name, config
+   paths, installer upgrade codes, artifact names, and support URLs.
+4. Decide what changes in the first Nimbus-branded release and what remains
+   inherited for compatibility.
 5. Set up a known-good Windows build environment and record the exact command.

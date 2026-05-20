@@ -50,7 +50,7 @@ jobs:
           import sys
           from pathlib import Path
 
-          VERSION_RE = re.compile(r"^v?([0-9]+\.[0-9]+\.[0-9]+)([-.][0-9A-Za-z.-]+)?$")
+          VERSION_RE = re.compile(r"^nimbus-v([0-9]+\.[0-9]+\.[0-9]+)([-.][0-9A-Za-z.-]+)?$")
           REPO = os.environ["GITHUB_REPOSITORY"]
 
           def run(*args, check=True):
@@ -94,10 +94,10 @@ jobs:
             if not match:
               return None
 
-            release_version = tag[1:] if tag.startswith("v") else tag
+            release_version = tag.removeprefix("nimbus-v")
             for candidate in (
-              Path("release_notes") / f"{release_version}.md",
               Path("release_notes") / f"{tag}.md",
+              Path("release_notes") / f"{release_version}.md",
             ):
               notes_path = candidate.as_posix()
               if subprocess.run(
@@ -125,12 +125,13 @@ jobs:
           head_sha = os.environ["GITHUB_SHA_VALUE"]
           candidate_tags = run("git", "tag", "--points-at", head_sha).splitlines()
           if not candidate_tags:
-            skip("No unreleased version tag points at this push commit.")
+            skip("No unreleased Nimbus release tag points at this push commit.")
 
           valid_candidates = []
           for tag in candidate_tags:
             key = version_key(tag)
             if key is None:
+              print(f"Skipping {tag}: Nimbus releases must use tags like nimbus-v0.1.0 or nimbus-v0.1.0-beta.1.")
               continue
             if tag in release_tags:
               print(f"Skipping {tag}: release already exists.")
@@ -157,7 +158,7 @@ jobs:
             skip("No unreleased newer tag with exact matching release notes was found.")
 
           _, tag_name, notes_file, release_commit = max(valid_candidates, key=lambda item: item[0])
-          release_version = tag_name[1:] if tag_name.startswith("v") else tag_name
+          release_version = tag_name.removeprefix("nimbus-v")
 
           print(f"Release candidate: {tag_name} ({release_commit}) using {notes_file}")
           output(
@@ -179,13 +180,10 @@ jobs:
     with:
       release_commit: ${{ needs.release-candidate.outputs.release_commit || github.sha }}
       release_version: ${{ needs.release-candidate.outputs.release_version || '0.0.0' }}
-      symbol_product_name: Vibepollo
-      publish_symbols: ${{ needs.release-candidate.outputs.should_release == 'true' }}
+      symbol_product_name: Nimbus
+      publish_symbols: false
       symbol_release_draft: true
-      symbol_release_prefix: polo
-    secrets:
-      symbol_token: ${{ secrets.SYMBOL_TOKEN }}
-      signpath_api_token: ${{ secrets.SIGNPATH_API_TOKEN }}
+      symbol_release_prefix: nimbus
 
   release:
     name: Release
@@ -196,7 +194,6 @@ jobs:
     permissions:
       actions: read
       contents: write
-      issues: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -211,11 +208,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ "${TAG_NAME}" =~ ^v?([0-9]+\.[0-9]+\.[0-9]+)([-.][0-9A-Za-z.-]+)?$ ]]; then
+          if [[ "${TAG_NAME}" =~ ^nimbus-v([0-9]+\.[0-9]+\.[0-9]+)([-.][0-9A-Za-z.-]+)?$ ]]; then
             base_version="${BASH_REMATCH[1]}"
-            release_version="${TAG_NAME#v}"
+            release_version="${TAG_NAME#nimbus-v}"
           else
-            echo "::error::Unsupported release tag '${TAG_NAME}'. Use a version tag like 1.15.4, v1.15.4, or 1.15.4-beta.1."
+            echo "::error::Unsupported release tag '${TAG_NAME}'. Nimbus releases must use tags like nimbus-v0.1.0 or nimbus-v0.1.0-beta.1."
             exit 1
           fi
 
@@ -242,12 +239,12 @@ jobs:
             make_latest=true
           fi
 
-          product_name="Vibepollo"
+          product_name="Nimbus"
 
           notes_file=""
           for candidate in \
-            "release_notes/${release_version}.md" \
-            "release_notes/${TAG_NAME}.md"; do
+            "release_notes/${TAG_NAME}.md" \
+            "release_notes/${release_version}.md"; do
             if [[ -f "${candidate}" ]]; then
               notes_file="${candidate}"
               break
@@ -255,7 +252,7 @@ jobs:
           done
 
           if [[ -z "${notes_file}" ]]; then
-            echo "::error::Release notes file not found. Expected exact release notes at release_notes/${release_version}.md or release_notes/${TAG_NAME}.md"
+            echo "::error::Release notes file not found. Expected exact release notes at release_notes/${TAG_NAME}.md or release_notes/${release_version}.md"
             exit 1
           fi
 
@@ -292,7 +289,7 @@ jobs:
           TAG_NAME: ${{ needs.release-candidate.outputs.tag_name }}
         run: |
           set -euo pipefail
-          release_title="v${RELEASE_VERSION}"
+          release_title="Nimbus v${RELEASE_VERSION}"
           # Keep the installer release asset aligned with the full tag version.
           # This preserves prerelease/patch-channel suffixes such as
           # -alpha.1, -beta.2, or -stable.3, while plain stable tags fall back
@@ -390,57 +387,4 @@ jobs:
               -H "Content-Type: application/octet-stream" \
               --input "${asset}" \
               >/dev/null
-          done
-
-      - name: Close fixed issues for release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_ID: ${{ steps.create-release.outputs.release_id }}
-          RELEASE_NAME: ${{ steps.create-release.outputs.release_name }}
-          RELEASE_URL: ${{ steps.create-release.outputs.release_url }}
-        run: |
-          set -euo pipefail
-
-          if [[ -z "${RELEASE_ID}" || -z "${RELEASE_NAME}" || -z "${RELEASE_URL}" ]]; then
-            echo "::error::Release metadata outputs were not set."
-            exit 1
-          fi
-
-          label_name="fixed"
-          release_marker="<!-- fixed-release-follow-up:${RELEASE_ID} -->"
-          encoded_label="$(jq -rn --arg label "${label_name}" '$label|@uri')"
-
-          mapfile -t issue_numbers < <(
-            gh api --paginate "repos/${GITHUB_REPOSITORY}/issues?state=open&labels=${encoded_label}&per_page=100" \
-              --jq '.[] | select(.pull_request | not) | .number'
-          )
-
-          if (( ${#issue_numbers[@]} == 0 )); then
-            echo "No open issues with the '${label_name}' label to close."
-            exit 0
-          fi
-
-          for issue_number in "${issue_numbers[@]}"; do
-            comments_file="$(mktemp)"
-            gh api --paginate "repos/${GITHUB_REPOSITORY}/issues/${issue_number}/comments?per_page=100" \
-              --jq '.[].body' > "${comments_file}"
-
-            if ! grep -Fq "${release_marker}" "${comments_file}"; then
-              comment_body="${release_marker}"$'\n'"This issue has been fixed in the latest release, [${RELEASE_NAME}](${RELEASE_URL}). Closing this issue now that the release containing the fix is available."
-              gh api \
-                --method POST \
-                "repos/${GITHUB_REPOSITORY}/issues/${issue_number}/comments" \
-                -f "body=${comment_body}" \
-                >/dev/null
-            fi
-            rm -f "${comments_file}"
-
-            gh api \
-              --method PATCH \
-              "repos/${GITHUB_REPOSITORY}/issues/${issue_number}" \
-              -f state=closed \
-              -f state_reason=completed \
-              >/dev/null
-
-            echo "Closed fixed issue #${issue_number} for ${RELEASE_NAME}."
           done

@@ -33,16 +33,18 @@ to understand inherited automation before changing release behavior.
 
 ## Release Automation Findings
 
-The inherited release automation is not ready to use as-is for Nimbus releases.
+The inherited release automation was not ready to use as-is for Nimbus releases.
+A hardening pass has now been applied so accidental upstream-style releases are
+less likely.
 
-Key blockers:
+Original blockers:
 
-- Release candidate detection accepts upstream-style tags like `1.15.4` and
+- Release candidate detection accepted upstream-style tags like `1.15.4` and
   `v1.15.4`, not the approved Nimbus `nimbus-v*` tag protocol.
 - Release notes are expected under `release_notes/<version>.md`, where the
   version is parsed from the upstream-style tag.
 - Product and artifact naming still uses `Vibepollo`.
-- Symbol publishing defaults to `Nonary/vibeshine_symbols`.
+- Symbol publishing defaulted to `Nonary/vibeshine_symbols`.
 - SignPath defaults still use the upstream Vibepollo project slug and
   organization id.
 - WebRTC artifacts point at `Nonary/vibeshine` in
@@ -50,9 +52,30 @@ Key blockers:
 - Release automation can close issues labeled `fixed`; this should not be
   enabled until Nimbus release notes and issue policy are ready.
 
-Decision: keep CI available for investigation, but do not intentionally trigger
-release publishing until release automation is adapted to Nimbus naming and tag
-rules.
+Applied hardening:
+
+- Release candidate detection now requires `nimbus-v*` tags.
+- Release metadata now rejects non-Nimbus release tags.
+- Symbol publishing is disabled by default from the main CI caller.
+- Tag-triggered symbol publishing in the Windows reusable workflow is disabled;
+  symbols require explicit `publish_symbols`.
+- The default symbol repository is retargeted to `kunolabs/nimbus-symbols`, but
+  publishing remains disabled until that repository and token policy exist.
+- SignPath submission is disabled by passing no signing token to the Windows
+  reusable workflow and blanking SignPath environment values.
+- WebRTC publishing defaults to `false` and requires an explicit confirmation
+  string.
+- Main release creation no longer closes `fixed` issues directly.
+- The separate fixed-issue release closer is disabled.
+
+Remaining release blocker: packaging still emits inherited Vibepollo-named
+artifacts. The release job now looks for `NimbusSetup*`, so a premature
+`nimbus-v*` tag should fail rather than publish an inherited Vibepollo installer
+as a Nimbus release.
+
+Decision: CI is safer for normal branch work and manual investigation, but do
+not intentionally create a Nimbus release tag until packaging identity is
+handled.
 
 ## Build And Packaging Findings
 
@@ -96,21 +119,17 @@ environment matching `docs/building.md`.
 | Secret | Purpose | Current Risk |
 | --- | --- | --- |
 | `SIGNPATH_API_TOKEN` | Submit/sign Windows artifacts | Upstream SignPath project defaults still reference Vibepollo. |
-| `SYMBOL_TOKEN` | Publish private symbols release | Defaults to `Nonary/vibeshine_symbols`; unsafe for Nimbus. |
+| `SYMBOL_TOKEN` | Publish private symbols release | Retargeted to `kunolabs/nimbus-symbols`, but still disabled until a Nimbus symbol repo and policy exist. |
 | `GITHUB_TOKEN` | Release creation and issue automation | Built-in token is fine, but workflows need Nimbus tag and wording changes first. |
 
 ## Recommended Next Actions
 
-1. Keep release workflows enabled only for read-only/manual investigation.
-2. Add a CI hardening pass before the first Nimbus release:
-   - require `nimbus-v*` tags for release publication;
-   - rename release product metadata deliberately;
-   - disable symbol publishing until a Nimbus symbol repo exists;
-   - disable SignPath submission until a Nimbus signing project exists;
-   - reword issue automation from Vibepollo to Nimbus.
-3. Create a dedicated packaging identity plan before changing installer/runtime
+1. Create a dedicated packaging identity plan before changing installer/runtime
    identifiers.
-4. Set up a known-good Windows build environment and record exact commands.
+2. Set up a known-good Windows build environment and record exact commands.
+3. Reword issue automation from Vibepollo to Nimbus before using it for public
+   support.
+4. Create a Nimbus symbol publishing plan before enabling `publish_symbols`.
 5. Use `docs/upstream-issue-radar.md` to select the first credibility fixes.
 
 ## Current Verdict

@@ -24,7 +24,7 @@ on:
       symbol_release_repo:
         required: false
         type: string
-        default: Nonary/vibeshine_symbols
+        default: kunolabs/nimbus-symbols
       symbol_release_tag:
         required: false
         type: string
@@ -300,7 +300,7 @@ jobs:
           echo "::remove-matcher owner=gcc::"
 
       - name: Install cv2pdb
-        if: startsWith(github.ref, 'refs/tags/') || inputs.publish_symbols
+        if: inputs.publish_symbols
         shell: pwsh
         env:
           CV2PDB_VERSION: "0.54"
@@ -319,7 +319,7 @@ jobs:
           Add-Content -Path $env:GITHUB_PATH -Value (Split-Path $cv2pdbExe.FullName -Parent)
 
       - name: Generate Windows PDB
-        if: startsWith(github.ref, 'refs/tags/') || inputs.publish_symbols
+        if: inputs.publish_symbols
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -347,7 +347,7 @@ jobs:
           }
 
       - name: Package Windows Symbols
-        if: startsWith(github.ref, 'refs/tags/') || inputs.publish_symbols
+        if: inputs.publish_symbols
         shell: pwsh
         env:
           RELEASE_VERSION: ${{ inputs.release_version }}
@@ -410,10 +410,10 @@ jobs:
         shell: msys2 {0}
         env:
           SYMBOL_PRODUCT_NAME: ${{ inputs.symbol_product_name }}
-          SIGNPATH_API_TOKEN: ${{ secrets.signpath_api_token }}
-          SIGNPATH_ORGANIZATION_ID: 1ba0e884-7ab4-43e6-aa84-9b2c7e3fba15
-          SIGNPATH_PROJECT_SLUG: Vibepollo
-          SIGNPATH_SIGNING_POLICY_SLUG: test-signing
+          SIGNPATH_API_TOKEN: ''
+          SIGNPATH_ORGANIZATION_ID: ''
+          SIGNPATH_PROJECT_SLUG: Nimbus
+          SIGNPATH_SIGNING_POLICY_SLUG: ''
         run: |
           mkdir -p artifacts
           cd build
@@ -489,7 +489,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish private symbols release
-        if: startsWith(github.ref, 'refs/tags/') || inputs.publish_symbols
+        if: inputs.publish_symbols
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.symbol_token }}
@@ -517,8 +517,8 @@ jobs:
               throw "Unsupported release tag '$sourceReleaseTag'. Expected a release tag like v1.15.2-beta.2."
             }
 
-            if ($env:SYMBOL_RELEASE_PREFIX -notmatch '^(shine|polo)$') {
-              throw "Unsupported symbol release prefix '$($env:SYMBOL_RELEASE_PREFIX)'. Expected 'shine' or 'polo'."
+            if ($env:SYMBOL_RELEASE_PREFIX -notmatch '^(shine|polo|nimbus)$') {
+              throw "Unsupported symbol release prefix '$($env:SYMBOL_RELEASE_PREFIX)'. Expected 'shine', 'polo', or 'nimbus'."
             }
 
             $symbolReleaseTag = "$($env:SYMBOL_RELEASE_PREFIX)_$releaseVersion"

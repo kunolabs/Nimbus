@@ -66,6 +66,11 @@ Use an explicit tag push:
 git push origin nimbus-v0.1.0
 ```
 
+Release automation rejects upstream-style tags such as `1.15.5` and `v1.15.5`.
+Until packaging identity is completed, a `nimbus-v*` tag should still be treated
+as unsafe for publication because the inherited build may produce Vibepollo-named
+artifacts.
+
 ## Release Notes
 
 Every Nimbus release note should separate:
@@ -104,5 +109,7 @@ After syncing:
 - Confirm license and upstream attribution are intact.
 - Confirm issue templates are Nimbus-branded.
 - Confirm CI workflows are safe for the org repository.
+- Confirm the Windows installer artifact is Nimbus-branded.
+- Confirm signing and symbol publishing have Nimbus-owned destinations.
 - Confirm artifacts do not pretend to be upstream releases.
 - Confirm tag name uses the `nimbus-` prefix.

@@ -6,10 +6,15 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: Create/update the pinned WebRTC GitHub release asset.
+        description: Create/update the pinned WebRTC GitHub release asset. Defaults to false for Nimbus hardening.
         required: true
-        default: true
+        default: false
         type: boolean
+      publish_confirm:
+        description: Type publish-webrtc-for-nimbus to allow publishing.
+        required: false
+        default: ''
+        type: string
       allow_replace:
         description: Allow replacing an existing release asset with different bytes.
         required: true
@@ -211,7 +216,7 @@ jobs:
           retention-days: 7
 
       - name: Publish WebRTC release
-        if: inputs.publish
+        if: inputs.publish && inputs.publish_confirm == 'publish-webrtc-for-nimbus'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

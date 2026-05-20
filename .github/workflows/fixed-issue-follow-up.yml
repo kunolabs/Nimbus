@@ -51,7 +51,9 @@ jobs:
 
   close-fixed-issues:
     name: Close Fixed Issues On Release
-    if: github.event_name == 'release' && !github.event.release.draft
+    # Disabled during Nimbus bootstrap. Re-enable only after release notes,
+    # issue labels, and public support policy are Nimbus-owned.
+    if: false
     runs-on: ubuntu-latest
     permissions:
       issues: write
