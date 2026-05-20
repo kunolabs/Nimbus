@@ -111,6 +111,18 @@ Preconditions before creating the tag:
 | WebRTC assets | WebRTC publishing remains manual and confirmation-gated. |
 | Issue automation | Automatic issue closure remains disabled. |
 
+Run the local preflight before creating or pushing a release tag:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\check_nimbus_release_preflight.ps1 `
+  -TagName nimbus-v0.1.0-alpha.1
+```
+
+The preflight is read-only. It checks the Nimbus tag format, promoted release
+notes, installer fixture status, local tag presence, and working-tree state. It
+should report `BLOCKED` while fixture rows are still pending or the final
+top-level release notes file has not been promoted.
+
 When all preconditions pass, create and push only the intended tag:
 
 ```bash
