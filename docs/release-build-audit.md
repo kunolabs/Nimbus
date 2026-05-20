@@ -124,8 +124,8 @@ environment matching `docs/building.md`.
 
 ## Recommended Next Actions
 
-1. Create a dedicated packaging identity plan before changing installer/runtime
-   identifiers.
+1. Use `docs/packaging-identity-plan.md` as the authority for packaging rename
+   order.
 2. Set up a known-good Windows build environment and record exact commands.
 3. Reword issue automation from Vibepollo to Nimbus before using it for public
    support.

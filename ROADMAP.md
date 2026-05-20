@@ -59,13 +59,13 @@ Goal: start the client fork deliberately.
 
 ## Immediate Next Move
 
-The next engineering pass should plan packaging identity before any branded
-Nimbus release:
+The next engineering pass should execute the package-branding slice from
+`docs/packaging-identity-plan.md` before any branded Nimbus release:
 
 1. Use `docs/release-build-audit.md` as the release automation baseline.
 2. Use `docs/upstream-issue-radar.md` to choose the first reliability issue.
-3. Inventory runtime identifiers: project name, app id, service name, config
-   paths, installer upgrade codes, artifact names, and support URLs.
-4. Decide what changes in the first Nimbus-branded release and what remains
-   inherited for compatibility.
+3. Keep runtime identifiers unchanged unless the packaging identity plan says
+   the migration has a test path.
+4. Produce a local Nimbus-named installer and inspect install, upgrade, and
+   uninstall behavior.
 5. Set up a known-good Windows build environment and record the exact command.
