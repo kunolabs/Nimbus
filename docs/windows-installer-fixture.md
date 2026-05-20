@@ -58,8 +58,36 @@ hashes.
 
 ## Evidence Commands
 
-Run these in the fixture VM from the directory containing the candidate
-installer:
+The recommended path is to run the evidence collector before install, after
+install, and after uninstall from inside the fixture VM. The script does not
+install or uninstall Nimbus; it only records evidence.
+
+Copy `NimbusSetup.exe` and the repository `scripts/` directory into the same
+fixture working folder before running these commands.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\collect_windows_installer_fixture.ps1 `
+  -Stage preinstall `
+  -InstallerPath .\NimbusSetup.exe `
+  -SkipWebUiProbe
+
+powershell -ExecutionPolicy Bypass -File .\scripts\collect_windows_installer_fixture.ps1 `
+  -Stage postinstall `
+  -InstallerPath .\NimbusSetup.exe
+
+powershell -ExecutionPolicy Bypass -File .\scripts\collect_windows_installer_fixture.ps1 `
+  -Stage postuninstall `
+  -InstallerPath .\NimbusSetup.exe `
+  -SkipWebUiProbe
+```
+
+Each run writes `fixture-summary.md` and `fixture-evidence.json` under a local
+`nimbus-fixture-evidence/` folder. Attach or summarize those outputs in the PR,
+but remove secrets, pairing PINs, user credentials, private hostnames, and
+private network details first.
+
+If you need to capture evidence manually, run these from the directory
+containing the candidate installer:
 
 ```powershell
 Get-FileHash .\NimbusSetup.exe -Algorithm SHA256
