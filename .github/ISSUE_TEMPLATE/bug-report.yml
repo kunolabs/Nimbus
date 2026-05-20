@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report a bug with symptoms, expected behavior, OS version, and logs.
+description: Report a reproducible Nimbus host bug with environment details and logs.
 body:
   - type: textarea
     id: symptoms
@@ -18,15 +18,47 @@ body:
       required: true
 
   - type: dropdown
-    id: os-version
+    id: host-os
     attributes:
-      label: Windows Version
-      description: Select the version of Windows you are using.
+      label: Host OS
+      description: Select the operating system used by the streaming host.
       options:
-        - 22H2
-        - 23H2
-        - 24H2
-        - 25H2
+        - Windows 11 25H2
+        - Windows 11 24H2
+        - Windows 11 23H2
+        - Windows 10
+        - Linux
+        - macOS
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: host-gpu
+    attributes:
+      label: Host GPU and Driver
+      description: Example: RTX 4080, NVIDIA 576.xx.
+    validations:
+      required: true
+
+  - type: input
+    id: client
+    attributes:
+      label: Client Device and App
+      description: Example: NVIDIA Shield TV Pro, Artemis v20.2.6, 4K 120 Hz HEVC HDR.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Provide the smallest sequence that triggers the issue.
+      placeholder: |
+        1. Start Nimbus
+        2. Connect from ...
+        3. Launch ...
+        4. Observe ...
     validations:
       required: true
 
@@ -35,8 +67,9 @@ body:
     attributes:
       label: Logs (Optional but Recommended)
       description: |
-        If possible, attach your logs to help us diagnose the issue.  
-        Go to **Troubleshooting tab → Export Logs** and upload the **Vibeshine logs zip file** here.
+        If possible, attach exported logs to help diagnose the issue.
+        Go to **Troubleshooting -> Export Logs** and upload the logs zip file here.
+        Remove secrets, tokens, public IPs, and private hostnames before posting.
     validations:
       required: false
 

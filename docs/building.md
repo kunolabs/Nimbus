@@ -1,5 +1,6 @@
 # Building
-Sunshine binaries are built using [CMake](https://cmake.org) and requires `cmake` > 3.25.
+Nimbus currently uses the inherited CMake build from its Vibepollo, Apollo, and Sunshine upstream lineage. The build
+requires [CMake](https://cmake.org) > 3.25.
 
 ## Building Locally
 
@@ -15,13 +16,13 @@ It is recommended to use one of the following compilers:
 ### Dependencies
 
 #### Linux
-Dependencies vary depending on the distribution. You can reference our
+Dependencies vary depending on the distribution. You can reference the inherited
 [linux_build.sh](https://github.com/LizardByte/Sunshine/blob/master/scripts/linux_build.sh) script for a list of
 dependencies we use in Debian-based and Fedora-based distributions. Please submit a PR if you would like to extend the
 script to support other distributions.
 
 ##### CUDA Toolkit
-Sunshine requires CUDA Toolkit for NVFBC capture. There are two caveats to CUDA:
+The inherited host build requires CUDA Toolkit for NVFBC capture. There are two caveats to CUDA:
 
 1. The version installed depends on the version of GCC.
 2. The version of CUDA you use will determine compatibility with various GPU generations.
@@ -113,7 +114,8 @@ pacman -S "${dependencies[@]}"
 ```
 
 ##### WebRTC (optional, Windows only)
-Sunshine can link against the libwebrtc C++ wrapper when `SUNSHINE_ENABLE_WEBRTC=ON`. The wrapper source is vendored as
+Nimbus can link against the libwebrtc C++ wrapper when `SUNSHINE_ENABLE_WEBRTC=ON`. The option name is inherited from
+upstream and has not been renamed yet. The wrapper source is vendored as
 the `third-party/libwebrtc` submodule, but you must build WebRTC separately and provide a staging directory that
 contains `include/` and `lib/` (e.g., `libwebrtc.dll` and its import library). We use the `third-party/depot_tools`
 submodule for `gclient`/`gn`.
@@ -141,17 +143,17 @@ Build steps (summary from libwebrtc):
    gn gen out-debug/Windows-x64 --args="target_os=\"win\" target_cpu=\"x64\" is_component_build=false is_clang=true is_debug=true rtc_use_h264=true ffmpeg_branding=\"Chrome\" rtc_include_tests=false rtc_build_examples=false libwebrtc_desktop_capture=true" --ide=vs2022
    ninja -C out-debug/Windows-x64 libwebrtc
    ```
-7. Stage the artifacts into a directory with `include/` and `lib/` subfolders inside your Sunshine build tree (for
+7. Stage the artifacts into a directory with `include/` and `lib/` subfolders inside your Nimbus build tree (for
    example, `build/libwebrtc`). Copy `libwebrtc.dll` and `libwebrtc.dll.lib` into `lib/`.
-8. Configure Sunshine with `-DSUNSHINE_ENABLE_WEBRTC=ON` (the default `WEBRTC_ROOT` points at `build/libwebrtc`). If
+8. Configure Nimbus with `-DSUNSHINE_ENABLE_WEBRTC=ON` (the default `WEBRTC_ROOT` points at `build/libwebrtc`). If
    CMake still fails to find libwebrtc, pass `WEBRTC_INCLUDE_DIR` and `WEBRTC_LIBRARY` explicitly.
 
 ### Clone
 Ensure [git](https://git-scm.com) is installed on your system, then clone the repository using the following command:
 
 ```bash
-git clone https://github.com/ClassicOldSong/Apollo.git --recurse-submodules
-cd Apollo
+git clone https://github.com/kunolabs/Nimbus.git --recurse-submodules
+cd Nimbus
 mkdir build
 ```
 
@@ -163,8 +165,8 @@ ninja -C build
 ```
 
 > [!TIP]
-> Available build options can be found in
-> [options.cmake](https://github.com/LizardByte/Sunshine/blob/master/cmake/prep/options.cmake).
+> Available build options can be found in the inherited `cmake/prep/options.cmake` file. Some option names still use
+> upstream Sunshine naming until the rebrand reaches build configuration.
 
 ### Package
 

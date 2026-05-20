@@ -61,6 +61,7 @@ _codeql_detected_source_root
 
 build-msvc
 .cache/
+.codeprism/
 
 # Local-only Copilot instructions (not committed)
 .github/copilot-instructions.md
