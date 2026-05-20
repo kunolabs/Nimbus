@@ -113,6 +113,13 @@ dependencies=(
 pacman -S "${dependencies[@]}"
 ```
 
+##### Windows MSI packaging tools
+The `package_installer` target uses CPack's WiX generator and requires WiX Toolset v3 style tools
+(`candle.exe` and `light.exe`). Install WiX v3.14.1 normally, or use the portable
+`wix314-binaries.zip` release and point `WIX` at the extracted directory before packaging.
+When building from MSYS2, configure CMake with Windows Git to keep generated version metadata clean:
+`-DGIT_EXECUTABLE=C:/Progra~1/Git/cmd/git.exe`.
+
 ##### WebRTC (optional, Windows only)
 Nimbus can link against the libwebrtc C++ wrapper when `SUNSHINE_ENABLE_WEBRTC=ON`. The option name is inherited from
 upstream and has not been renamed yet. The wrapper source is vendored as
@@ -186,8 +193,11 @@ ninja -C build
   }}
   @tab{Windows | @tabs{
     @tab{Installer | ```bash
+      # Preferred: builds Web UI, helper executables, MSI, and NimbusSetup.exe.
+      ninja -C build package_installer
+
+      # Direct MSI-only packaging also works after the build payload exists.
       cpack -G WIX --config ./build/CPackConfig.cmake
-      # note: MSI packaging requires WiX Toolset v3 to be installed (e.g. `choco install wixtoolset`)
       ```}
     @tab{Portable | ```bash
       cpack -G ZIP --config ./build/CPackConfig.cmake

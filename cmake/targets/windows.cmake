@@ -56,7 +56,7 @@ target_compile_definitions(sunshine PRIVATE SUNSHINE_USE_DISPLAYDEVICE_LOGGING)
 set(SUNSHINE_UNINSTALL_UI_EXE "${CMAKE_BINARY_DIR}/uninstall.exe")
 add_custom_command(
     OUTPUT "${SUNSHINE_UNINSTALL_UI_EXE}"
-    COMMAND powershell -NoProfile -ExecutionPolicy Bypass -File "${CMAKE_SOURCE_DIR}/packaging/windows/bootstrapper/build_bootstrapper.ps1" -BuildDir "${CMAKE_BINARY_DIR}" -UninstallOnly -OutputName "uninstall.exe" -DisableSignPath
+    COMMAND ${CMAKE_COMMAND} -E env "GIT_EXECUTABLE=${GIT_EXECUTABLE}" powershell -NoProfile -ExecutionPolicy Bypass -File "${CMAKE_SOURCE_DIR}/packaging/windows/bootstrapper/build_bootstrapper.ps1" -BuildDir "${CMAKE_BINARY_DIR}" -UninstallOnly -OutputName "uninstall.exe" -DisableSignPath
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_BINARY_DIR}/cpack_artifacts/uninstall.exe" "${SUNSHINE_UNINSTALL_UI_EXE}"
     DEPENDS "${CMAKE_SOURCE_DIR}/packaging/windows/bootstrapper/build_bootstrapper.ps1"
             "${CMAKE_SOURCE_DIR}/packaging/windows/bootstrapper/VibeshineInstaller.cs"
@@ -69,15 +69,34 @@ add_custom_command(
 add_custom_target(build_uninstall_ui ALL DEPENDS "${SUNSHINE_UNINSTALL_UI_EXE}")
 
 # Convenience target to build MSI via CPack (WiX)
+set(SUNSHINE_WINDOWS_PACKAGE_TARGETS
+    sunshine
+    copy_playnite_plugin
+    build_uninstall_ui
+)
+foreach(_sunshine_windows_package_target
+        dxgi-info
+        audio-info
+        sunshinesvc
+        playnite-launcher
+        sunshine_wgc_capture
+        sunshine_display_helper)
+    if(TARGET ${_sunshine_windows_package_target})
+        list(APPEND SUNSHINE_WINDOWS_PACKAGE_TARGETS ${_sunshine_windows_package_target})
+    endif()
+endforeach()
+
 add_custom_target(package_msi
     COMMAND "${CMAKE_CPACK_COMMAND}" -G WIX -C "$<IF:$<CONFIG:>,${CMAKE_BUILD_TYPE},$<CONFIG>>"
-    DEPENDS sunshine copy_playnite_plugin build_uninstall_ui
+    DEPENDS ${SUNSHINE_WINDOWS_PACKAGE_TARGETS}
     COMMENT "Building MSI installer via CPack (WiX)"
 )
+unset(_sunshine_windows_package_target)
+unset(SUNSHINE_WINDOWS_PACKAGE_TARGETS)
 
 # Build custom elevated installer EXE that wraps the generated MSI
 add_custom_target(package_installer
-    COMMAND powershell -NoProfile -ExecutionPolicy Bypass -File "${CMAKE_SOURCE_DIR}/packaging/windows/bootstrapper/build_bootstrapper.ps1" -BuildDir "${CMAKE_BINARY_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E env "GIT_EXECUTABLE=${GIT_EXECUTABLE}" powershell -NoProfile -ExecutionPolicy Bypass -File "${CMAKE_SOURCE_DIR}/packaging/windows/bootstrapper/build_bootstrapper.ps1" -BuildDir "${CMAKE_BINARY_DIR}"
     DEPENDS package_msi
     COMMENT "Building custom installer executable"
 )

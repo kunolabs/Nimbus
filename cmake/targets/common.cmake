@@ -94,6 +94,10 @@ add_custom_target(web-ui ALL
     COMMAND_EXPAND_LISTS
     VERBATIM)
 
+if(WIN32 AND TARGET package_msi)
+    add_dependencies(package_msi web-ui)
+endif()
+
 # docs
 if(BUILD_DOCS)
     add_subdirectory(third-party/doxyconfig docs)

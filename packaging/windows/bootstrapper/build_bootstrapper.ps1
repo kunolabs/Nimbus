@@ -14,7 +14,8 @@ param(
     [string]$SignPathProjectSlug = $(if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_PROJECT_SLUG)) { "Nimbus" } else { $env:SIGNPATH_PROJECT_SLUG }),
     [string]$SignPathSigningPolicySlug = $env:SIGNPATH_SIGNING_POLICY_SLUG,
     [string]$SignPathPeArtifactConfigurationSlug = $env:SIGNPATH_PE_ARTIFACT_CONFIGURATION_SLUG,
-    [string]$SignPathMsiArtifactConfigurationSlug = $(if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_MSI_ARTIFACT_CONFIGURATION_SLUG)) { "msi-file" } else { $env:SIGNPATH_MSI_ARTIFACT_CONFIGURATION_SLUG })
+    [string]$SignPathMsiArtifactConfigurationSlug = $(if ([string]::IsNullOrWhiteSpace($env:SIGNPATH_MSI_ARTIFACT_CONFIGURATION_SLUG)) { "msi-file" } else { $env:SIGNPATH_MSI_ARTIFACT_CONFIGURATION_SLUG }),
+    [string]$GitExecutable = $env:GIT_EXECUTABLE
 )
 
 $ErrorActionPreference = "Stop"
@@ -40,6 +41,15 @@ function Find-LatestMsi([string]$Directory) {
     return $candidate.FullName
 }
 
+function Invoke-GitCommand([string]$RepoRoot, [string[]]$Arguments) {
+    $gitCommand = "git"
+    if (-not [string]::IsNullOrWhiteSpace($GitExecutable)) {
+        $gitCommand = $GitExecutable
+    }
+
+    & $gitCommand -C $RepoRoot @Arguments
+}
+
 function Get-GitTagVersion([string]$RepoRoot) {
     $tagPatterns = @(
         'nimbus-v[0-9]*.[0-9]*.[0-9]*'
@@ -47,7 +57,7 @@ function Get-GitTagVersion([string]$RepoRoot) {
 
     try {
         foreach ($tagPattern in $tagPatterns) {
-            $rawCandidates = git -C $RepoRoot tag --merged HEAD --sort=-version:refname --list $tagPattern 2>$null
+            $rawCandidates = Invoke-GitCommand $RepoRoot @("tag", "--merged", "HEAD", "--sort=-version:refname", "--list", $tagPattern) 2>$null
             foreach ($candidate in $rawCandidates) {
                 $rawTag = [string]$candidate
                 if ([string]::IsNullOrWhiteSpace($rawTag)) {
@@ -69,7 +79,7 @@ function Get-GitTagVersion([string]$RepoRoot) {
     }
 
     try {
-        $rawTag = (git -C $RepoRoot describe --tags --abbrev=0 2>$null).Trim()
+        $rawTag = (Invoke-GitCommand $RepoRoot @("describe", "--tags", "--abbrev=0") 2>$null).Trim()
         if ($rawTag -match '^nimbus-v(\d+)\.(\d+)\.(\d+)(?:([.-][0-9A-Za-z.-]+))?$') {
             return @{
                 Tag = $rawTag
@@ -86,7 +96,7 @@ function Get-GitTagVersion([string]$RepoRoot) {
 
 function Get-GitInformationalVersion([string]$RepoRoot, [string]$fallbackTag) {
     try {
-        $desc = (git -C $RepoRoot describe --tags --dirty --always 2>$null).Trim()
+        $desc = (Invoke-GitCommand $RepoRoot @("describe", "--tags", "--dirty", "--always") 2>$null).Trim()
         if (-not [string]::IsNullOrWhiteSpace($desc)) {
             return $desc
         }
@@ -342,6 +352,10 @@ if ($UninstallOnly) {
 Write-Host "[bootstrapper] Output EXE: $outputPath"
 Write-Host "[bootstrapper] Compiler: $cscPath"
 Write-Host "[bootstrapper] Version: $assemblyVersion ($informationalVersion)"
+
+if (Test-Path -LiteralPath $outputPath) {
+    Remove-Item -LiteralPath $outputPath -Force
+}
 
 & $cscPath @args
 if ($LASTEXITCODE -ne 0) {
