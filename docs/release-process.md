@@ -122,6 +122,11 @@ Do not create `stable/0.1` for the first alpha. Create a stable branch only
 when Nimbus has a beta or release-candidate line that users can reasonably
 track for fixes.
 
+While fixture results are pending, keep draft notes in
+`release_notes/drafts/nimbus-v0.1.0-alpha.1.md`. Move them to the top-level
+`release_notes/` directory only after `docs/windows-installer-fixture.md` has
+recorded passing fixture evidence.
+
 ## Release Notes
 
 Every Nimbus release note should separate:
@@ -177,6 +182,7 @@ flowchart TD
 - Confirm CI workflows are safe for the org repository.
 - Confirm the Windows installer artifact is Nimbus-branded.
 - Confirm the installer was executed in a VM or snapshot fixture.
+- Confirm `docs/windows-installer-fixture.md` records the fixture result.
 - Confirm inherited runtime ids that remain in place are listed in release
   notes.
 - Confirm signing and symbol publishing have Nimbus-owned destinations.
