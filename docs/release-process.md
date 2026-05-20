@@ -67,10 +67,60 @@ git push origin nimbus-v0.1.0
 ```
 
 Release automation rejects upstream-style tags such as `1.15.5` and `v1.15.5`.
-Until the package-branding slice in `docs/packaging-identity-plan.md` is
-validated with a local Windows package build, a `nimbus-v*` tag should still be
-treated as unsafe for publication. The expected release artifact is
-`NimbusSetup*.exe`.
+The package-branding slice in `docs/packaging-identity-plan.md` now produces
+local `NimbusSetup.exe` and `Nimbus.msi` artifacts. A `nimbus-v*` tag should
+still be treated as unsafe for publication until installer execution is tested
+in a VM or snapshot fixture. The expected release artifact is
+`NimbusSetup-v<version>.exe`.
+
+## First Alpha Tag Policy
+
+The first planned Nimbus tag is:
+
+```text
+nimbus-v0.1.0-alpha.1
+```
+
+This tag is for a compatibility-first alpha. It should prove that Nimbus can
+publish a branded package while clearly disclosing inherited runtime ids such as
+service names, config filenames, upgrade GUIDs, and install-path behavior.
+
+```mermaid
+flowchart TD
+  A["Local package build passed"] --> B["VM or snapshot install test"]
+  B --> C["Upgrade and uninstall notes recorded"]
+  C --> D["release_notes/nimbus-v0.1.0-alpha.1.md"]
+  D --> E["Annotated tag"]
+  E --> F["Explicit tag push"]
+  F --> G["GitHub prerelease"]
+
+  B -. "blocks" .-> E
+  D -. "must exist in tagged commit" .-> E
+```
+
+Preconditions before creating the tag:
+
+| Gate | Required state |
+| --- | --- |
+| Package output | `NimbusSetup.exe` and `Nimbus.msi` generated locally. |
+| Installer fixture | Fresh install, uninstall, reinstall, and upgrade behavior recorded in a VM or snapshot. |
+| Release notes | `release_notes/nimbus-v0.1.0-alpha.1.md` exists in the tagged commit. |
+| Runtime identity | Remaining inherited ids are listed as known compatibility choices. |
+| Signing | Either unsigned alpha is explicitly disclosed, or Nimbus-owned signing is configured. |
+| Symbols | Symbol publishing remains disabled unless `kunolabs/nimbus-symbols` and `SYMBOL_TOKEN` are ready. |
+| WebRTC assets | WebRTC publishing remains manual and confirmation-gated. |
+| Issue automation | Automatic issue closure remains disabled. |
+
+When all preconditions pass, create and push only the intended tag:
+
+```bash
+git tag -a nimbus-v0.1.0-alpha.1 -m "Nimbus v0.1.0-alpha.1"
+git push origin nimbus-v0.1.0-alpha.1
+```
+
+Do not create `stable/0.1` for the first alpha. Create a stable branch only
+when Nimbus has a beta or release-candidate line that users can reasonably
+track for fixes.
 
 ## Release Notes
 
@@ -126,6 +176,7 @@ flowchart TD
 - Confirm issue templates are Nimbus-branded.
 - Confirm CI workflows are safe for the org repository.
 - Confirm the Windows installer artifact is Nimbus-branded.
+- Confirm the installer was executed in a VM or snapshot fixture.
 - Confirm inherited runtime ids that remain in place are listed in release
   notes.
 - Confirm signing and symbol publishing have Nimbus-owned destinations.

@@ -41,8 +41,9 @@ Original blockers:
 
 - Release candidate detection accepted upstream-style tags like `1.15.4` and
   `v1.15.4`, not the approved Nimbus `nimbus-v*` tag protocol.
-- Release notes are expected under `release_notes/<version>.md`, where the
-  version is parsed from the upstream-style tag.
+- Release notes are expected under `release_notes/<tag>.md`, with
+  `release_notes/<version>.md` accepted as a fallback after removing the
+  `nimbus-v` prefix.
 - Product and artifact naming still uses `Vibepollo`.
 - Symbol publishing defaulted to `Nonary/vibeshine_symbols`.
 - SignPath defaults still use the upstream Vibepollo project slug and
@@ -68,13 +69,14 @@ Applied hardening:
 - Main release creation no longer closes `fixed` issues directly.
 - The separate fixed-issue release closer is disabled.
 
-Remaining release blocker: package branding has been updated to emit
-Nimbus-named artifacts, but a local Windows package build has not yet verified
-the final installer output. The release job looks for `NimbusSetup*`.
+Remaining release blocker: package branding now emits Nimbus-named artifacts and
+the local Windows package build has verified the final installer output. A
+release tag is still blocked until installer execution is tested in a VM or
+snapshot fixture and release notes are prepared.
 
 Decision: CI is safer for normal branch work and manual investigation, but do
-not intentionally create a Nimbus release tag until package output is validated
-locally.
+not intentionally create a Nimbus release tag until package install, upgrade,
+and uninstall behavior is recorded.
 
 ## Build And Packaging Findings
 
@@ -94,37 +96,82 @@ Runtime identifiers should not be renamed in one broad sweep. Upgrade codes,
 service names, config paths, and app ids can affect upgrades and coexistence
 with Apollo/Vibepollo/Sunshine.
 
-## Local Validation Attempt
+## Local Windows Package Validation
 
-Commands attempted:
+Validation date: 2026-05-20
+
+Validated commit: `82fa5cdd`
+
+Scope: full local Windows package build for the Phase C Nimbus packaging slice.
+This validates generated package artifacts, not installer execution on a target
+machine.
+
+```mermaid
+flowchart LR
+  A["Configure MSYS2 UCRT64 build"] --> B["Build package_installer"]
+  B --> C["Build web UI and native tools"]
+  C --> D["Run CPack WiX"]
+  D --> E["Create Nimbus.msi"]
+  E --> F["Create NimbusSetup.exe"]
+  F --> G{"Installer executed?"}
+  G -- "not yet" --> H["VM or snapshot dry run required"]
+```
+
+Tooling used:
 
 ```bash
-cmake --version
-git submodule status --recursive
-git diff --check
-python -c "import yaml ..."
-powershell XML and PowerShell parser checks
-powershell -File packaging/windows/bootstrapper/build_bootstrapper.ps1 -BuildDir .\build\phasec-bootstrapper -UninstallOnly -DisableSignPath
+MSYS2 UCRT64
+cmake 4.3.2
+ninja 1.13.2
+g++ 16.1.0
+WiX Toolset v3.14.1 portable binaries
+Git for Windows via -DGIT_EXECUTABLE=C:/Progra~1/Git/cmd/git.exe
+```
+
+Build configuration:
+
+```bash
+cmake -B build/nimbus-package-validation -G Ninja -S . \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_DOCS=OFF \
+  -DBUILD_TESTS=OFF \
+  -DSUNSHINE_ENABLE_WEBRTC=OFF \
+  -DGIT_EXECUTABLE=C:/Progra~1/Git/cmd/git.exe
+
+WIX=K:/CODEX/game-dev/game-streaming/Nimbus/build/nimbus-package-validation/tools/wix314 \
+  ninja -C build/nimbus-package-validation package_installer
 ```
 
 Result:
 
-- `cmake` is not available on this PATH.
-- `git submodule status --recursive` failed in this PowerShell/Git setup because
-  Git's submodule helper shell could not find `basename`, `sed`, and
-  `git-sh-setup`.
-- Diff whitespace validation passed.
-- GitHub workflow YAML parsing passed.
-- Changed WiX/app manifest XML parsing passed.
-- Changed PowerShell script parsing passed.
-- The bootstrapper source compiled successfully in uninstall-only mode with the
-  local .NET Framework C# compiler.
-- A full CMake/WiX package build was not run in this environment, so
-  `NimbusSetup.exe` still needs package-level validation.
+| Check | Result | Notes |
+| --- | --- | --- |
+| Git submodules | Pass | Initialized recursively before the package build. |
+| CMake configure | Pass | WebRTC disabled for this validation pass. |
+| Native build | Pass | Non-fatal unused-code warnings remain in `src/webrtc_stream.cpp`. |
+| Web UI build | Pass | Vite reported large vendor chunk warnings only. |
+| CPack WiX MSI | Pass | WiX ICE validation required normal Windows Installer service access. |
+| Bootstrapper | Pass | Final version text resolved to `0.0.0.30 (82fa5cdd)`. |
+| Signing | Skipped | `SIGNPATH_API_TOKEN` was unset; output is unsigned. |
+| Authenticode | Expected | `NimbusSetup.exe` reports `NotSigned`. |
 
-These are local environment blockers. They do not prove the project build is
-broken. The next local build pass should use MSYS2 UCRT64 or a configured build
-environment matching `docs/building.md`.
+Artifacts:
+
+| Artifact | Size | SHA256 |
+| --- | ---: | --- |
+| `build/nimbus-package-validation/cpack_artifacts/NimbusSetup.exe` | 25,866,752 | `F0C161A08BD9696E500EC694B0723CB769A5E5A0C8E3B031B5838DBCAE4E3338` |
+| `build/nimbus-package-validation/cpack_artifacts/Nimbus.msi` | 25,602,498 | `525AAB47E3539CE29521AC67592996BFA1535E8AE91405442C1A82EAC403FDF1` |
+
+Caveats:
+
+- These are local validation artifacts, not public release candidates.
+- The installer was not executed on the host machine.
+- Fresh install, upgrade from Apollo/Vibepollo, uninstall, and reinstall
+  behavior are not yet recorded.
+- The package version remains `0.0.0.30` because Nimbus has no `nimbus-v*` tag
+  yet.
+- Signing and symbol publishing remain disabled until Nimbus-owned destinations
+  and secrets exist.
 
 ## Required Secrets Before Release CI
 
@@ -136,13 +183,14 @@ environment matching `docs/building.md`.
 
 ## Recommended Next Actions
 
-1. Validate the Phase C package-branding slice with a known-good Windows build.
-2. Set up a known-good Windows build environment and record exact commands.
+1. Run installer dry-runs in a Windows VM or snapshot fixture.
+2. Prepare the first alpha release notes for `nimbus-v0.1.0-alpha.1`.
 3. Review issue automation policy before enabling automatic issue closures.
 4. Create a Nimbus symbol publishing plan before enabling `publish_symbols`.
 5. Use `docs/upstream-issue-radar.md` to select the first credibility fixes.
 
 ## Current Verdict
 
-Nimbus is ready for documentation and issue triage work. It is not yet ready for
-branded release publication.
+Nimbus is ready for documentation, issue triage work, and first-alpha release
+planning. It is not yet ready for public release-tag publication because
+installer execution and upgrade behavior still need fixture validation.

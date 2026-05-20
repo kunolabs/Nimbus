@@ -101,18 +101,18 @@ Do not change these until there is a tested migration plan.
 
 | Area | Current inherited value | Recommendation |
 | --- | --- | --- |
-| CMake project | `project(Nimbus ...)` | Changed in Phase C. Verify generated artifacts. |
+| CMake project | `project(Nimbus ...)` | Changed in Phase C. Generated artifacts verified locally. |
 | Project homepage | `https://github.com/kunolabs/Nimbus` | Changed in Phase C. |
 | Project FQDN | `dev.lizardbyte.app.Sunshine` | Defer until Linux desktop, Flatpak, and config migration are planned. |
 | Windows app model id | `Nonary.Vibepollo` | Defer until shortcut/taskbar behavior is tested. |
-| CPack package name | `Nimbus` | Changed in Phase C. Verify generated MSI and setup EXE names. |
+| CPack package name | `Nimbus` | Changed in Phase C. Local package build generated `Nimbus.msi` and `NimbusSetup.exe`. |
 | CPack vendor | `Kuno Labs` | Changed in Phase C. |
 | CPack contact | `https://github.com/kunolabs/Nimbus/issues` | Changed in Phase C. |
 | Windows install directory | `Apollo` | Defer or migrate with explicit install-path behavior. |
 | WiX upgrade GUID | `{E3FA501A-85F8-4187-85A7-D6E6BDC7EDA1}` | Preserve unless we intentionally break upgrade lineage. |
 | WiX product-line seed | `Vibepollo-<major>.<minor>` | Treat as high-risk. Change only with upgrade testing. |
 | Bootstrapper namespace | `VibepolloInstaller` | Split cosmetic UI naming from installer detection logic. |
-| Bootstrapper output | `NimbusSetup.exe` | Changed in Phase C. Validate with a local Windows package build. |
+| Bootstrapper output | `NimbusSetup.exe` | Changed in Phase C. Local Windows package build passed. |
 | Start menu folder | `Nimbus` | Changed in Phase C. Validate shortcut cleanup tests. |
 | Service names | `ApolloService`, `SunshineService`, `VibeshineService`, `sunshinesvc` | Preserve detection and cleanup paths until migration logic is explicit. |
 | Config/state files | `sunshine.conf`, `sunshine_state.json` | Preserve for first branded release unless migration is built and tested. |
@@ -192,8 +192,9 @@ flowchart LR
 
 Acceptance criteria:
 
-- A local build produces a Nimbus-named installer.
-- The installer does not publish or sign using upstream destinations.
+- A local build produces a Nimbus-named installer. Status: passed.
+- The installer does not publish or sign using upstream destinations. Status:
+  passed for local unsigned validation artifacts.
 - Upgrade behavior from an existing Vibepollo/Apollo install is recorded.
 - Fresh install and uninstall behavior is recorded.
 - Release notes disclose inherited runtime ids that remain in place.
@@ -234,7 +235,7 @@ Acceptance criteria:
 
 ## Immediate Next Step
 
-Do Phase C as a small, reviewable package-branding branch. Change package and
-bootstrapper display names, keep runtime migration identifiers unchanged, build
-locally, and document the actual installer behavior before creating any
-`nimbus-v*` tag.
+Run the installer in a Windows VM or snapshot fixture. Record fresh install,
+upgrade from Apollo/Vibepollo where practical, uninstall, reinstall, generated
+shortcuts, Add/Remove Programs text, services, and config behavior before
+creating any `nimbus-v*` tag.
