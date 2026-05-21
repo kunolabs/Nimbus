@@ -68,12 +68,12 @@ Current source validation has passed after the UI and status-message rebrand:
   portable binaries and the WiX ICE validation step runs outside the Codex
   sandbox.
 
-Current local package artifacts from commit `0b4966f8`:
+Current local package artifacts from commit `57d01875`:
 
 | Artifact | Size | SHA256 |
 | --- | ---: | --- |
-| `NimbusSetup.exe` | 25,871,360 | `41A5EF596C9C04ACFC792A1A8EB3591CEE970F995A64ABAC80331770C45DA471` |
-| `Nimbus.msi` | 25,606,741 | `02697C964EA22CA2E7AD840BD355D943ECC59CE64A184F573A12F9B781904F85` |
+| `NimbusSetup.exe` | 25,871,360 | `1BE1C58A6128A541F0A9DC49E20186A3D93E3E3C8FFA448A130DD8D5E93D69CF` |
+| `Nimbus.msi` | 25,606,727 | `9F31155E08353B7788C47FAA7C321C6C25AC4F91B7A557238D1D9B9C9A5B5501` |
 
 These are local validation artifacts, not release candidates, until the pending
 VM fixture checks below are recorded.
