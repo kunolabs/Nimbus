@@ -77,16 +77,26 @@ Current local package artifacts from commit `0af1f3b8`:
 | `NimbusSetup.exe` | 25,871,872 | `4091BACCA4CF23356C583956606D18451D3516ABDA8D35438996A9693BE66F20` |
 | `Nimbus.msi` | 25,606,719 | `6B348D3516352DE46690940A0241B9DB38B1FA4F56ECF856A4BE7E52BE7A63EC` |
 
-These are local validation artifacts, not release candidates, until the pending
-VM fixture checks below are recorded.
+These are local validation artifacts, not release candidates, until the VM
+fixture checks below are completed and recorded.
+
+Partial manual VM observations from the current candidate loop:
+
+- Fresh install defaults to `C:\Program Files\Nimbus`.
+- Visible installer, tray-opened Web UI, first-run, dashboard, and uninstall
+  confirmation surfaces use Nimbus wording.
+- The installed service runs with Nimbus user-visible description text while
+  preserving the inherited internal `ApolloService` service name for this alpha.
+- No Microsoft Defender warning was observed during the manual install smoke.
+- The uninstaller quick-tip panel was fixed after VM feedback and still needs a
+  retest with the `0.0.0.41` candidate.
 
 Pending before release:
 
-- Fresh install in a Windows VM or snapshot fixture.
-- Web UI launch after install.
+- Retest the `0.0.0.41` uninstaller quick-tip copy.
+- Uninstall and reinstall behavior.
 - Compatible-client pairing smoke.
 - Short local-network stream smoke.
-- Uninstall and reinstall behavior.
 - Upgrade behavior from Apollo and/or Vibepollo where practical.
 
 ## Known Issues And Caveats

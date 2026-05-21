@@ -278,7 +278,7 @@ Result:
 | CPack WiX MSI | Pass | Initial sandbox run reached WiX but failed ICE validation because Windows Installer service access was unavailable; rerunning outside the sandbox with the same `WIX` path passed. |
 | Bootstrapper | Pass | Final file metadata resolves to `Nimbus Installer`, `0.0.0.41`, `0af1f3b8`, `Kuno Labs`. |
 | Signing | Skipped | `SIGNPATH_API_TOKEN` was unset; output is unsigned. |
-| Installer execution | Pending | Fresh install, uninstall, reinstall, and upgrade behavior still need VM fixture records. |
+| Installer execution | Partial | Manual VM smoke observed Nimbus default install path, visible Nimbus wording, service running with Nimbus description, Web UI launch path, and no Defender warning. Uninstall/reinstall, client pairing, streaming, and upgrade behavior still need fixture records. |
 
 Artifacts:
 
@@ -289,7 +289,8 @@ Artifacts:
 
 Current caveat: these artifacts are newer and better branded than the earlier
 `82fa5cdd` validation artifacts, but they are still local validation artifacts
-until VM install and upgrade evidence is recorded.
+until the remaining VM uninstall, reinstall, pairing, stream, and upgrade
+evidence is recorded.
 
 ## Required Secrets Before Release CI
 
@@ -301,7 +302,9 @@ until VM install and upgrade evidence is recorded.
 
 ## Recommended Next Actions
 
-1. Run installer dry-runs in a Windows VM or snapshot fixture.
+1. Finish the Windows VM fixture: uninstaller quick-tip retest, uninstall,
+   reinstall, compatible-client pairing, short stream smoke, and upgrade checks
+   where practical.
 2. Prepare the first alpha release notes for `nimbus-v0.1.0-alpha.1`.
 3. Review issue automation policy before enabling automatic issue closures.
 4. Create a Nimbus symbol publishing plan before enabling `publish_symbols`.

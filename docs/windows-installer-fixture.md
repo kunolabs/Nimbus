@@ -67,6 +67,36 @@ Current artifact metadata:
 | Coexistence with Sunshine | Optional for alpha | Pending | Record whether install replaces or coexists |
 | Windows SmartScreen/AV behavior | Yes | Pending | Unsigned prompt or false-positive notes recorded |
 
+## Partial Manual Fixture Notes
+
+Date: 2026-05-21
+
+Candidate artifact: `NimbusSetup.exe` from source commit `0af1f3b8`
+(`0.0.0.41`). These notes summarize the maintainer VM smoke loop. Screenshots
+and fixture handoff folders are local validation evidence and are not committed
+to the public repository.
+
+Observed so far:
+
+| Check | Status | Notes |
+| --- | --- | --- |
+| Default install path | Observed pass | Fresh install defaults to `C:\Program Files\Nimbus`. |
+| Visible installer and app branding | Observed pass | Maintainer-confirmed visible checks use Nimbus wording, including installer surfaces and Web UI/dashboard copy. |
+| Windows service after install | Observed compatibility pass | Service is running. Internal service name remains `ApolloService`; visible service description is `Nimbus Service`. |
+| Web UI launch path | Observed pass | Tray context menu can open the local Web UI. Browser certificate warning is expected for the inherited local HTTPS flow. |
+| Uninstall confirmation modal | Observed pass | Modal copy correctly describes uninstall options and factory-reset behavior. |
+| Uninstaller quick tips | Fixed, retest pending | An older candidate reused install/upgrade tips in uninstall mode. Fixed in `0af1f3b8`; retest with `0.0.0.41`. |
+| Windows Defender prompt | Observed pass | Maintainer reported no Defender warning during the install smoke. |
+
+Still blocking the alpha gate:
+
+- Confirm the `0.0.0.41` uninstaller quick tips show uninstall-specific copy.
+- Confirm uninstall removes or stops the service and removes the Add/Remove
+  Programs entry.
+- Confirm reinstall after uninstall completes without manual cleanup.
+- Run at least one compatible-client pairing and short stream smoke.
+- Record upgrade behavior from Apollo and/or Vibepollo where practical.
+
 ## Evidence Commands
 
 The recommended path is to run the evidence collector before install, after
