@@ -2151,7 +2151,7 @@ namespace VibepolloInstaller {
       Console.WriteLine("  /?, /h, --help  Show this help message");
       Console.WriteLine();
       Console.WriteLine("Supported MSI properties:");
-      Console.WriteLine("  INSTALL_ROOT=<path>  Install to a custom directory (default: %ProgramFiles%\\Apollo)");
+      Console.WriteLine("  INSTALL_ROOT=<path>  Install to a custom directory (default: %ProgramFiles%\\Nimbus)");
       Console.WriteLine("  INSTALL_SUDOVDA=0    Skip Virtual Display Driver installation");
       Console.WriteLine();
       Console.WriteLine("Examples:");
@@ -2279,7 +2279,7 @@ namespace VibepolloInstaller {
       get {
         return Path.Combine(
           Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-          "Apollo");
+          ProductIdentity.Name);
       }
     }
 
