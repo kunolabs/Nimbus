@@ -73,6 +73,8 @@ Early Nimbus work is focused on:
 - Preparing the future Lucent client track.
 
 See [ROADMAP.md](ROADMAP.md) for the current maintainer roadmap.
+See [docs/ui-identity-plan.md](docs/ui-identity-plan.md) for the staged Nimbus
+Web UI identity direction.
 
 ## Building
 
