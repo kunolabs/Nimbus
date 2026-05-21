@@ -527,10 +527,24 @@ namespace VibepolloInstaller {
         Margin = new Thickness(0, 0, 0, 4)
       });
 
-      tipsStack.Children.Add(new TextBlock {
-        Text = "You can install or upgrade Nimbus while actively streaming. No system restart is required. "
+      var quickTipsBody = BuildFlavor.IsUninstallOnly
+        ? "Uninstall removes the Nimbus service, firewall rules, and MSI-installed program files. "
+          + "User settings are preserved unless you choose Factory reset in the confirmation step."
+        : "You can install or upgrade Nimbus while actively streaming. No system restart is required. "
           + "After you click Install or Upgrade, the current streaming session will end, then you can usually "
-          + "start streaming again after about 1–2 minutes without issues.",
+          + "start streaming again after about 1–2 minutes without issues.";
+      var quickTipsCommandIntro = BuildFlavor.IsUninstallOnly
+        ? "You can also uninstall from an elevated shell:"
+        : "You can also install from an SSH session on this host (run in an elevated shell):";
+      var quickTipsCommand = BuildFlavor.IsUninstallOnly
+        ? "NimbusSetup.exe /uninstall /quiet"
+        : "NimbusSetup.exe /qn /norestart";
+      var quickTipsFooter = BuildFlavor.IsUninstallOnly
+        ? "Click Uninstall Nimbus to choose removal options."
+        : "Click the buttons below to proceed.";
+
+      tipsStack.Children.Add(new TextBlock {
+        Text = quickTipsBody,
         FontSize = 12.5,
         Foreground = new SolidColorBrush(Color.FromRgb(211, 220, 246)),
         Margin = new Thickness(0, 0, 0, 10),
@@ -538,7 +552,7 @@ namespace VibepolloInstaller {
       });
 
       tipsStack.Children.Add(new TextBlock {
-        Text = "You can also install from an SSH session on this host (run in an elevated shell):",
+        Text = quickTipsCommandIntro,
         FontSize = 13,
         Foreground = new SolidColorBrush(Color.FromRgb(203, 219, 241)),
         Margin = new Thickness(0, 0, 0, 6),
@@ -546,7 +560,7 @@ namespace VibepolloInstaller {
       });
 
       tipsStack.Children.Add(new TextBox {
-        Text = "NimbusSetup.exe /qn /norestart",
+        Text = quickTipsCommand,
         IsReadOnly = true,
         FontFamily = new FontFamily("Consolas"),
         FontSize = 12.5,
@@ -559,7 +573,7 @@ namespace VibepolloInstaller {
       });
 
       tipsStack.Children.Add(new TextBlock {
-        Text = "Click the buttons below to proceed.",
+        Text = quickTipsFooter,
         FontSize = 12.5,
         Foreground = new SolidColorBrush(Color.FromRgb(211, 220, 246)),
         Margin = new Thickness(0, 0, 0, 0),
