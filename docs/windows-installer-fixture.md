@@ -1,6 +1,6 @@
 # Nimbus Windows Installer Fixture
 
-Snapshot date: 2026-05-20
+Snapshot date: 2026-05-21
 
 This fixture is the release gate for the first Nimbus alpha. It is intentionally
 separate from the local package build audit: the package build proves that
@@ -28,18 +28,29 @@ flowchart TD
 
 ## Candidate Artifact
 
-The current local package validation produced these artifacts from commit
-`82fa5cdd`:
+The current local package validation produced these artifacts from source commit
+`57d01875`. The documentation commit that records these hashes may be newer than
+the validated source commit.
 
 | Artifact | Size | SHA256 |
 | --- | ---: | --- |
-| `build/nimbus-package-validation/cpack_artifacts/NimbusSetup.exe` | 25,866,752 | `F0C161A08BD9696E500EC694B0723CB769A5E5A0C8E3B031B5838DBCAE4E3338` |
-| `build/nimbus-package-validation/cpack_artifacts/Nimbus.msi` | 25,602,498 | `525AAB47E3539CE29521AC67592996BFA1535E8AE91405442C1A82EAC403FDF1` |
+| `build/nimbus-package-validation/cpack_artifacts/NimbusSetup.exe` | 25,871,360 | `1BE1C58A6128A541F0A9DC49E20186A3D93E3E3C8FFA448A130DD8D5E93D69CF` |
+| `build/nimbus-package-validation/cpack_artifacts/Nimbus.msi` | 25,606,727 | `9F31155E08353B7788C47FAA7C321C6C25AC4F91B7A557238D1D9B9C9A5B5501` |
 
-Before tagging `nimbus-v0.1.0-alpha.1`, rebuild the package from the final
-release-prep commit and replace the hashes in the fixture results. The older
-hashes above are proof of the Phase C build, not final release-candidate
-hashes.
+Before tagging `nimbus-v0.1.0-alpha.1`, either use these artifacts for fixture
+testing or rebuild the package from the final release-prep commit and replace
+the hashes here. These are still local validation artifacts until the fixture
+matrix below is recorded.
+
+Current artifact metadata:
+
+| Field | Value |
+| --- | --- |
+| Bootstrapper product | `Nimbus Installer` |
+| File version | `0.0.0.40` |
+| Product version | `57d01875` |
+| Company | `Kuno Labs` |
+| Signing | Unsigned; SignPath skipped because `SIGNPATH_API_TOKEN` is unset |
 
 ## Fixture Matrix
 
