@@ -533,11 +533,11 @@
     "sudovda_status_watchdog_failed": "Watchdog failed",
     "dd_resolution_option_manual_desc": "⚠️ Enforcing a manual resolution disables all display overrides below. The host will always be set to this resolution regardless of any override rules.",
     "vigem_missing_title": "Virtual Gamepad Driver (ViGEm) not installed",
-    "vigem_missing_desc": "Vibepollo requires the ViGEmBus driver to emulate controllers on Windows. It is no longer bundled. Please download and install it manually:",
+    "vigem_missing_desc": "Nimbus requires the ViGEmBus driver to emulate controllers on Windows. It is no longer bundled. Please download and install it manually:",
     "vigem_install": "Download ViGEmBus",
     "vigem_detected_version": "Detected",
     "crash_dump_title": "Recent crash detected",
-    "crash_dump_desc": "Vibepollo detected a crash dump within the last week. Please export a crash bundle and include it when opening an issue.",
+    "crash_dump_desc": "Nimbus detected a crash dump within the last week. Please export a crash bundle and include it when opening an issue.",
     "crash_dump_export": "Export Crash Bundle",
     "crash_dump_report": "Report Issue",
     "crash_dump_dismiss": "Dismiss",
@@ -600,16 +600,16 @@
     "legacy_ordering_desc": "Enable ordering support workaround for legacy clients. Can cause issues with clients or scripts that can't handle UTF8 correctly. Artemis clients support this by default."
   },
   "index": {
-    "description": "Vibepollo is a self-hosted game stream host for Moonlight.",
+    "description": "Nimbus is a self-hosted game stream host for Moonlight-compatible clients.",
     "download": "Download",
-    "installed_version_not_stable": "You are running a pre-release version of Vibepollo. You may experience bugs or other issues. Please report any issues you encounter. Thank you for helping to make Vibepollo a better software!",
+    "installed_version_not_stable": "You are running a pre-release version of Nimbus. You may experience bugs or other issues. Please report any issues you encounter. Thank you for helping to make Nimbus better!",
     "loading_latest": "Loading latest release...",
     "new_pre_release": "A new Pre-Release Version is Available!",
     "new_stable": "A new Stable Version is Available!",
-    "startup_errors": "<b>Attention!</b> Vibepollo detected these errors during startup. We <b>STRONGLY RECOMMEND</b> fixing them before streaming.",
-    "version_dirty": "Thank you for helping to make Vibepollo a better software!",
-    "version_latest": "You are running the latest version of Vibepollo",
-    "welcome": "Hello, Vibepollo!",
+    "startup_errors": "<b>Attention!</b> Nimbus detected these errors during startup. We <b>STRONGLY RECOMMEND</b> fixing them before streaming.",
+    "version_dirty": "Thank you for helping to make Nimbus better!",
+    "version_latest": "You are running the latest version of Nimbus",
+    "welcome": "Hello, Nimbus!",
     "view_notes": "Release Notes",
     "hide_notes": "Hide Notes",
     "version_ahead": "You are running a development build ahead of the latest release ({ahead} commits)",
@@ -677,7 +677,7 @@
     "lizardbyte_website": "LizardByte Website",
     "resources": "Resources",
     "discord_desc": "Join the community",
-    "resources_desc": "Resources for Vibepollo!",
+    "resources_desc": "Resources for Nimbus!",
     "third_party_notice": "Third Party Notice"
   },
   "troubleshooting": {
@@ -740,8 +740,8 @@
   "welcome": {
     "confirm_password": "Confirm password",
     "create_creds": "Before Getting Started, we need you to make a new username and password for accessing the Web UI.",
-    "create_creds_alert": "The credentials below are needed to access Vibepollo's Web UI. Keep them safe, since you will never see them again!",
-    "greeting": "Welcome to Vibepollo!",
+    "create_creds_alert": "The credentials below are needed to access the Nimbus Web UI. Keep them safe, since you will never see them again!",
+    "greeting": "Welcome to Nimbus!",
     "login": "Login",
     "welcome_success": "This page will reload soon, your browser will ask you for the new credentials"
   },
@@ -1184,6 +1184,5 @@
     "sessions_time_unknown": "Unknown",
     "sessions_unknown_device": "Unknown device",
     "sessions_unknown_address": "Unknown address"
-    "noticeCopy": "RTSS offers the most stable frame pacing. Vibepollo will use it automatically when available; NVIDIA's limiter is not recommended because it cannot guarantee perfect frame pacing."
   }
 }

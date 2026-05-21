@@ -135,7 +135,7 @@
                     {{
                       crashDumpMessage ||
                       $t('config.crash_dump_desc') ||
-                      'Vibepollo detected a recent crash dump. Please export a crash bundle and include it when filing an issue.'
+                      'Nimbus detected a recent crash dump. Please export a crash bundle and include it when filing an issue.'
                     }}
                   </p>
                   <p v-if="crashDumpDetails" class="text-xs opacity-60 m-0">
@@ -199,7 +199,7 @@
                   <p class="text-xs opacity-80 m-0">
                     {{
                       $t('config.vigem_missing_desc') ||
-                      'Vibepollo requires the ViGEmBus driver to emulate controllers on Windows. It is no longer bundled. Please download and install it manually:'
+                      'Nimbus requires the ViGEmBus driver to emulate controllers on Windows. It is no longer bundled. Please download and install it manually:'
                     }}
                     <span v-if="vigemVersion" class="ml-2 opacity-60">
                       ({{ $t('config.vigem_detected_version') || 'Detected' }}: {{ vigemVersion }})
