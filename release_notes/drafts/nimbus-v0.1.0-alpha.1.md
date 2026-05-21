@@ -45,6 +45,9 @@ has wider testers.
 - Retargeted the active Windows display-restore scheduled task and related
   state-file log messages to Nimbus wording while preserving legacy Vibeshine
   cleanup during uninstall/restore task deletion.
+- Added a naming identity audit for inherited Sunshine, Vibeshine, Moonlight,
+  Artemis, Apollo, and Vibepollo surfaces, then cleaned low-risk visible Web UI
+  settings copy, placeholders, and Web UI package metadata.
 
 ## Compatibility Notes
 
@@ -108,6 +111,8 @@ Pending before release:
 - Retest the `0.0.0.44` uninstaller quick-tip copy.
 - Uninstall and reinstall behavior.
 - Retest the pairing notification deep link and runtime log-branding cleanup in
+  the next candidate build.
+- Retest the General and Files settings pages for inherited visible names in
   the next candidate build.
 - Upgrade behavior from Apollo and/or Vibepollo where practical.
 

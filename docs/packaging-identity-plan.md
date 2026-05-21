@@ -6,6 +6,8 @@ This plan separates public Nimbus branding from runtime identifiers that affect
 installs, upgrades, shortcuts, services, config paths, and platform packages.
 The fork inherited names from Vibepollo, Apollo, Sunshine, and Vibeshine. Some
 of those names are user-facing strings. Others are compatibility anchors.
+See `docs/naming-identity-audit.md` for the current inherited-name scan and
+Lucent client naming policy.
 
 Do not rename every inherited identifier in one broad sweep. Each package or
 runtime identity change should have a migration note, a rollback expectation,

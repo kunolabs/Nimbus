@@ -99,6 +99,7 @@ Observed so far:
 | Compatible-client stream smoke | Observed pass | Artemis on Shield TV streamed from the Nimbus VM host and disconnected cleanly; no issues observed so far. |
 | Pairing notification target | Fixed, retest pending | Pairing toast now opens `/clients?sec=pair` so the Clients page scrolls directly to the Pair Client section. |
 | Runtime log branding | Fixed, retest pending | Fixture logs still showed `VibeshineDisplayRestore` and `vibeshine state`; active runtime logs now use Nimbus wording while legacy cleanup still removes old Vibeshine tasks. |
+| Settings naming polish | Fixed, retest pending | General and Files settings no longer show `Vibeshine`, `sunshine_state.json`, `sunshine.log`, or `vibeshine_state.json` as low-risk visible placeholders. |
 | Windows Defender prompt | Observed pass | Maintainer reported no Defender warning during the install smoke. |
 
 Still blocking the alpha gate:
@@ -108,6 +109,8 @@ Still blocking the alpha gate:
   section in the next candidate.
 - Confirm the next candidate logs `NimbusDisplayRestore` and `Nimbus state file`
   instead of new runtime `Vibeshine` task/state messages.
+- Confirm the General and Files settings pages do not show inherited host names
+  or filenames as visible placeholder text.
 - Confirm uninstall removes or stops the service and removes the Add/Remove
   Programs entry.
 - Confirm reinstall after uninstall completes without manual cleanup.
