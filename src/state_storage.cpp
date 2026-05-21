@@ -405,7 +405,7 @@ namespace statefile {
     migrate_recent_state_keys();
     const auto &path_str = vibeshine_state_path();
     if (path_str.empty()) {
-      BOOST_LOG(warning) << "statefile: cannot save snapshot exclusions - vibeshine state path is empty";
+      BOOST_LOG(warning) << "statefile: cannot save snapshot exclusions - Nimbus state file path is empty";
       return;
     }
 
@@ -434,7 +434,7 @@ namespace statefile {
       BOOST_LOG(error) << "statefile: failed to write "sv << path.string() << ": "sv << e.what();
       return;
     }
-    BOOST_LOG(info) << "statefile: persisted " << devices.size() << " snapshot exclusion device(s) to vibeshine state";
+    BOOST_LOG(info) << "statefile: persisted " << devices.size() << " snapshot exclusion device(s) to Nimbus state file";
   }
 
   std::vector<std::string> load_snapshot_exclude_devices() {

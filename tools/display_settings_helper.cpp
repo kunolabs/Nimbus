@@ -115,7 +115,23 @@ namespace {
   }
 
   std::wstring build_restore_task_name(const std::wstring &username) {
+    (void) username;
+    return L"NimbusDisplayRestore";
+  }
+
+  std::wstring build_legacy_vibeshine_restore_task_name(const std::wstring &username) {
+    (void) username;
     return L"VibeshineDisplayRestore";
+  }
+
+  void add_unique_task_name(std::vector<std::wstring> &task_names, std::wstring task_name) {
+    if (task_name.empty()) {
+      return;
+    }
+    if (std::find(task_names.begin(), task_names.end(), task_name) != task_names.end()) {
+      return;
+    }
+    task_names.push_back(std::move(task_name));
   }
 
   // Trigger a more robust Explorer/shell refresh so that desktop/taskbar icons
@@ -4134,8 +4150,6 @@ namespace {
   }
 
   bool create_restore_scheduled_task() {
-    BOOST_LOG(info) << "Attempting to create scheduled task 'VibeshineDisplayRestore'...";
-
     const DWORD active_session_id = WTSGetActiveConsoleSessionId();
 
     HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -4182,7 +4196,7 @@ namespace {
     IRegistrationInfo *reg_info = nullptr;
     hr = task->get_RegistrationInfo(&reg_info);
     if (SUCCEEDED(hr)) {
-      reg_info->put_Author(_bstr_t(L"Sunshine Display Helper"));
+      reg_info->put_Author(_bstr_t(L"Nimbus Display Helper"));
       reg_info->put_Description(_bstr_t(L"Automatically restores display settings after reboot"));
       reg_info->Release();
     }
@@ -4241,6 +4255,7 @@ namespace {
     }
 
     const std::wstring task_name = build_restore_task_name(has_username ? username : std::wstring {});
+    BOOST_LOG(info) << "Attempting to create scheduled task '" << std::string(task_name.begin(), task_name.end()) << "'...";
 
     wchar_t exe_path[MAX_PATH];
     if (!GetModuleFileNameW(nullptr, exe_path, MAX_PATH)) {
@@ -4279,7 +4294,7 @@ namespace {
     hr = trigger->QueryInterface(IID_ILogonTrigger, (void **) &logon_trigger);
     trigger->Release();
     if (SUCCEEDED(hr)) {
-      logon_trigger->put_Id(_bstr_t(L"SunshineDisplayHelperLogonTrigger"));
+      logon_trigger->put_Id(_bstr_t(L"NimbusDisplayHelperLogonTrigger"));
       logon_trigger->put_Enabled(VARIANT_TRUE);
       if (has_username) {
         logon_trigger->put_UserId(_bstr_t(username.c_str()));
@@ -4424,11 +4439,13 @@ namespace {
     }
 
     std::vector<std::wstring> task_names;
-    task_names.push_back(build_restore_task_name({}));
+    add_unique_task_name(task_names, build_restore_task_name({}));
+    add_unique_task_name(task_names, build_legacy_vibeshine_restore_task_name({}));
 
     if (!username.empty()) {
       if (_wcsicmp(username.c_str(), L"SYSTEM") != 0 && _wcsicmp(username.c_str(), L"NT AUTHORITY\\SYSTEM") != 0) {
-        task_names.push_back(build_restore_task_name(username));
+        add_unique_task_name(task_names, build_restore_task_name(username));
+        add_unique_task_name(task_names, build_legacy_vibeshine_restore_task_name(username));
       }
     }
 
@@ -4600,7 +4617,7 @@ namespace {
         }
       }
     } catch (const std::exception &e) {
-      BOOST_LOG(warning) << "Failed to parse vibeshine_state.json for snapshot exclusions: " << e.what();
+      BOOST_LOG(warning) << "Failed to parse Nimbus state file for snapshot exclusions: " << e.what();
     } catch (...) {
     }
     return false;
@@ -4975,7 +4992,7 @@ int main(int argc, char *argv[]) {
       for (const auto &root : search_roots) {
         const auto vibeshine_state_file = root / L"vibeshine_state.json";
         if (load_vibeshine_snapshot_exclusions(vibeshine_state_file, persisted)) {
-          BOOST_LOG(info) << "Loaded snapshot exclusions from vibeshine_state.json (" << persisted.size()
+          BOOST_LOG(info) << "Loaded snapshot exclusions from Nimbus state file (" << persisted.size()
                           << ") at " << vibeshine_state_file.string();
           state.controller.set_snapshot_exclusions(persisted);
           break;
@@ -5050,7 +5067,7 @@ int main(int argc, char *argv[]) {
     for (const auto &root : search_roots) {
       const auto vibeshine_state_file = root / L"vibeshine_state.json";
       if (load_vibeshine_snapshot_exclusions(vibeshine_state_file, persisted)) {
-        BOOST_LOG(info) << "Loaded snapshot exclusions from vibeshine_state.json (" << persisted.size()
+        BOOST_LOG(info) << "Loaded snapshot exclusions from Nimbus state file (" << persisted.size()
                         << ") at " << vibeshine_state_file.string();
         state.controller.set_snapshot_exclusions(persisted);
         break;

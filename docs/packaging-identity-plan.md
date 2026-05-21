@@ -114,6 +114,7 @@ Do not change these until there is a tested migration plan.
 | Bootstrapper namespace | `VibepolloInstaller` | Split cosmetic UI naming from installer detection logic. |
 | Bootstrapper output | `NimbusSetup.exe` | Changed in Phase C. Local Windows package build passed. |
 | Start menu folder | `Nimbus` | Changed in Phase C. Validate shortcut cleanup tests. |
+| Display restore scheduled task | `NimbusDisplayRestore`; legacy `VibeshineDisplayRestore` is still deleted during cleanup | Active runtime task name changed after VM log feedback. Keep legacy deletion until upgrade/uninstall fixtures prove it is safe to remove. |
 | Service names | `ApolloService`, `SunshineService`, `VibeshineService`, `sunshinesvc` | Preserve detection and cleanup paths until migration logic is explicit. |
 | Config/state files | `sunshine.conf`, `sunshine_state.json` | Preserve for first branded release unless migration is built and tested. |
 | WebRTC release scripts | Nimbus wording and fallback repo | Publishing remains manual and confirmation-gated. |

@@ -66,7 +66,7 @@ so user-facing version surfaces no longer look like an unversioned build.
 | Fresh install on clean Windows 11 x64 | Yes | Pending | Installer log, screenshots, service state |
 | Launch Web UI after install | Yes | Pending | Local URL opens and login/setup path is reachable |
 | Pair with a compatible client | Yes | Observed pass | Artemis on Shield TV paired with the Nimbus VM host |
-| Start a short stream session | Yes | Pending | One local-network stream smoke, with hardware encoder noted |
+| Start a short stream session | Yes | Observed pass | Artemis on Shield TV streamed from the Nimbus VM host and disconnected cleanly |
 | Uninstall | Yes | Pending | Add/Remove Programs entry removed and service stopped |
 | Reinstall after uninstall | Yes | Pending | Reinstall completes without manual cleanup |
 | Upgrade from Vibepollo | Strongly recommended | Pending | Config, credentials, and paired-client state checked |
@@ -96,7 +96,9 @@ Observed so far:
 | Uninstaller quick tips | Fixed, retest pending | An older candidate reused install/upgrade tips in uninstall mode. Fixed in `0af1f3b8`; retest with the current `0.0.0.44` candidate. |
 | Manual tray update check | Observed pass | Maintainer confirmed the `Check for Update` tray action shows visible feedback in the VM. |
 | Compatible-client pairing | Observed pass | Artemis on Shield TV paired with the Nimbus VM host. |
+| Compatible-client stream smoke | Observed pass | Artemis on Shield TV streamed from the Nimbus VM host and disconnected cleanly; no issues observed so far. |
 | Pairing notification target | Fixed, retest pending | Pairing toast now opens `/clients?sec=pair` so the Clients page scrolls directly to the Pair Client section. |
+| Runtime log branding | Fixed, retest pending | Fixture logs still showed `VibeshineDisplayRestore` and `vibeshine state`; active runtime logs now use Nimbus wording while legacy cleanup still removes old Vibeshine tasks. |
 | Windows Defender prompt | Observed pass | Maintainer reported no Defender warning during the install smoke. |
 
 Still blocking the alpha gate:
@@ -104,10 +106,11 @@ Still blocking the alpha gate:
 - Confirm the `0.0.0.44` uninstaller quick tips show uninstall-specific copy.
 - Confirm clicking the pairing notification scrolls directly to the Pair Client
   section in the next candidate.
+- Confirm the next candidate logs `NimbusDisplayRestore` and `Nimbus state file`
+  instead of new runtime `Vibeshine` task/state messages.
 - Confirm uninstall removes or stops the service and removes the Add/Remove
   Programs entry.
 - Confirm reinstall after uninstall completes without manual cleanup.
-- Run a short stream smoke.
 - Record upgrade behavior from Apollo and/or Vibepollo where practical.
 
 ## Evidence Commands

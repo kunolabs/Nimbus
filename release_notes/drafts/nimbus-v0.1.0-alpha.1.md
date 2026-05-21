@@ -42,6 +42,9 @@ has wider testers.
   status instead of only writing to logs.
 - Improved the incoming pairing notification target so it opens the Clients page
   directly at the Pair Client section.
+- Retargeted the active Windows display-restore scheduled task and related
+  state-file log messages to Nimbus wording while preserving legacy Vibeshine
+  cleanup during uninstall/restore task deletion.
 
 ## Compatibility Notes
 
@@ -97,12 +100,15 @@ Partial manual VM observations from the previous candidate loop:
   retest with the `0.0.0.44` candidate.
 - Manual tray update-check feedback is visible in the VM.
 - Artemis on Shield TV can pair with the Nimbus VM host.
+- Artemis on Shield TV can stream from the Nimbus VM host and disconnect
+  cleanly in the current local-network smoke test.
 
 Pending before release:
 
 - Retest the `0.0.0.44` uninstaller quick-tip copy.
 - Uninstall and reinstall behavior.
-- Short local-network stream smoke.
+- Retest the pairing notification deep link and runtime log-branding cleanup in
+  the next candidate build.
 - Upgrade behavior from Apollo and/or Vibepollo where practical.
 
 ## Known Issues And Caveats
