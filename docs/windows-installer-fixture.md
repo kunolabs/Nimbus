@@ -29,13 +29,13 @@ flowchart TD
 ## Candidate Artifact
 
 The current local package validation produced these artifacts from source commit
-`0af1f3b8`. The documentation commit that records these hashes may be newer than
+`4f3411b2`. The documentation commit that records these hashes may be newer than
 the validated source commit.
 
 | Artifact | Size | SHA256 |
 | --- | ---: | --- |
-| `build/nimbus-package-validation/cpack_artifacts/NimbusSetup.exe` | 25,871,872 | `4091BACCA4CF23356C583956606D18451D3516ABDA8D35438996A9693BE66F20` |
-| `build/nimbus-package-validation/cpack_artifacts/Nimbus.msi` | 25,606,719 | `6B348D3516352DE46690940A0241B9DB38B1FA4F56ECF856A4BE7E52BE7A63EC` |
+| `build/nimbus-package-validation/cpack_artifacts/NimbusSetup.exe` | 25,871,872 | `EEAD1749BA88032AFD09E7FBB1917B50DDA88F425059CEEDC18775ADE3028328` |
+| `build/nimbus-package-validation/cpack_artifacts/Nimbus.msi` | 25,606,727 | `6E739CE9F56B11A0FD5B824E460AB389A0C61216FEE2CCE8DAA30E1E27F48D4E` |
 
 Before tagging `nimbus-v0.1.0-alpha.1`, either use these artifacts for fixture
 testing or rebuild the package from the final release-prep commit and replace
@@ -47,8 +47,8 @@ Current artifact metadata:
 | Field | Value |
 | --- | --- |
 | Bootstrapper product | `Nimbus Installer` |
-| File version | `0.0.0.41` |
-| Product version | `0af1f3b8` |
+| File version | `0.0.0.44` |
+| Product version | `4f3411b2` |
 | Company | `Kuno Labs` |
 | Signing | Unsigned; SignPath skipped because `SIGNPATH_API_TOKEN` is unset |
 
@@ -71,10 +71,11 @@ Current artifact metadata:
 
 Date: 2026-05-21
 
-Candidate artifact: `NimbusSetup.exe` from source commit `0af1f3b8`
-(`0.0.0.41`). These notes summarize the maintainer VM smoke loop. Screenshots
-and fixture handoff folders are local validation evidence and are not committed
-to the public repository.
+Current candidate artifact: `NimbusSetup.exe` from source commit `4f3411b2`
+(`0.0.0.44`). The observations below were gathered during the maintainer VM
+smoke loop on the immediately preceding candidate series. Screenshots and
+fixture handoff folders are local validation evidence and are not committed to
+the public repository.
 
 Observed so far:
 
@@ -85,12 +86,14 @@ Observed so far:
 | Windows service after install | Observed compatibility pass | Service is running. Internal service name remains `ApolloService`; visible service description is `Nimbus Service`. |
 | Web UI launch path | Observed pass | Tray context menu can open the local Web UI. Browser certificate warning is expected for the inherited local HTTPS flow. |
 | Uninstall confirmation modal | Observed pass | Modal copy correctly describes uninstall options and factory-reset behavior. |
-| Uninstaller quick tips | Fixed, retest pending | An older candidate reused install/upgrade tips in uninstall mode. Fixed in `0af1f3b8`; retest with `0.0.0.41`. |
+| Uninstaller quick tips | Fixed, retest pending | An older candidate reused install/upgrade tips in uninstall mode. Fixed in `0af1f3b8`; retest with the current `0.0.0.44` candidate. |
+| Manual tray update check | Fixed, retest pending | `Check for Update` now reports manual tray feedback from `4f3411b2`; retest in the VM. |
 | Windows Defender prompt | Observed pass | Maintainer reported no Defender warning during the install smoke. |
 
 Still blocking the alpha gate:
 
-- Confirm the `0.0.0.41` uninstaller quick tips show uninstall-specific copy.
+- Confirm the `0.0.0.44` uninstaller quick tips show uninstall-specific copy.
+- Confirm the `Check for Update` tray action shows manual feedback.
 - Confirm uninstall removes or stops the service and removes the Add/Remove
   Programs entry.
 - Confirm reinstall after uninstall completes without manual cleanup.

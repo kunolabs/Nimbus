@@ -73,17 +73,17 @@ Current source validation has passed after the UI and status-message rebrand:
   portable binaries and the WiX ICE validation step runs outside the Codex
   sandbox.
 
-Current local package artifacts from commit `0af1f3b8`:
+Current local package artifacts from commit `4f3411b2`:
 
 | Artifact | Size | SHA256 |
 | --- | ---: | --- |
-| `NimbusSetup.exe` | 25,871,872 | `4091BACCA4CF23356C583956606D18451D3516ABDA8D35438996A9693BE66F20` |
-| `Nimbus.msi` | 25,606,719 | `6B348D3516352DE46690940A0241B9DB38B1FA4F56ECF856A4BE7E52BE7A63EC` |
+| `NimbusSetup.exe` | 25,871,872 | `EEAD1749BA88032AFD09E7FBB1917B50DDA88F425059CEEDC18775ADE3028328` |
+| `Nimbus.msi` | 25,606,727 | `6E739CE9F56B11A0FD5B824E460AB389A0C61216FEE2CCE8DAA30E1E27F48D4E` |
 
 These are local validation artifacts, not release candidates, until the VM
 fixture checks below are completed and recorded.
 
-Partial manual VM observations from the current candidate loop:
+Partial manual VM observations from the previous candidate loop:
 
 - Fresh install defaults to `C:\Program Files\Nimbus`.
 - Visible installer, tray-opened Web UI, first-run, dashboard, and uninstall
@@ -92,11 +92,14 @@ Partial manual VM observations from the current candidate loop:
   preserving the inherited internal `ApolloService` service name for this alpha.
 - No Microsoft Defender warning was observed during the manual install smoke.
 - The uninstaller quick-tip panel was fixed after VM feedback and still needs a
-  retest with the `0.0.0.41` candidate.
+  retest with the `0.0.0.44` candidate.
+- Manual tray update-check feedback was added after VM feedback and needs a
+  retest with the `0.0.0.44` candidate.
 
 Pending before release:
 
-- Retest the `0.0.0.41` uninstaller quick-tip copy.
+- Retest the `0.0.0.44` uninstaller quick-tip copy.
+- Retest manual `Check for Update` tray feedback.
 - Uninstall and reinstall behavior.
 - Compatible-client pairing smoke.
 - Short local-network stream smoke.
