@@ -127,7 +127,7 @@ namespace confighttp {
           } else if (!fl.nvcp_ready) {
             add_segment(provider_message, "NVIDIA Control Panel integration unavailable (NvAPI not ready).");
           } else {
-            add_segment(provider_message, "NVIDIA Control Panel limiter selected (not recommended). Sunshine recommends RTSS for smoother pacing.");
+            add_segment(provider_message, "NVIDIA Control Panel limiter selected (not recommended). Nimbus recommends RTSS for smoother pacing.");
           }
         } else if (prefer_rtss) {
           if (!rtss.path_exists) {
@@ -137,10 +137,10 @@ namespace confighttp {
           } else {
             add_segment(provider_message, std::string("Frame limiter configured for ") + describe_provider(configured_id) + "; awaiting next stream.");
             if (!rtss.process_running) {
-              add_segment(provider_message, "Sunshine will launch RTSS automatically when streaming starts.");
+              add_segment(provider_message, "Nimbus will launch RTSS automatically when streaming starts.");
             }
             if (rtss_bootstrap_pending) {
-              add_segment(provider_message, "Sunshine will refresh RTSS configuration automatically on the next stream.");
+              add_segment(provider_message, "Nimbus will refresh RTSS configuration automatically on the next stream.");
             }
           }
         } else {
@@ -154,17 +154,17 @@ namespace confighttp {
     if (prefer_rtss) {
       add_segment(provider_message, "RTSS provides the smoothest pacing; NVIDIA's limiter is not recommended because it cannot guarantee perfect frame pacing.");
     } else if (fl.configured_provider == platf::frame_limiter_provider::nvidia_control_panel) {
-      add_segment(provider_message, "Sunshine recommends installing RTSS for the smoothest streaming experience; NVIDIA's limiter is not recommended because it cannot guarantee perfect frame pacing.");
+      add_segment(provider_message, "Nimbus recommends installing RTSS for the smoothest streaming experience; NVIDIA's limiter is not recommended because it cannot guarantee perfect frame pacing.");
     }
 
     std::string override_message;
     if (fl.disable_vsync) {
       if (fl.nv_overrides_supported) {
-        override_message = "NVIDIA overrides ready: Sunshine will force VSYNC off during streams.";
+        override_message = "NVIDIA overrides ready: Nimbus will force VSYNC off during streams.";
       } else if (fl.nvidia_available && !fl.nvcp_ready) {
-        override_message = "NvAPI unavailable; Sunshine will fall back to forcing the highest available refresh rate during streams.";
+        override_message = "NvAPI unavailable; Nimbus will fall back to forcing the highest available refresh rate during streams.";
       } else if (!fl.nvidia_available) {
-        override_message = "No NVIDIA GPU detected; Sunshine will force the highest available refresh rate during streams as a best-effort VSYNC workaround.";
+        override_message = "No NVIDIA GPU detected; Nimbus will force the highest available refresh rate during streams as a best-effort VSYNC workaround.";
       }
     }
 
