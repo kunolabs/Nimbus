@@ -213,6 +213,34 @@ before rerunning the final package build. The old `82fa5cdd` artifacts above are
 historical validation evidence only; do not promote them as the current release
 candidate.
 
+## Local UI And Status Revalidation
+
+Validation date: 2026-05-21
+
+Validated commits: `2ab4bf99`, `5bdc0784`, `3d8197ae`
+
+Scope: revalidate the additional Nimbus visible web copy sweep, first app-shell
+identity token pass, and Windows status/log message rebrand.
+
+Result:
+
+| Check | Result | Notes |
+| --- | --- | --- |
+| Web UI production build | Pass | `npm run build` passes. Vite still reports inherited large vendor chunk warnings. |
+| Targeted visible-name scan | Pass | Targeted Vue shell, app-edit, troubleshooting, Playnite, and English locale surfaces no longer contain `Vibepollo`. |
+| English locale JSON parse | Pass | `en.json`, `en_GB.json`, and `en_US.json` parse successfully after the broader Nimbus copy sweep. |
+| Native Windows host build | Pass | `cmake --build build\nimbus-package-validation --target sunshine --config Release -j 6` passes when `C:\msys64\ucrt64\bin` is on `PATH`. |
+| Figma UI kit automation | Blocked | Existing Figma Starter-plan MCP call limit still blocks automated UI kit population. `docs/ui-identity-plan.md` remains the implementation source of truth. |
+
+Current visual-design state:
+
+- The Vue app shell and login/logout surfaces no longer depend on the inherited
+  Apollo logo image.
+- Tailwind semantic tokens now use the Nimbus blue, Lucent mint, neutral host
+  console, amber, green, and red token direction from `docs/ui-identity-plan.md`.
+- RTSS and Windows troubleshooting status text now uses Nimbus wording for
+  user-visible guidance.
+
 ## Required Secrets Before Release CI
 
 | Secret | Purpose | Current Risk |
