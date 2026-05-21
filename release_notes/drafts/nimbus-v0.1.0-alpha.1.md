@@ -61,8 +61,19 @@ Current source validation has passed after the UI and status-message rebrand:
 - English locale JSON files parse successfully.
 - Native Windows host target builds successfully when MSYS2 UCRT64 is on
   `PATH`.
-- The current full package target is blocked on this machine until WiX v3
-  `candle.exe` and `light.exe` are available again.
+- The current full package target passes when `WIX` points at WiX Toolset v3.14.1
+  portable binaries and the WiX ICE validation step runs outside the Codex
+  sandbox.
+
+Current local package artifacts from commit `0b4966f8`:
+
+| Artifact | Size | SHA256 |
+| --- | ---: | --- |
+| `NimbusSetup.exe` | 25,871,360 | `41A5EF596C9C04ACFC792A1A8EB3591CEE970F995A64ABAC80331770C45DA471` |
+| `Nimbus.msi` | 25,606,741 | `02697C964EA22CA2E7AD840BD355D943ECC59CE64A184F573A12F9B781904F85` |
+
+These are local validation artifacts, not release candidates, until the pending
+VM fixture checks below are recorded.
 
 Pending before release:
 

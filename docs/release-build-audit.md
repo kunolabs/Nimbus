@@ -69,10 +69,9 @@ Applied hardening:
 - Main release creation no longer closes `fixed` issues directly.
 - The separate fixed-issue release closer is disabled.
 
-Remaining release blocker: package branding now emits Nimbus-named artifacts,
-but the final package must be rebuilt from the current release-prep commit. A
-release tag is still blocked until the current package builds with WiX available,
-installer execution is tested in a VM or snapshot fixture, and release notes are
+Remaining release blocker: the current release-prep commit now builds
+Nimbus-named Windows artifacts locally, but a release tag is still blocked until
+installer execution is tested in a VM or snapshot fixture and release notes are
 prepared.
 
 Decision: CI is safer for normal branch work and manual investigation, but do
@@ -202,16 +201,15 @@ cmake -S . -B build\nimbus-package-validation -UNPM
 cmake --build build\nimbus-package-validation --target package_installer --config Release -j 6
 ```
 
-Current package blocker:
+Historical package blocker:
 
 ```text
 Could not find the WiX candle executable.
 ```
 
-Install WiX Toolset v3.14.1 or make its portable `bin` directory discoverable
-before rerunning the final package build. The old `82fa5cdd` artifacts above are
-historical validation evidence only; do not promote them as the current release
-candidate.
+This blocker was resolved by making WiX Toolset v3.14.1 portable binaries
+discoverable through `WIX`. The old `82fa5cdd` artifacts above are historical
+validation evidence only; do not promote them as the current release candidate.
 
 ## Local UI And Status Revalidation
 
@@ -245,6 +243,46 @@ Current visual-design state:
 - RTSS and Windows troubleshooting status text now uses Nimbus wording for
   user-visible guidance.
 
+## Current Full Package Revalidation
+
+Validation date: 2026-05-21
+
+Validated source commit: `0b4966f8`
+
+Scope: rebuild the full Windows package after the visible Nimbus web shell,
+static onboarding, Windows status copy, release-note, and release-safety passes.
+This validates generated package artifacts, not installer execution on a target
+machine.
+
+Command shape:
+
+```powershell
+$env:PATH = 'C:\msys64\ucrt64\bin;' + $env:PATH
+$env:WIX = 'K:\CODEX\game-dev\game-streaming\Nimbus\build\nimbus-package-validation\tools\wix314'
+cmake --build build\nimbus-package-validation --target package_installer --config Release -j 6
+```
+
+Result:
+
+| Check | Result | Notes |
+| --- | --- | --- |
+| Web UI production build | Pass | Vite still reports inherited large vendor chunk warnings only. |
+| CPack WiX MSI | Pass | Initial sandbox run reached WiX but failed ICE validation because Windows Installer service access was unavailable; rerunning outside the sandbox with the same `WIX` path passed. |
+| Bootstrapper | Pass | Final file metadata resolves to `Nimbus Installer`, `0.0.0.38`, `0b4966f8`, `Kuno Labs`. |
+| Signing | Skipped | `SIGNPATH_API_TOKEN` was unset; output is unsigned. |
+| Installer execution | Pending | Fresh install, uninstall, reinstall, and upgrade behavior still need VM fixture records. |
+
+Artifacts:
+
+| Artifact | Size | SHA256 |
+| --- | ---: | --- |
+| `build/nimbus-package-validation/cpack_artifacts/NimbusSetup.exe` | 25,871,360 | `41A5EF596C9C04ACFC792A1A8EB3591CEE970F995A64ABAC80331770C45DA471` |
+| `build/nimbus-package-validation/cpack_artifacts/Nimbus.msi` | 25,606,741 | `02697C964EA22CA2E7AD840BD355D943ECC59CE64A184F573A12F9B781904F85` |
+
+Current caveat: these artifacts are newer and better branded than the earlier
+`82fa5cdd` validation artifacts, but they are still local validation artifacts
+until VM install and upgrade evidence is recorded.
+
 ## Required Secrets Before Release CI
 
 | Secret | Purpose | Current Risk |
@@ -264,5 +302,6 @@ Current visual-design state:
 ## Current Verdict
 
 Nimbus is ready for documentation, issue triage work, and first-alpha release
-planning. It is not yet ready for public release-tag publication because
-installer execution and upgrade behavior still need fixture validation.
+planning. The current Windows package build now completes locally, but Nimbus is
+not yet ready for public release-tag publication because installer execution and
+upgrade behavior still need fixture validation.
