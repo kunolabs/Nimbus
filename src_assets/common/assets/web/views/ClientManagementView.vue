@@ -57,87 +57,91 @@
     <SessionHistoryCard />
 
     <!-- Pair New Client -->
-    <n-card class="clients-card" :segmented="{ content: true, footer: false }">
-      <template #header>
-        <div class="clients-section-heading">
-          <span class="clients-section-icon">
-            <i class="fas fa-link" />
-          </span>
-          <div class="min-w-0">
-            <h2 class="text-lg font-medium">{{ $t('clients.pair_title') }}</h2>
-            <p class="text-xs opacity-70 max-w-2xl mt-1">{{ $t('clients.pair_desc') }}</p>
+    <section ref="pairSectionRef" id="clients-pair-client">
+      <n-card class="clients-card" :segmented="{ content: true, footer: false }">
+        <template #header>
+          <div class="clients-section-heading">
+            <span class="clients-section-icon">
+              <i class="fas fa-link" />
+            </span>
+            <div class="min-w-0">
+              <h2 class="text-lg font-medium">{{ $t('clients.pair_title') }}</h2>
+              <p class="text-xs opacity-70 max-w-2xl mt-1">{{ $t('clients.pair_desc') }}</p>
+            </div>
           </div>
+        </template>
+        <div class="space-y-4">
+          <n-form
+            class="grid grid-cols-1 gap-4 md:grid-cols-[minmax(8rem,12rem)_minmax(12rem,1fr)_auto] md:items-end"
+            @submit.prevent="registerDevice"
+          >
+            <n-form-item class="flex flex-col" :label="$t('navbar.pin')" label-placement="top">
+              <n-input
+                :value="pin"
+                :placeholder="$t('navbar.pin')"
+                clearable
+                maxlength="4"
+                :input-props="{
+                  inputmode: 'numeric',
+                  pattern: '^[0-9]{4}$',
+                  autocomplete: 'one-time-code',
+                  required: true,
+                }"
+                @update:value="updatePin"
+              >
+                <template #prefix>
+                  <i class="fas fa-key" />
+                </template>
+              </n-input>
+            </n-form-item>
+            <n-form-item class="flex flex-col" :label="$t('pin.device_name')" label-placement="top">
+              <n-input
+                v-model:value="deviceName"
+                :placeholder="$t('pin.device_name')"
+                clearable
+                :input-props="{ autocomplete: 'off', required: true }"
+              >
+                <template #prefix>
+                  <i class="fas fa-desktop" />
+                </template>
+              </n-input>
+            </n-form-item>
+            <n-form-item class="flex flex-col md:items-end">
+              <n-button
+                :disabled="pairing || !canPairClient"
+                :loading="pairing"
+                class="w-full md:w-auto"
+                type="primary"
+                strong
+                attr-type="submit"
+              >
+                <i class="fas fa-plus" />
+                <span v-if="!pairing" class="ml-2">{{ $t('pin.send') }}</span>
+                <span v-else class="ml-2">{{ $t('clients.pairing') }}</span>
+              </n-button>
+            </n-form-item>
+          </n-form>
+          <div
+            class="clients-pair-readiness"
+            :class="{ 'clients-pair-readiness--ready': canPairClient }"
+          >
+            <i :class="canPairClient ? 'fas fa-circle-check' : 'fas fa-circle-info'" />
+            <span>{{
+              canPairClient ? $t('clients.pair_ready') : $t('clients.pair_requirements')
+            }}</span>
+          </div>
+          <div class="space-y-2">
+            <n-alert v-if="pairStatus === true" type="success">{{
+              $t('pin.pair_success')
+            }}</n-alert>
+            <n-alert v-if="pairStatus === false" type="error">{{ $t('pin.pair_failure') }}</n-alert>
+          </div>
+          <n-alert type="warning" :title="$t('_common.warning')" class="text-sm">
+            {{ $t('pin.warning_msg') }}
+          </n-alert>
         </div>
-      </template>
-      <div class="space-y-4">
-        <n-form
-          class="grid grid-cols-1 gap-4 md:grid-cols-[minmax(8rem,12rem)_minmax(12rem,1fr)_auto] md:items-end"
-          @submit.prevent="registerDevice"
-        >
-          <n-form-item class="flex flex-col" :label="$t('navbar.pin')" label-placement="top">
-            <n-input
-              :value="pin"
-              :placeholder="$t('navbar.pin')"
-              clearable
-              maxlength="4"
-              :input-props="{
-                inputmode: 'numeric',
-                pattern: '^[0-9]{4}$',
-                autocomplete: 'one-time-code',
-                required: true,
-              }"
-              @update:value="updatePin"
-            >
-              <template #prefix>
-                <i class="fas fa-key" />
-              </template>
-            </n-input>
-          </n-form-item>
-          <n-form-item class="flex flex-col" :label="$t('pin.device_name')" label-placement="top">
-            <n-input
-              v-model:value="deviceName"
-              :placeholder="$t('pin.device_name')"
-              clearable
-              :input-props="{ autocomplete: 'off', required: true }"
-            >
-              <template #prefix>
-                <i class="fas fa-desktop" />
-              </template>
-            </n-input>
-          </n-form-item>
-          <n-form-item class="flex flex-col md:items-end">
-            <n-button
-              :disabled="pairing || !canPairClient"
-              :loading="pairing"
-              class="w-full md:w-auto"
-              type="primary"
-              strong
-              attr-type="submit"
-            >
-              <i class="fas fa-plus" />
-              <span v-if="!pairing" class="ml-2">{{ $t('pin.send') }}</span>
-              <span v-else class="ml-2">{{ $t('clients.pairing') }}</span>
-            </n-button>
-          </n-form-item>
-        </n-form>
-        <div
-          class="clients-pair-readiness"
-          :class="{ 'clients-pair-readiness--ready': canPairClient }"
-        >
-          <i :class="canPairClient ? 'fas fa-circle-check' : 'fas fa-circle-info'" />
-          <span>{{
-            canPairClient ? $t('clients.pair_ready') : $t('clients.pair_requirements')
-          }}</span>
-        </div>
-        <div class="space-y-2">
-          <n-alert v-if="pairStatus === true" type="success">{{ $t('pin.pair_success') }}</n-alert>
-          <n-alert v-if="pairStatus === false" type="error">{{ $t('pin.pair_failure') }}</n-alert>
-        </div>
-        <n-alert type="warning" :title="$t('_common.warning')" class="text-sm">
-          {{ $t('pin.warning_msg') }}
-        </n-alert>
-      </div>
-    </n-card>
+      </n-card>
+    </section>
 
     <!-- Existing Clients -->
     <n-card class="clients-card" :segmented="{ content: true, footer: false }">
@@ -1084,6 +1088,7 @@ const { t } = useI18n();
 const route = useRoute();
 const message = useMessage();
 const configStore = useConfigStore();
+const pairSectionRef = ref<HTMLElement | null>(null);
 const apiTokensSectionRef = ref<HTMLElement | null>(null);
 const globalPrefer10BitSdr = computed<boolean>(() =>
   toBool(configValue('prefer_10bit_sdr'), false),
@@ -2025,15 +2030,25 @@ function scrollToTokenSection(): void {
   apiTokensSectionRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function scrollToPairSection(): void {
+  pairSectionRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function scrollToRequestedSection(section: unknown): Promise<void> {
+  await nextTick();
+  if (section === 'tokens') {
+    scrollToTokenSection();
+  } else if (section === 'pair') {
+    scrollToPairSection();
+  }
+}
+
 onMounted(async () => {
   const auth = useAuthStore();
   await configStore.fetchConfig().catch(() => {});
   await auth.waitForAuthentication();
   await refreshClients();
-  if (route.query['sec'] === 'tokens') {
-    await nextTick();
-    scrollToTokenSection();
-  }
+  await scrollToRequestedSection(route.query['sec']);
   if (refreshIntervalId === null) {
     refreshIntervalId = setInterval(() => {
       void refreshClients();
@@ -2044,11 +2059,10 @@ onMounted(async () => {
 watch(
   () => route.query['sec'],
   async (section) => {
-    if (section !== 'tokens') {
+    if (section !== 'tokens' && section !== 'pair') {
       return;
     }
-    await nextTick();
-    scrollToTokenSection();
+    await scrollToRequestedSection(section);
   },
 );
 

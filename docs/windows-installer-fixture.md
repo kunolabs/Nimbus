@@ -65,7 +65,7 @@ so user-facing version surfaces no longer look like an unversioned build.
 | --- | --- | --- | --- |
 | Fresh install on clean Windows 11 x64 | Yes | Pending | Installer log, screenshots, service state |
 | Launch Web UI after install | Yes | Pending | Local URL opens and login/setup path is reachable |
-| Pair with a compatible client | Yes | Pending | Artemis, Moonlight, or current compatible client can see the host |
+| Pair with a compatible client | Yes | Observed pass | Artemis on Shield TV paired with the Nimbus VM host |
 | Start a short stream session | Yes | Pending | One local-network stream smoke, with hardware encoder noted |
 | Uninstall | Yes | Pending | Add/Remove Programs entry removed and service stopped |
 | Reinstall after uninstall | Yes | Pending | Reinstall completes without manual cleanup |
@@ -95,15 +95,19 @@ Observed so far:
 | Uninstall confirmation modal | Observed pass | Modal copy correctly describes uninstall options and factory-reset behavior. |
 | Uninstaller quick tips | Fixed, retest pending | An older candidate reused install/upgrade tips in uninstall mode. Fixed in `0af1f3b8`; retest with the current `0.0.0.44` candidate. |
 | Manual tray update check | Observed pass | Maintainer confirmed the `Check for Update` tray action shows visible feedback in the VM. |
+| Compatible-client pairing | Observed pass | Artemis on Shield TV paired with the Nimbus VM host. |
+| Pairing notification target | Fixed, retest pending | Pairing toast now opens `/clients?sec=pair` so the Clients page scrolls directly to the Pair Client section. |
 | Windows Defender prompt | Observed pass | Maintainer reported no Defender warning during the install smoke. |
 
 Still blocking the alpha gate:
 
 - Confirm the `0.0.0.44` uninstaller quick tips show uninstall-specific copy.
+- Confirm clicking the pairing notification scrolls directly to the Pair Client
+  section in the next candidate.
 - Confirm uninstall removes or stops the service and removes the Add/Remove
   Programs entry.
 - Confirm reinstall after uninstall completes without manual cleanup.
-- Run at least one compatible-client pairing and short stream smoke.
+- Run a short stream smoke.
 - Record upgrade behavior from Apollo and/or Vibepollo where practical.
 
 ## Evidence Commands

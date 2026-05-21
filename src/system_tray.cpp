@@ -535,7 +535,7 @@ namespace system_tray {
       tray.notification_icon = TRAY_ICON_LOCKED;
       tray.tooltip = PROJECT_NAME;
       tray.notification_cb = []() {
-        launch_ui("/clients");
+        launch_ui("/clients?sec=pair");
       };
       tray_update(&tray);
     });

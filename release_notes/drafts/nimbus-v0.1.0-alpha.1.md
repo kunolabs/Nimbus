@@ -40,6 +40,8 @@ has wider testers.
 - Added user-visible tray feedback for manual update checks so `Check for
   Update` reports checking, already-running, no-release, up-to-date, or failure
   status instead of only writing to logs.
+- Improved the incoming pairing notification target so it opens the Clients page
+  directly at the Pair Client section.
 
 ## Compatibility Notes
 
@@ -94,12 +96,12 @@ Partial manual VM observations from the previous candidate loop:
 - The uninstaller quick-tip panel was fixed after VM feedback and still needs a
   retest with the `0.0.0.44` candidate.
 - Manual tray update-check feedback is visible in the VM.
+- Artemis on Shield TV can pair with the Nimbus VM host.
 
 Pending before release:
 
 - Retest the `0.0.0.44` uninstaller quick-tip copy.
 - Uninstall and reinstall behavior.
-- Compatible-client pairing smoke.
 - Short local-network stream smoke.
 - Upgrade behavior from Apollo and/or Vibepollo where practical.
 
