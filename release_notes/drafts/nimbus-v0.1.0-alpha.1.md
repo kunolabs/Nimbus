@@ -27,6 +27,11 @@ has wider testers.
 - Retargeted the Web UI release checks to `kunolabs/Nimbus` and filtered update
   banners to Nimbus-owned `nimbus-v*` tags so the alpha cannot advertise an
   inherited Vibepollo download or downgrade path.
+- Rebranded the visible Vue Web UI shell, English UI copy, static first-run
+  onboarding, login header, favicon, and Windows status messages to Nimbus.
+- Added the first Nimbus host-console token pass so the Web UI moves away from
+  inherited Apollo/Sunshine visual identity while keeping compatibility-safe
+  runtime identifiers in place.
 
 ## Compatibility Notes
 
@@ -43,12 +48,21 @@ feedback:
 
 ## Verification
 
-Local package validation has passed for the Phase C packaging slice:
+Historical local package validation passed for the Phase C packaging slice:
 
 - `NimbusSetup.exe` was generated locally.
 - `Nimbus.msi` was generated locally.
 - Authenticode status was `NotSigned`, as expected for the unsigned alpha path.
 - SignPath signing and symbol publishing were skipped.
+
+Current source validation has passed after the UI and status-message rebrand:
+
+- Web UI production build passes with inherited large vendor chunk warnings.
+- English locale JSON files parse successfully.
+- Native Windows host target builds successfully when MSYS2 UCRT64 is on
+  `PATH`.
+- The current full package target is blocked on this machine until WiX v3
+  `candle.exe` and `light.exe` are available again.
 
 Pending before release:
 
@@ -67,9 +81,9 @@ Pending before release:
   artifacts.
 - Runtime identity migration is not complete; this alpha is branded Nimbus at
   the public package layer, not a full rename of every inherited runtime id.
-- The Web UI may still include inherited Vibepollo, Apollo, or Sunshine wording,
-  but update banners and release-note links are now restricted to Nimbus
-  releases.
+- Some compatibility routes, filenames, service names, icons, docs links, and
+  internal comments may still include inherited Vibepollo, Apollo, or Sunshine
+  wording until each migration surface has a dedicated test plan.
 - Symbols, SignPath signing, WebRTC asset publishing, and automatic issue
   closure remain disabled.
 

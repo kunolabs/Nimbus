@@ -108,7 +108,7 @@ Do not change these until there is a tested migration plan.
 | CPack package name | `Nimbus` | Changed in Phase C. Local package build generated `Nimbus.msi` and `NimbusSetup.exe`. |
 | CPack vendor | `Kuno Labs` | Changed in Phase C. |
 | CPack contact | `https://github.com/kunolabs/Nimbus/issues` | Changed in Phase C. |
-| Windows install directory | `Apollo` | Defer or migrate with explicit install-path behavior. |
+| Windows install directory | `Nimbus` for fresh installs; inherited Apollo paths are still detected for upgrade/migration compatibility | Changed for fresh install defaults. Validate upgrade and uninstall cleanup before release. |
 | WiX upgrade GUID | `{E3FA501A-85F8-4187-85A7-D6E6BDC7EDA1}` | Preserve unless we intentionally break upgrade lineage. |
 | WiX product-line seed | `Vibepollo-<major>.<minor>` | Treat as high-risk. Change only with upgrade testing. |
 | Bootstrapper namespace | `VibepolloInstaller` | Split cosmetic UI naming from installer detection logic. |
@@ -185,6 +185,8 @@ flowchart LR
 - Change user-facing package metadata to Nimbus.
 - Rename generated release artifacts to Nimbus.
 - Update bootstrapper UI strings and support links.
+- Update fresh-install defaults to Nimbus while preserving inherited Apollo and
+  Vibepollo detection paths for compatibility.
 - Keep service names, config paths, and upgrade GUIDs unchanged unless the test
   plan proves a migration is safe.
 - Build on Windows and inspect the installer, generated filenames, Start menu
