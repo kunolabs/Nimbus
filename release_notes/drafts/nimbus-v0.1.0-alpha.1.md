@@ -32,6 +32,9 @@ has wider testers.
 - Added the first Nimbus host-console token pass so the Web UI moves away from
   inherited Apollo/Sunshine visual identity while keeping compatibility-safe
   runtime identifiers in place.
+- Retargeted user-visible tray, launcher export, service display, fallback host
+  naming, and in-app client-control help surfaces to Nimbus-owned wording and
+  docs.
 
 ## Compatibility Notes
 

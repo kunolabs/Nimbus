@@ -91,7 +91,7 @@
         <ServiceInstall
             Id="ApolloServiceInstall"
             Name="ApolloService"
-            DisplayName="Apollo Service"
+            DisplayName="Nimbus Service"
             Type="ownProcess"
             Start="auto"
             ErrorControl="normal"

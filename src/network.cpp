@@ -229,6 +229,6 @@ namespace net {
       }
     }
 
-    return !instancename.empty() ? instancename : "Apollo";
+    return !instancename.empty() ? instancename : "Nimbus";
   }
 }  // namespace net
