@@ -69,10 +69,11 @@ Applied hardening:
 - Main release creation no longer closes `fixed` issues directly.
 - The separate fixed-issue release closer is disabled.
 
-Remaining release blocker: package branding now emits Nimbus-named artifacts and
-the local Windows package build has verified the final installer output. A
-release tag is still blocked until installer execution is tested in a VM or
-snapshot fixture and release notes are prepared.
+Remaining release blocker: package branding now emits Nimbus-named artifacts,
+but the final package must be rebuilt from the current release-prep commit. A
+release tag is still blocked until the current package builds with WiX available,
+installer execution is tested in a VM or snapshot fixture, and release notes are
+prepared.
 
 Decision: CI is safer for normal branch work and manual investigation, but do
 not intentionally create a Nimbus release tag until package install, upgrade,
@@ -87,7 +88,7 @@ identity:
 - `PROJECT_FQDN` is still `dev.lizardbyte.app.Sunshine`.
 - `WINDOWS_APP_USER_MODEL_ID` is still `Nonary.Vibepollo`.
 - CPack package name is now `Nimbus`.
-- Windows install directory is still `Apollo`.
+- Fresh Windows installs default to `Nimbus`.
 - Windows WiX product family is seeded with `Vibepollo`.
 - Bootstrapper text, support links, and output names now use Nimbus.
 - Several installer paths intentionally detect or migrate Apollo and Sunshine.
@@ -172,6 +173,45 @@ Caveats:
   yet.
 - Signing and symbol publishing remain disabled until Nimbus-owned destinations
   and secrets exist.
+
+## Local Windows Package Revalidation
+
+Validation date: 2026-05-21
+
+Validated commits: `ce9ec7aa`, `fe7b7422`, `f14d443b`
+
+Scope: revalidate the Nimbus release-safety, visible web branding, visible
+Windows branding, and CMake web packaging fixes after VM fixture feedback.
+
+Result:
+
+| Check | Result | Notes |
+| --- | --- | --- |
+| Web UI production build | Pass | `npm run build` passes after restoring dependencies. Vite still reports inherited large vendor chunk warnings. |
+| English locale JSON parse | Pass | `en.json`, `en_GB.json`, and repaired `en_US.json` parse successfully. |
+| Native Windows host build | Pass | `cmake --build build/nimbus-package-validation --target sunshine --config Release -j 6` passes when `C:\msys64\ucrt64\bin` is on `PATH`. |
+| Bootstrapper C# compile | Pass | `build_bootstrapper.ps1 -UninstallOnly` compiles the shared installer source. |
+| CMake package web step | Pass | Windows CMake now prefers `C:/Program Files/nodejs/npm.cmd` and uses a build-local npm cache. |
+| CPack WiX MSI | Blocked | Current host does not expose WiX v3 `candle.exe` / `light.exe`, so `package_installer` stops at CPack WiX. |
+
+Useful command shape:
+
+```powershell
+$env:PATH = 'C:\msys64\ucrt64\bin;' + $env:PATH
+cmake -S . -B build\nimbus-package-validation -UNPM
+cmake --build build\nimbus-package-validation --target package_installer --config Release -j 6
+```
+
+Current package blocker:
+
+```text
+Could not find the WiX candle executable.
+```
+
+Install WiX Toolset v3.14.1 or make its portable `bin` directory discoverable
+before rerunning the final package build. The old `82fa5cdd` artifacts above are
+historical validation evidence only; do not promote them as the current release
+candidate.
 
 ## Required Secrets Before Release CI
 

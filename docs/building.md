@@ -120,6 +120,15 @@ The `package_installer` target uses CPack's WiX generator and requires WiX Tools
 When building from MSYS2, configure CMake with Windows Git to keep generated version metadata clean:
 `-DGIT_EXECUTABLE=C:/Progra~1/Git/cmd/git.exe`.
 
+On Windows, Nimbus prefers the standard Node.js `npm.cmd` launcher for the CMake web UI package step and stores npm
+cache data under the CMake build directory. If a build tree was configured before that change, clear the cached npm
+path before packaging:
+
+```powershell
+$env:PATH = 'C:\msys64\ucrt64\bin;' + $env:PATH
+cmake -S . -B build -UNPM
+```
+
 ##### WebRTC (optional, Windows only)
 Nimbus can link against the libwebrtc C++ wrapper when `SUNSHINE_ENABLE_WEBRTC=ON`. The option name is inherited from
 upstream and has not been renamed yet. The wrapper source is vendored as
