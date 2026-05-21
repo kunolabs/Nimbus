@@ -26,10 +26,10 @@ to understand inherited automation before changing release behavior.
 | `.github/workflows/ci.yml` | push, pull request, manual | High | Builds Windows and can create GitHub releases from `nimbus-v*` tags. Release creation remains blocked on package-output validation. |
 | `.github/workflows/ci-windows.yml` | reusable workflow | High | Builds Windows artifacts, downloads pinned WebRTC artifacts, optionally signs artifacts, and optionally publishes symbols. |
 | `.github/workflows/webrtc-release.yml` | manual | High | Can publish pinned WebRTC release assets with `contents: write`. Publishing defaults to off and requires an explicit Nimbus confirmation string. |
-| `.github/workflows/fixed-issue-follow-up.yml` | issue label, release published | Medium | Comments on and closes issues labeled `fixed`. Useful later, but should be reworded and checked before relying on it publicly. |
+| `.github/workflows/fixed-issue-follow-up.yml` | issue label, release published | Medium | Can comment when issues are labeled `fixed`; release-time closure is disabled during Nimbus bootstrap. |
 | `.github/workflows/logs-needed-reminder.yml` | issue/comment events | Medium | Uses inherited Vibeshine/Sunshine log filename detection for compatibility. Instructions now use Nimbus wording. |
-| `.github/workflows/logs-needed-closure.yml` | scheduled or issue state flow | Medium | Can close issues for missing logs. Needs maintainer policy review before use. |
-| `.github/workflows/environment-specific-closure.yml` | issue label | Medium | Closes issues as not planned when labeled `environment-specific`. Wording now says Nimbus. |
+| `.github/workflows/logs-needed-closure.yml` | scheduled or issue state flow | Medium | Disabled during Nimbus bootstrap. Re-enable only after maintainer support policy is defined. |
+| `.github/workflows/environment-specific-closure.yml` | issue label | Medium | Disabled during Nimbus bootstrap. Re-enable only after environment-specific closure policy is defined. |
 
 ## Release Automation Findings
 
@@ -68,6 +68,8 @@ Applied hardening:
   string.
 - Main release creation no longer closes `fixed` issues directly.
 - The separate fixed-issue release closer is disabled.
+- Stale logs-needed closure and environment-specific closure jobs are disabled
+  until Nimbus has a public support policy.
 
 Remaining release blocker: the current release-prep commit now builds
 Nimbus-named Windows artifacts locally, but a release tag is still blocked until

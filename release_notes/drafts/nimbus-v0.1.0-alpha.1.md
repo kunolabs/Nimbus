@@ -17,7 +17,7 @@ has wider testers.
   policy, and issue-radar workflow.
 - Hardened release automation so public releases require `nimbus-v*` tags.
 - Disabled inherited signing, symbol publishing, WebRTC publishing, and
-  automatic fixed-issue closure until Nimbus-owned policy and secrets exist.
+  automatic issue-closure paths until Nimbus-owned policy and secrets exist.
 - Rebranded public Windows package output to Nimbus, including
   `NimbusSetup.exe`, `Nimbus.msi`, Kuno Labs publisher metadata, and Nimbus
   support links.

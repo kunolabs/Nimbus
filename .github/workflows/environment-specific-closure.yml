@@ -10,7 +10,10 @@ on:
 jobs:
   close:
     name: Close Environment-Specific Issue
+    # Disabled during Nimbus bootstrap. Re-enable only after the public support
+    # policy clearly defines when maintainers close environment-specific issues.
     if: >-
+      false &&
       github.event.action == 'labeled' &&
       github.event.label.name == 'environment-specific' &&
       github.event.issue.state == 'open' &&
