@@ -52,6 +52,13 @@ Current artifact metadata:
 | Company | `Kuno Labs` |
 | Signing | Unsigned; SignPath skipped because `SIGNPATH_API_TOKEN` is unset |
 
+Version caveat: this is a pre-tag fixture candidate. It may display `0.0.0` in
+the installer, Web UI, or Programs & Features even though file metadata includes
+the generated four-part Windows file version above. That is acceptable for
+local VM validation only. Public alpha artifacts must be rebuilt from the
+`nimbus-v0.1.0-alpha.1` tag, or an equivalent explicit `TAG` build environment,
+so user-facing version surfaces no longer look like an unversioned build.
+
 ## Fixture Matrix
 
 | Scenario | Required before alpha? | Status | Evidence |

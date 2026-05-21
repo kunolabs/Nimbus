@@ -111,6 +111,21 @@ Preconditions before creating the tag:
 | WebRTC assets | WebRTC publishing remains manual and confirmation-gated. |
 | Issue automation | Automatic issue closure remains disabled. |
 
+Version display policy:
+
+- Pre-tag VM candidates may display `0.0.0` in the installer, Web UI, or
+  Programs & Features because the repository default version remains `0.0.0`
+  until a Nimbus tag or explicit build version is provided.
+- Do not publish public release artifacts from an unversioned configure/build.
+- The final `nimbus-v0.1.0-alpha.1` package must be configured from the
+  annotated tag or with an explicit `TAG=nimbus-v0.1.0-alpha.1` build
+  environment before packaging.
+- Windows Installer `ProductVersion` is numeric-only, so Programs & Features may
+  show the MSI-safe base version such as `0.1.0` or `0.1.0.0` even when the
+  user-facing release tag is `0.1.0-alpha.1`.
+- File metadata may include a fourth numeric build/revision component, such as
+  `0.1.0.12`, for Windows upgrade ordering and local candidate inspection.
+
 When all preconditions pass, create and push only the intended tag:
 
 ```bash
