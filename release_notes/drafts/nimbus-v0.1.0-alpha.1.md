@@ -37,6 +37,9 @@ has wider testers.
   docs.
 - Made the uninstaller quick-tip panel uninstall-specific instead of showing
   install/upgrade guidance.
+- Added user-visible tray feedback for manual update checks so `Check for
+  Update` reports checking, already-running, no-release, up-to-date, or failure
+  status instead of only writing to logs.
 
 ## Compatibility Notes
 

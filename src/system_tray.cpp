@@ -153,7 +153,7 @@ namespace system_tray {
         {.text = TRAY_MSG_NO_APP_RUNNING, .cb = tray_force_stop_cb},
         {.text = "Check for Update", .cb = [](tray_menu *) {
            BOOST_LOG(info) << "Manual update check requested from tray"sv;
-           update::trigger_check(true);
+           update::trigger_check(true, true);
          }},
 
         {.text = "Restart", .cb = tray_restart_cb},

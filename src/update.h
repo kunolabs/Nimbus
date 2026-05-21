@@ -47,7 +47,7 @@ namespace update {
    * Initiates a check for updates if not already running. If force is true, bypasses interval throttling.
    * @param force If true, forces the check regardless of throttling.
    */
-  void trigger_check(bool force);
+  void trigger_check(bool force, bool notify_manual_result = false);
 
   /**
    * @brief Handle stream start event for update notification.
