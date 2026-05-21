@@ -66,10 +66,20 @@ flowchart LR
 
 | Slice | Scope | Validation |
 | --- | --- | --- |
-| UI-1 | Browser title, login shell, dashboard greeting, resource links | Vite build and VM screenshot |
+| UI-1 | Browser title, login shell, dashboard greeting, resource links, app-shell token pass | Vite build and VM screenshot |
 | UI-2 | Dashboard status cards and update/release alert layout | Vite build and responsive screenshots |
 | UI-3 | Settings navigation and form density pass | Vite build, keyboard navigation, mobile width check |
 | UI-4 | Changelog and support surfaces | Vite build, no upstream release links |
+
+## Implementation Notes
+
+- The first implementation slice should replace inherited Apollo/Sunshine visual
+  anchors before larger layout work: shell navigation, login/logout brand mark,
+  and semantic Tailwind/Naive UI color tokens.
+- Keep source compatibility names separate from visible product identity. If a
+  backend feature still uses an inherited folder, profile, or executable name,
+  prefer neutral wording such as "managed profile" until that runtime migration
+  is complete.
 
 ## Figma Status
 

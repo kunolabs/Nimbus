@@ -18,52 +18,43 @@ module.exports = {
       // These values drive CSS variables that both Tailwind utilities and Naive UI consume.
       semanticColors: {
         light: {
-          // Sun-like palette (warmer, less brown)
-          primary: '253 184 19', // #FDB813 sun gold
-          secondary: '234 88 12', // #EA580C vibrant orange
-          success: '76 175 80',
-          warning: '245 158 11', // #F59E0B amber
-          danger: '220 38 38',
-          info: '2 136 209',
-          light: '255 250 244', // warm paper
-          dark: '33 33 33',
-          surface: '255 248 225', // #FFF8E1 soft cream
-          accent: '245 130 0', // #F58200 rich amber accent
-          onPrimary: '33 33 33', // dark text on bright gold for contrast
-          onSecondary: '255 255 255',
-          onAccent: '255 255 255',
-          onLight: '33 33 33',
-          onDark: '255 255 255',
-          brand: '217 119 6', // #D97706 brand orange
+          // Nimbus host-console palette: neutral base, blue actions, mint streaming health.
+          primary: '37 99 235', // #2563EB Nimbus Blue
+          secondary: '45 212 191', // #2DD4BF Lucent Mint
+          success: '34 197 94', // #22C55E
+          warning: '245 158 11', // #F59E0B
+          danger: '244 63 94', // #F43F5E
+          info: '14 165 233', // #0EA5E9
+          light: '246 248 251', // #F6F8FB Mist Surface
+          dark: '13 17 23', // #0D1117 Cloud Ink
+          surface: '255 255 255',
+          accent: '45 212 191',
+          onPrimary: '255 255 255',
+          onSecondary: '13 17 23',
+          onAccent: '13 17 23',
+          onLight: '13 17 23',
+          onDark: '246 248 251',
+          brand: '30 64 175', // #1E40AF
         },
         dark: {
-          // 🌙 Lunar (cosmic blues + purples), tuned for contrast on deep navy
-          dark: '6 10 24', // #0A0F18  starfield background
-          surface: '14 20 36', // #0E1424  panels/cards
-          light: '224 236 255', // #E0ECFF  pale moon haze (for light surfaces)
-
-          // Core actions/brand (cool spectrum)
-          primary: '99 102 241', // #6366F1  indigo (main CTA/links)
-          secondary: '168 85 247', // #A855F7  vibrant purple (alt CTA/accents)
-          accent: '56 189 248', // #38BDF8  cyan comet (chips/highlights)
-          info: '147 197 253', // #93C5FD  periwinkle info
-
-          // Status with lunar tilt (cool-leaning where possible)
-          success: '16 185 129', // #10B981  emerald-teal
-          warning: '245 158 11', // #F59E0B  amber flare (kept warm for salience)
-          danger: '225 29 72', // #E11D48  rose/magenta-leaning red
-
-          // Text-on-color (picked to pass AA on typical sizes)
-          onDark: '245 249 255', // near-white on dark/surface
-          onSurface: '245 249 255', // (if you expose separately)
-          onLight: '6 10 24', // dark text on light surfaces
-          onPrimary: '245 249 255', // white on indigo (AA+)
-          onSecondary: '245 249 255', // white on purple (AA+)
-          onAccent: '6 10 24', // dark text on cyan (AA+)
-          onInfo: '6 10 24', // dark text on light info blue (AA+)
-
-          // Brand tint (cool lavender for logos/illustrations)
-          brand: '165 180 252', // #A5B4FC  steel-lavender
+          dark: '13 17 23',
+          surface: '22 27 34',
+          light: '226 232 240',
+          primary: '96 165 250',
+          secondary: '45 212 191',
+          accent: '251 191 36',
+          info: '125 211 252',
+          success: '52 211 153',
+          warning: '245 158 11',
+          danger: '251 113 133',
+          onDark: '248 250 252',
+          onSurface: '248 250 252',
+          onLight: '13 17 23',
+          onPrimary: '13 17 23',
+          onSecondary: '13 17 23',
+          onAccent: '13 17 23',
+          onInfo: '13 17 23',
+          brand: '147 197 253',
         },
       },
       colors: {
