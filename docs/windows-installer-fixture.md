@@ -29,13 +29,13 @@ flowchart TD
 ## Candidate Artifact
 
 The current local package validation produced these artifacts from source commit
-`57d01875`. The documentation commit that records these hashes may be newer than
+`0af1f3b8`. The documentation commit that records these hashes may be newer than
 the validated source commit.
 
 | Artifact | Size | SHA256 |
 | --- | ---: | --- |
-| `build/nimbus-package-validation/cpack_artifacts/NimbusSetup.exe` | 25,871,360 | `1BE1C58A6128A541F0A9DC49E20186A3D93E3E3C8FFA448A130DD8D5E93D69CF` |
-| `build/nimbus-package-validation/cpack_artifacts/Nimbus.msi` | 25,606,727 | `9F31155E08353B7788C47FAA7C321C6C25AC4F91B7A557238D1D9B9C9A5B5501` |
+| `build/nimbus-package-validation/cpack_artifacts/NimbusSetup.exe` | 25,871,872 | `4091BACCA4CF23356C583956606D18451D3516ABDA8D35438996A9693BE66F20` |
+| `build/nimbus-package-validation/cpack_artifacts/Nimbus.msi` | 25,606,719 | `6B348D3516352DE46690940A0241B9DB38B1FA4F56ECF856A4BE7E52BE7A63EC` |
 
 Before tagging `nimbus-v0.1.0-alpha.1`, either use these artifacts for fixture
 testing or rebuild the package from the final release-prep commit and replace
@@ -47,8 +47,8 @@ Current artifact metadata:
 | Field | Value |
 | --- | --- |
 | Bootstrapper product | `Nimbus Installer` |
-| File version | `0.0.0.40` |
-| Product version | `57d01875` |
+| File version | `0.0.0.41` |
+| Product version | `0af1f3b8` |
 | Company | `Kuno Labs` |
 | Signing | Unsigned; SignPath skipped because `SIGNPATH_API_TOKEN` is unset |
 

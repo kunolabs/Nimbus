@@ -247,17 +247,20 @@ Current visual-design state:
 - Tray menu text, launcher export headers, default discovery fallback, service
   display text, and in-app client-control help links now use Nimbus-owned
   wording and docs.
+- The uninstaller quick-tip panel now uses uninstall-specific copy instead of
+  reusing install/upgrade guidance.
 
 ## Current Full Package Revalidation
 
 Validation date: 2026-05-21
 
-Validated source commit: `57d01875`
+Validated source commit: `0af1f3b8`
 
 Scope: rebuild the full Windows package after the visible Nimbus web shell,
 static onboarding, Windows status copy, remaining visible host-branding cleanup,
-release-note, and release-safety passes. This validates generated package
-artifacts, not installer execution on a target machine.
+uninstaller quick-tip copy, release-note, and release-safety passes. This
+validates generated package artifacts, not installer execution on a target
+machine.
 
 Command shape:
 
@@ -273,7 +276,7 @@ Result:
 | --- | --- | --- |
 | Web UI production build | Pass | Vite still reports inherited large vendor chunk warnings only. |
 | CPack WiX MSI | Pass | Initial sandbox run reached WiX but failed ICE validation because Windows Installer service access was unavailable; rerunning outside the sandbox with the same `WIX` path passed. |
-| Bootstrapper | Pass | Final file metadata resolves to `Nimbus Installer`, `0.0.0.40`, `57d01875`, `Kuno Labs`. |
+| Bootstrapper | Pass | Final file metadata resolves to `Nimbus Installer`, `0.0.0.41`, `0af1f3b8`, `Kuno Labs`. |
 | Signing | Skipped | `SIGNPATH_API_TOKEN` was unset; output is unsigned. |
 | Installer execution | Pending | Fresh install, uninstall, reinstall, and upgrade behavior still need VM fixture records. |
 
@@ -281,8 +284,8 @@ Artifacts:
 
 | Artifact | Size | SHA256 |
 | --- | ---: | --- |
-| `build/nimbus-package-validation/cpack_artifacts/NimbusSetup.exe` | 25,871,360 | `1BE1C58A6128A541F0A9DC49E20186A3D93E3E3C8FFA448A130DD8D5E93D69CF` |
-| `build/nimbus-package-validation/cpack_artifacts/Nimbus.msi` | 25,606,727 | `9F31155E08353B7788C47FAA7C321C6C25AC4F91B7A557238D1D9B9C9A5B5501` |
+| `build/nimbus-package-validation/cpack_artifacts/NimbusSetup.exe` | 25,871,872 | `4091BACCA4CF23356C583956606D18451D3516ABDA8D35438996A9693BE66F20` |
+| `build/nimbus-package-validation/cpack_artifacts/Nimbus.msi` | 25,606,719 | `6B348D3516352DE46690940A0241B9DB38B1FA4F56ECF856A4BE7E52BE7A63EC` |
 
 Current caveat: these artifacts are newer and better branded than the earlier
 `82fa5cdd` validation artifacts, but they are still local validation artifacts

@@ -35,6 +35,8 @@ has wider testers.
 - Retargeted user-visible tray, launcher export, service display, fallback host
   naming, and in-app client-control help surfaces to Nimbus-owned wording and
   docs.
+- Made the uninstaller quick-tip panel uninstall-specific instead of showing
+  install/upgrade guidance.
 
 ## Compatibility Notes
 
@@ -68,12 +70,12 @@ Current source validation has passed after the UI and status-message rebrand:
   portable binaries and the WiX ICE validation step runs outside the Codex
   sandbox.
 
-Current local package artifacts from commit `57d01875`:
+Current local package artifacts from commit `0af1f3b8`:
 
 | Artifact | Size | SHA256 |
 | --- | ---: | --- |
-| `NimbusSetup.exe` | 25,871,360 | `1BE1C58A6128A541F0A9DC49E20186A3D93E3E3C8FFA448A130DD8D5E93D69CF` |
-| `Nimbus.msi` | 25,606,727 | `9F31155E08353B7788C47FAA7C321C6C25AC4F91B7A557238D1D9B9C9A5B5501` |
+| `NimbusSetup.exe` | 25,871,872 | `4091BACCA4CF23356C583956606D18451D3516ABDA8D35438996A9693BE66F20` |
+| `Nimbus.msi` | 25,606,719 | `6B348D3516352DE46690940A0241B9DB38B1FA4F56ECF856A4BE7E52BE7A63EC` |
 
 These are local validation artifacts, not release candidates, until the pending
 VM fixture checks below are recorded.
