@@ -1,3 +1,5 @@
+import { normalizeReleaseTag } from '@/utils/releaseRepository';
+
 // Minimal GitHub release shape used by the UI and SunshineVersion.
 // Keep only the fields we actually reference in the code to reduce noise.
 export interface GitHubRelease {
@@ -54,11 +56,7 @@ export default class SunshineVersion {
    */
   parseVersion(version: string): [number, number, number] {
     if (!version) return [0, 0, 0];
-    let v = version.trim();
-    // Strip leading 'v'
-    if (v.startsWith('v') || v.startsWith('V')) {
-      v = v.slice(1);
-    }
+    let v = normalizeReleaseTag(version);
     // Split out build metadata and prerelease but keep prerelease for separate parsing
     const plusIdx = v.indexOf('+');
     if (plusIdx >= 0) v = v.slice(0, plusIdx);
@@ -85,8 +83,7 @@ export default class SunshineVersion {
   /** Parse prerelease identifiers (semver) as array of numbers/strings */
   parsePreRelease(version: string): (string | number)[] {
     if (!version) return [];
-    let v = version.trim();
-    if (v.startsWith('v') || v.startsWith('V')) v = v.slice(1);
+    let v = normalizeReleaseTag(version);
     const plusIdx = v.indexOf('+');
     if (plusIdx >= 0) v = v.slice(0, plusIdx);
     const dashIdx = v.indexOf('-');

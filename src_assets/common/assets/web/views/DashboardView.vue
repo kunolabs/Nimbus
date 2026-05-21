@@ -149,7 +149,7 @@
                     strong
                     size="small"
                     class="w-full justify-center sm:w-auto"
-                    href="https://github.com/Nonary/vibeshine/issues/new?template=bug_report.yml"
+                    :href="NIMBUS_ISSUE_REPORT_URL"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -487,6 +487,13 @@ import { useAppsStore } from '@/stores/apps';
 import { http } from '@/http';
 import type { CrashDumpStatus } from '@/utils/crashDump';
 import { isCrashDumpEligible, sanitizeCrashDumpStatus } from '@/utils/crashDump';
+import {
+  NIMBUS_ISSUE_REPORT_URL,
+  NIMBUS_RELEASES_API_URL,
+  isNimbusReleaseTag,
+  normalizeReleaseTag,
+  normalizeReleaseTagKey,
+} from '@/utils/releaseRepository';
 
 const installedVersion = ref<VibepolloVersion>(new VibepolloVersion('0.0.0'));
 const githubRelease = ref<GitHubRelease | null>(null);
@@ -552,6 +559,25 @@ const translate = (key: string, fallback: string) => {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object';
+}
+
+function isDashboardRelease(value: unknown): value is GitHubRelease {
+  if (!isRecord(value)) return false;
+  const tagName = value['tag_name'];
+  return (
+    value['draft'] !== true &&
+    typeof tagName === 'string' &&
+    isNimbusReleaseTag(tagName)
+  );
+}
+
+function latestReleaseByVersion(releases: GitHubRelease[]): GitHubRelease | null {
+  return releases.reduce<GitHubRelease | null>((best, candidate) => {
+    if (!best) return candidate;
+    return VibepolloVersion.fromRelease(candidate).isGreater(VibepolloVersion.fromRelease(best))
+      ? candidate
+      : best;
+  }, null);
 }
 
 function isPlayniteFullscreenEntry(app: Record<string, unknown>): boolean {
@@ -637,47 +663,27 @@ async function runVersionChecks() {
     branch.value = cfg.branch || '';
     commit.value = cfg.commit || '';
 
-    // Remote release checks (GitHub)
+    githubRelease.value = null;
+    preReleaseRelease.value = null;
+    installedIsPrerelease.value = false;
+
+    // Fetch Nimbus-owned releases only; inherited upstream tags must not drive update banners.
     try {
-      githubRelease.value = await fetch(
-        'https://api.github.com/repos/Nonary/Vibepollo/releases/latest',
-      ).then((r) => r.json());
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn('[Dashboard] latest release fetch failed', e);
-    }
-    // Fetch list of releases to locate prereleases and determine installed stability
-    try {
-      const releases = await fetch('https://api.github.com/repos/Nonary/Vibepollo/releases').then(
-        (r) => r.json(),
-      );
+      const releases = await fetch(NIMBUS_RELEASES_API_URL, {
+        headers: { Accept: 'application/vnd.github+json' },
+      }).then((r) => r.json());
       if (Array.isArray(releases)) {
-        // Pick the latest prerelease by semver (not just the first one)
-        const prereleases = releases.filter((r: any) => r && r.prerelease && !r.draft);
-        if (prereleases.length > 0) {
-          let best = prereleases[0];
-          let bestV = VibepolloVersion.fromRelease(best);
-          for (let i = 1; i < prereleases.length; i++) {
-            const cand = prereleases[i];
-            const candV = VibepolloVersion.fromRelease(cand);
-            if (candV.isGreater(bestV)) {
-              best = cand;
-              bestV = candV;
-            }
-          }
-          preReleaseRelease.value = best as GitHubRelease;
-        }
+        const nimbusReleases = releases.filter(isDashboardRelease);
+        githubRelease.value = latestReleaseByVersion(
+          nimbusReleases.filter((release) => release.prerelease !== true),
+        );
+        preReleaseRelease.value = latestReleaseByVersion(
+          nimbusReleases.filter((release) => release.prerelease === true),
+        );
         // Determine if installed tag corresponds to a prerelease on GitHub
-        const installedTag = installedVersion.value?.version || '';
-        const installedTagV = installedTag.toLowerCase().startsWith('v')
-          ? installedTag
-          : 'v' + installedTag;
-        const match = releases.find(
-          (r: any) =>
-            r &&
-            !r.draft &&
-            typeof r.tag_name === 'string' &&
-            (r.tag_name === installedTag || r.tag_name === installedTagV),
+        const installedTagKey = normalizeReleaseTagKey(installedVersion.value?.version || '');
+        const match = nimbusReleases.find(
+          (release) => normalizeReleaseTagKey(release.tag_name) === installedTagKey,
         );
         installedIsPrerelease.value = !!(match && match.prerelease === true);
       }
@@ -966,19 +972,19 @@ const displayVersion = computed(() => {
   const v = installedVersion.value?.version || '0.0.0';
   if (!v || v === '0.0.0') {
     const pre = preReleaseRelease.value?.tag_name || '';
-    if (pre) return pre.replace(/^v/i, '');
+    if (pre) return normalizeReleaseTag(pre);
   }
-  return v;
+  return normalizeReleaseTag(v);
 });
 const stableBuildAvailable = computed(() => {
   if (!githubRelease.value) return false;
   return githubVersion.value.isGreater(installedVersion.value);
 });
 const preReleaseBuildAvailable = computed(() => {
-  if (!preReleaseRelease.value || !githubRelease.value) return false;
+  if (!preReleaseRelease.value) return false;
   return (
     preReleaseVersion.value.isGreater(installedVersion.value) &&
-    preReleaseVersion.value.isGreater(githubVersion.value)
+    (!githubRelease.value || preReleaseVersion.value.isGreater(githubVersion.value))
   );
 });
 const buildVersionIsDirty = computed(() => {

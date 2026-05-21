@@ -24,6 +24,9 @@ has wider testers.
 - Fixed Windows package target dependencies so `package_installer` builds the
   helper executables and Web UI payload before CPack/WiX packaging.
 - Documented the first alpha tag policy and installer fixture gate.
+- Retargeted the Web UI release checks to `kunolabs/Nimbus` and filtered update
+  banners to Nimbus-owned `nimbus-v*` tags so the alpha cannot advertise an
+  inherited Vibepollo download or downgrade path.
 
 ## Compatibility Notes
 
@@ -64,6 +67,9 @@ Pending before release:
   artifacts.
 - Runtime identity migration is not complete; this alpha is branded Nimbus at
   the public package layer, not a full rename of every inherited runtime id.
+- The Web UI may still include inherited Vibepollo, Apollo, or Sunshine wording,
+  but update banners and release-note links are now restricted to Nimbus
+  releases.
 - Symbols, SignPath signing, WebRTC asset publishing, and automatic issue
   closure remain disabled.
 
