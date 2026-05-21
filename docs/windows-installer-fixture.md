@@ -94,13 +94,12 @@ Observed so far:
 | Web UI launch path | Observed pass | Tray context menu can open the local Web UI. Browser certificate warning is expected for the inherited local HTTPS flow. |
 | Uninstall confirmation modal | Observed pass | Modal copy correctly describes uninstall options and factory-reset behavior. |
 | Uninstaller quick tips | Fixed, retest pending | An older candidate reused install/upgrade tips in uninstall mode. Fixed in `0af1f3b8`; retest with the current `0.0.0.44` candidate. |
-| Manual tray update check | Fixed, retest pending | `Check for Update` now reports manual tray feedback from `4f3411b2`; retest in the VM. |
+| Manual tray update check | Observed pass | Maintainer confirmed the `Check for Update` tray action shows visible feedback in the VM. |
 | Windows Defender prompt | Observed pass | Maintainer reported no Defender warning during the install smoke. |
 
 Still blocking the alpha gate:
 
 - Confirm the `0.0.0.44` uninstaller quick tips show uninstall-specific copy.
-- Confirm the `Check for Update` tray action shows manual feedback.
 - Confirm uninstall removes or stops the service and removes the Add/Remove
   Programs entry.
 - Confirm reinstall after uninstall completes without manual cleanup.

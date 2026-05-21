@@ -278,7 +278,7 @@ Result:
 | CPack WiX MSI | Pass | Initial sandbox run reached WiX but failed ICE validation because Windows Installer service access was unavailable; rerunning outside the sandbox with the same `WIX` path passed. |
 | Bootstrapper | Pass | Final file metadata resolves to `Nimbus Installer`, `0.0.0.44`, `4f3411b2`, `Kuno Labs`. |
 | Signing | Skipped | `SIGNPATH_API_TOKEN` was unset; output is unsigned. |
-| Installer execution | Partial | Manual VM smoke observed Nimbus default install path, visible Nimbus wording, service running with Nimbus description, Web UI launch path, and no Defender warning. Uninstall/reinstall, client pairing, streaming, and upgrade behavior still need fixture records. |
+| Installer execution | Partial | Manual VM smoke observed Nimbus default install path, visible Nimbus wording, service running with Nimbus description, Web UI launch path, manual update-check feedback, and no Defender warning. Uninstall/reinstall, client pairing, streaming, and upgrade behavior still need fixture records. |
 
 Artifacts:
 

@@ -93,13 +93,11 @@ Partial manual VM observations from the previous candidate loop:
 - No Microsoft Defender warning was observed during the manual install smoke.
 - The uninstaller quick-tip panel was fixed after VM feedback and still needs a
   retest with the `0.0.0.44` candidate.
-- Manual tray update-check feedback was added after VM feedback and needs a
-  retest with the `0.0.0.44` candidate.
+- Manual tray update-check feedback is visible in the VM.
 
 Pending before release:
 
 - Retest the `0.0.0.44` uninstaller quick-tip copy.
-- Retest manual `Check for Update` tray feedback.
 - Uninstall and reinstall behavior.
 - Compatible-client pairing smoke.
 - Short local-network stream smoke.
