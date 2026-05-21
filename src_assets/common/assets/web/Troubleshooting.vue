@@ -55,7 +55,7 @@
             <p class="text-xs opacity-70 leading-snug">
               {{
                 $t('troubleshooting.collect_playnite_logs_desc') ||
-                'Export Vibepollo, Playnite, plugin, and display-helper logs.'
+                'Export Nimbus, Playnite, plugin, and display-helper logs.'
               }}
             </p>
           </div>
@@ -74,7 +74,7 @@
             <p class="text-xs opacity-70 leading-snug">
               {{
                 $t('troubleshooting.export_crash_bundle_desc') ||
-                'Download logs and the most recent Vibepollo crash dump for issue reports.'
+                'Download logs and the most recent Nimbus crash dump for issue reports.'
               }}
             </p>
           </div>
@@ -350,7 +350,7 @@ const tCount = (key: string, fallback: string, count: number) => {
 
 const logSourceOptions = computed(() => {
   const options = [
-    { label: translate('troubleshooting.logs_source_sunshine', 'Vibepollo'), value: 'sunshine' },
+    { label: translate('troubleshooting.logs_source_sunshine', 'Nimbus'), value: 'sunshine' },
   ];
   if (platform.value === 'windows') {
     options.push(
