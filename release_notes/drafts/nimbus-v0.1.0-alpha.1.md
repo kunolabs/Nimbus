@@ -52,6 +52,9 @@ has wider testers.
   Profiles, Cursor Doctor, and the future Game Discovery Inbox direction.
 - Added the first Cursor Doctor card to the Troubleshooting page and cleaned
   remaining Playnite cleanup copy that still said Vibeshine.
+- Cherry-picked upstream Vibepollo display, HDR/10-bit, NVENC bit-depth, and
+  display-helper restore fixes from the refreshed `upstream-vibepollo/master`
+  while preserving Nimbus installer cache naming.
 
 ## Compatibility Notes
 

@@ -51,7 +51,8 @@ scoped.
 
 | Issue | Bucket | Why |
 | --- | --- | --- |
-| [#236 HEVC Main10/HDR not advertised despite `hevc_mode = 3`](https://github.com/Nonary/Vibepollo/issues/236) | Upstream fixed | Labeled `fixed` upstream. Wait for release/sync or inspect the fixing commit before creating Nimbus work. |
+| [#236 HEVC Main10/HDR not advertised despite `hevc_mode = 3`](https://github.com/Nonary/Vibepollo/issues/236) | Synced | Upstream 1.16.0-alpha.4 HDR/10-bit and NVENC API 12.1 fixes were cherry-picked into Nimbus after the 2026-05-23 upstream refresh. |
+| [#238 Secondary monitor never recovers properly](https://github.com/Nonary/Vibepollo/issues/238) | Partially synced | Upstream 1.16.0-alpha.4 display-helper restore and golden snapshot fixes were cherry-picked. Keep VM validation before marking closed for Nimbus. |
 
 ## Docs And Support
 

@@ -178,7 +178,8 @@ candidate scoring are reviewed.
 
 ## Next Actions
 
-1. Open a public roadmap issue for Setup Doctor and Client Profiles.
+1. Keep the public maintainer tracker for Setup Doctor and Client Profiles
+   honest: it is a maintainer planning issue, not a user-reported issue.
 2. Keep the first implementation read-only wherever possible.
 3. Add a Troubleshooting page cursor card as the first visible Setup Doctor seed.
 4. Create a fixture matrix after the next VM build and Shield TV stream test.

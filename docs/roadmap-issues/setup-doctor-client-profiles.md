@@ -1,4 +1,9 @@
-# Roadmap: Nimbus Setup Doctor And Client Profiles
+# Tracking: Nimbus Setup Doctor And Client Profiles
+
+Public tracker: https://github.com/kunolabs/Nimbus/issues/4
+
+Maintainer note: this is a Nimbus bootstrap planning tracker, not a
+user-reported issue or a claim of existing community demand.
 
 ## Problem
 
