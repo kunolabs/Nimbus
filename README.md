@@ -75,6 +75,9 @@ Early Nimbus work is focused on:
 See [ROADMAP.md](ROADMAP.md) for the current maintainer roadmap.
 See [docs/community-research.md](docs/community-research.md) for the community
 setup research behind Setup Doctor, Client Profiles, and future fixture work.
+See [docs/streaming-recipes.md](docs/streaming-recipes.md) and
+[docs/fixture-matrix.md](docs/fixture-matrix.md) for the first repeatable
+testing surfaces.
 See [docs/ui-identity-plan.md](docs/ui-identity-plan.md) for the staged Nimbus
 Web UI identity direction.
 

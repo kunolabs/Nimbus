@@ -18,6 +18,25 @@ body:
       required: true
 
   - type: dropdown
+    id: issue-area
+    attributes:
+      label: Issue Area
+      description: Select the closest area. Pick the most visible symptom if more than one applies.
+      options:
+        - Pairing / client connection
+        - Display / virtual display / HDR
+        - Frame pacing / stutter / bitrate
+        - Audio / channel layout / delay
+        - Controller / gamepad / input
+        - Cursor / mouse visibility
+        - Playnite / app launch / app exit
+        - Installer / upgrade / uninstall
+        - Web UI / API
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
     id: host-os
     attributes:
       label: Host OS
@@ -37,7 +56,7 @@ body:
     id: host-gpu
     attributes:
       label: Host GPU and Driver
-      description: Example: RTX 4080, NVIDIA 576.xx.
+      description: "Example: RTX 4080, NVIDIA 576.xx."
     validations:
       required: true
 
@@ -45,9 +64,41 @@ body:
     id: client
     attributes:
       label: Client Device and App
-      description: Example: NVIDIA Shield TV Pro, Artemis v20.2.6, 4K 120 Hz HEVC HDR.
+      description: "Example: NVIDIA Shield TV Pro, Artemis v20.2.6, 4K 120 Hz HEVC HDR."
     validations:
       required: true
+
+  - type: input
+    id: stream-settings
+    attributes:
+      label: Stream Settings
+      description: "Example: 3840x2160, 60 FPS, HEVC, HDR off, 80 Mbps."
+    validations:
+      required: false
+
+  - type: input
+    id: display-setup
+    attributes:
+      label: Host Display Setup
+      description: "Example: physical LG OLED, SudoVDA virtual display, dummy plug, headless VM."
+    validations:
+      required: false
+
+  - type: input
+    id: network-path
+    attributes:
+      label: Network Path
+      description: "Example: wired LAN, Wi-Fi 6, Tailscale direct, Tailscale relay, WireGuard, WAN."
+    validations:
+      required: false
+
+  - type: textarea
+    id: input-audio
+    attributes:
+      label: Input And Audio Notes
+      description: Mention gamepads, mouse/cursor behavior, audio sink, stereo/5.1/7.1, Bluetooth, eARC, or soundbar details if relevant.
+    validations:
+      required: false
 
   - type: textarea
     id: reproduction

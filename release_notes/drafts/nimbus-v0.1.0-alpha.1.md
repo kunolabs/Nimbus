@@ -55,6 +55,9 @@ has wider testers.
 - Cherry-picked upstream Vibepollo display, HDR/10-bit, NVENC bit-depth, and
   display-helper restore fixes from the refreshed `upstream-vibepollo/master`
   while preserving Nimbus installer cache naming.
+- Added streaming recipes, a fixture matrix, and a richer bug report template
+  for display, HDR, audio, controller, cursor, network, Playnite, and installer
+  evidence.
 
 ## Compatibility Notes
 
