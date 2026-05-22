@@ -42,6 +42,8 @@ Goal: build maintainer credibility through user-visible stability work.
 
 - Prioritize Windows 11, NVIDIA Shield TV Pro, Android TV, and Moonlight/Artemis
   compatibility reports.
+- Turn community setup pain into guided diagnostics, starting with Setup Doctor,
+  Client Profiles, Cursor Doctor, and a fixture matrix.
 - Improve logs and diagnostics before changing capture behavior.
 - Create reproducible issue templates for frame pacing, WGC, virtual display,
   HDR, audio, controller, and Playnite issues.
@@ -72,7 +74,8 @@ The next engineering pass should validate the package-branding slice from
 `docs/packaging-identity-plan.md` before any branded Nimbus release:
 
 1. Use `docs/release-build-audit.md` as the release automation baseline.
-2. Use `docs/upstream-issue-radar.md` to choose the first reliability issue.
+2. Use `docs/community-research.md` and `docs/upstream-issue-radar.md` to choose
+   the first reliability issue.
 3. Confirm runtime identifiers remained unchanged unless the packaging identity
    plan says the migration has a test path.
 4. Produce a local Nimbus-named installer and inspect install, upgrade, and

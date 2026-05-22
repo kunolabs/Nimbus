@@ -734,6 +734,13 @@
     "copy_logs": "Copy Logs",
     "collect_playnite_logs": "Export Logs",
     "collect_playnite_logs_desc": "Export Nimbus log, Playnite/plugin logs, and display-helper logs.",
+    "cursor_doctor": "Cursor Doctor",
+    "cursor_doctor_desc": "If the Windows cursor remains visible, disappears, or duplicates during a stream, start by separating host cursor, client cursor, and game cursor behavior.",
+    "cursor_doctor_host": "Host cursor: Windows pointer captured from the streaming PC.",
+    "cursor_doctor_client": "Client cursor: local pointer overlay or touch/trackpad cursor from the client app.",
+    "cursor_doctor_game": "Game cursor: a cursor drawn by the game itself, often independent of Windows.",
+    "search_cursor_logs": "Search cursor logs",
+    "search_mouse_logs": "Search mouse logs",
     "export_crash_bundle": "Export Crash Bundle",
     "export_crash_bundle_desc": "Download logs along with the most recent Nimbus crash dump."
   },

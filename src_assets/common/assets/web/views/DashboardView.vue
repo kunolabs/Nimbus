@@ -1058,7 +1058,7 @@ const playniteMissingPluginBannerText = computed(() => {
   }
   const detected =
     details.length > 1 ? `${details[0]} and ${details[1]}` : (details[0] ?? 'Playnite entries');
-  return `Detected ${detected}, but the Playnite plugin is no longer installed. Reinstall the plugin to restore integration, or purge Playnite games to remove all Playnite entries from Vibeshine.`;
+  return `Detected ${detected}, but the Playnite plugin is no longer installed. Reinstall the plugin to restore integration, or purge Playnite games to remove all Playnite entries from Nimbus.`;
 });
 
 async function resolvePlaynitePluginIssue() {
@@ -1129,7 +1129,7 @@ function openPurgePlayniteGamesConfirm() {
   dialog.warning({
     title: 'Purge Playnite games?',
     content:
-      'This removes all Playnite entries from Vibeshine, including auto-synced games and the Playnite (Fullscreen) launcher.',
+      'This removes all Playnite entries from Nimbus, including auto-synced games and the Playnite (Fullscreen) launcher.',
     positiveText: 'Purge',
     negativeText: 'Cancel',
     onPositiveClick: async () => {

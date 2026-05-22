@@ -65,6 +65,58 @@
         </div>
       </section>
 
+      <section class="troubleshoot-card">
+        <div class="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h2 class="text-base font-semibold text-dark dark:text-light">
+              {{ translate('troubleshooting.cursor_doctor', 'Cursor Doctor') }}
+            </h2>
+            <p class="text-xs opacity-70 leading-snug">
+              {{
+                translate(
+                  'troubleshooting.cursor_doctor_desc',
+                  'If the Windows cursor remains visible, disappears, or duplicates during a stream, start by separating host cursor, client cursor, and game cursor behavior.',
+                )
+              }}
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <n-button type="default" strong @click="focusLogSearch('cursor')">
+              {{ translate('troubleshooting.search_cursor_logs', 'Search cursor logs') }}
+            </n-button>
+            <n-button type="default" strong @click="focusLogSearch('mouse')">
+              {{ translate('troubleshooting.search_mouse_logs', 'Search mouse logs') }}
+            </n-button>
+          </div>
+        </div>
+        <ul class="mt-3 list-disc space-y-1 pl-5 text-xs leading-snug opacity-75">
+          <li>
+            {{
+              translate(
+                'troubleshooting.cursor_doctor_host',
+                'Host cursor: Windows pointer captured from the streaming PC.',
+              )
+            }}
+          </li>
+          <li>
+            {{
+              translate(
+                'troubleshooting.cursor_doctor_client',
+                'Client cursor: local pointer overlay or touch/trackpad cursor from the client app.',
+              )
+            }}
+          </li>
+          <li>
+            {{
+              translate(
+                'troubleshooting.cursor_doctor_game',
+                'Game cursor: a cursor drawn by the game itself, often independent of Windows.',
+              )
+            }}
+          </li>
+        </ul>
+      </section>
+
       <section v-if="platform === 'windows' && crashDumpAvailable" class="troubleshoot-card">
         <div class="flex items-start justify-between gap-4 flex-wrap">
           <div>
@@ -691,6 +743,13 @@ function clearSearch() {
   pendingJumpLine.value = null;
   logFilter.value = '';
   searchTerm.value = '';
+}
+
+async function focusLogSearch(term: string) {
+  logSource.value = 'sunshine';
+  logFilter.value = term;
+  await nextTick();
+  logScrollbar.value?.scrollTo?.({ top: 0 });
 }
 
 function cancelSearchTask() {

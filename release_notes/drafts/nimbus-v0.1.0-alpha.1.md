@@ -48,6 +48,10 @@ has wider testers.
 - Added a naming identity audit for inherited Sunshine, Vibeshine, Moonlight,
   Artemis, Apollo, and Vibepollo surfaces, then cleaned low-risk visible Web UI
   settings copy, placeholders, and Web UI package metadata.
+- Added community research and a roadmap issue draft for Setup Doctor, Client
+  Profiles, Cursor Doctor, and the future Game Discovery Inbox direction.
+- Added the first Cursor Doctor card to the Troubleshooting page and cleaned
+  remaining Playnite cleanup copy that still said Vibeshine.
 
 ## Compatibility Notes
 
