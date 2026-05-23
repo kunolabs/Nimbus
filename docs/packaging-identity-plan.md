@@ -201,6 +201,8 @@ Acceptance criteria:
 - The installer does not publish or sign using upstream destinations. Status:
   passed for local unsigned validation artifacts.
 - Upgrade behavior from an existing Vibepollo/Apollo install is recorded.
+- Apollo-to-Nimbus config carry-over is validated with an explicit backup/import
+  bundle before any release note claims seamless migration.
 - Fresh install and uninstall behavior is recorded.
 - Release notes disclose inherited runtime ids that remain in place.
 
@@ -244,3 +246,8 @@ Run the installer in a Windows VM or snapshot fixture. Record fresh install,
 upgrade from Apollo/Vibepollo where practical, uninstall, reinstall, generated
 shortcuts, Add/Remove Programs text, services, and config behavior before
 creating any `nimbus-v*` tag.
+
+For Apollo upgrade testing, use `docs/apollo-to-nimbus-switch.md` first. The
+current alpha-prep installer detects and removes Apollo, but Apollo config
+carry-over into the Nimbus install directory must be backed up and verified
+explicitly.

@@ -78,6 +78,8 @@ setup research behind Setup Doctor, Client Profiles, and future fixture work.
 See [docs/streaming-recipes.md](docs/streaming-recipes.md) and
 [docs/fixture-matrix.md](docs/fixture-matrix.md) for the first repeatable
 testing surfaces.
+See [docs/apollo-to-nimbus-switch.md](docs/apollo-to-nimbus-switch.md) before
+testing Nimbus on a host that already runs Apollo.
 See [docs/ui-identity-plan.md](docs/ui-identity-plan.md) for the staged Nimbus
 Web UI identity direction.
 

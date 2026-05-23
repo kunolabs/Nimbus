@@ -1261,6 +1261,7 @@ namespace VibepolloInstaller {
       return "Apollo" + versionSuffix + " was detected on this PC.\n\n"
         + "Nimbus replaces Apollo and cannot be installed while Apollo is installed.\n"
         + "Continuing will uninstall Apollo before installation.\n\n"
+        + "This alpha does not yet prove automatic Apollo settings import. Back up Apollo first if you want to carry apps, credentials, paired clients, or host settings into Nimbus.\n\n"
         + "Click Uninstall Apollo to proceed.";
     }
 
@@ -1286,7 +1287,7 @@ namespace VibepolloInstaller {
 
       return "Legacy Apollo" + versionSuffix + " was detected on this PC.\n\n"
         + "Nimbus replaces legacy Apollo and will automatically uninstall it first, then install Nimbus.\n"
-        + "No settings will be carried over.\n\n"
+        + "This alpha does not automatically import legacy Apollo settings. Back up Apollo first if you want to carry apps, credentials, paired clients, or host settings into Nimbus.\n\n"
         + "Click Uninstall Apollo to proceed.";
     }
 

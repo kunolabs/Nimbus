@@ -70,7 +70,7 @@ so user-facing version surfaces no longer look like an unversioned build.
 | Uninstall | Yes | Pending | Add/Remove Programs entry removed and service stopped |
 | Reinstall after uninstall | Yes | Pending | Reinstall completes without manual cleanup |
 | Upgrade from Vibepollo | Strongly recommended | Pending | Config, credentials, and paired-client state checked |
-| Upgrade from Apollo | Strongly recommended | Pending | Config, credentials, and paired-client state checked |
+| Upgrade from Apollo | Strongly recommended | Pending | Export/import bundle, config, credentials, and paired-client state checked |
 | Coexistence with Sunshine | Optional for alpha | Pending | Record whether install replaces or coexists |
 | Windows SmartScreen/AV behavior | Yes | Pending | Unsigned prompt or false-positive notes recorded |
 
@@ -115,6 +115,9 @@ Still blocking the alpha gate:
   Programs entry.
 - Confirm reinstall after uninstall completes without manual cleanup.
 - Record upgrade behavior from Apollo and/or Vibepollo where practical.
+- For Apollo upgrade testing, use
+  [Apollo To Nimbus Switch Guide](apollo-to-nimbus-switch.md) and attach the
+  sanitized `switch-bundle-summary.md` plus post-import fixture evidence.
 
 ## Evidence Commands
 

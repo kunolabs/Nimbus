@@ -7,6 +7,8 @@ setups, not one-size-fits-all tuning claims.
   Android TV, Steam Deck, OLED HDR, headless hosts, and remote overlay networks.
 - [Fixture Matrix](fixture-matrix.md): real tested host/client combinations and
   evidence expectations.
+- [Apollo To Nimbus Switch Guide](apollo-to-nimbus-switch.md): backup, import,
+  and rollback guidance for Apollo users testing Nimbus.
 - [Community Research](community-research.md): source research behind Setup
   Doctor, Client Profiles, Cursor Doctor, and Game Discovery Inbox.
 

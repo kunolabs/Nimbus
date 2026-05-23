@@ -55,9 +55,15 @@ has wider testers.
 - Cherry-picked upstream Vibepollo display, HDR/10-bit, NVENC bit-depth, and
   display-helper restore fixes from the refreshed `upstream-vibepollo/master`
   while preserving Nimbus installer cache naming.
+- Ported the upstream client-certificate authentication hardening so Nimbus no
+  longer accepts untrusted client certificates that fail local issuer
+  verification.
 - Added streaming recipes, a fixture matrix, and a richer bug report template
   for display, HDR, audio, controller, cursor, network, Playnite, and installer
   evidence.
+- Added an Apollo-to-Nimbus switch bundle script and switch guide so existing
+  Apollo apps, host settings, credentials, paired clients, and covers can be
+  backed up and imported deliberately during alpha testing.
 
 ## Compatibility Notes
 
@@ -71,6 +77,8 @@ feedback:
   a dedicated migration plan is built and tested.
 - Existing Apollo or Vibepollo users should treat this alpha as a test build and
   back up configuration before installing over a daily-use host.
+- Automatic Apollo settings import is not yet a proven installer guarantee; use
+  the Apollo-to-Nimbus switch guide for controlled export/import testing.
 
 ## Verification
 
@@ -125,6 +133,7 @@ Pending before release:
 - Retest the General and Files settings pages for inherited visible names in
   the next candidate build.
 - Upgrade behavior from Apollo and/or Vibepollo where practical.
+- Apollo-to-Nimbus switch bundle export/import on a physical host.
 
 ## Known Issues And Caveats
 
