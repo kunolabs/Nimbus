@@ -29,13 +29,13 @@ flowchart TD
 ## Candidate Artifact
 
 The current local package validation produced these artifacts from source commit
-`4f3411b2`. The documentation commit that records these hashes may be newer than
+`10ed2c32`. The documentation commit that records these hashes may be newer than
 the validated source commit.
 
 | Artifact | Size | SHA256 |
 | --- | ---: | --- |
-| `build/nimbus-package-validation/cpack_artifacts/NimbusSetup.exe` | 25,871,872 | `EEAD1749BA88032AFD09E7FBB1917B50DDA88F425059CEEDC18775ADE3028328` |
-| `build/nimbus-package-validation/cpack_artifacts/Nimbus.msi` | 25,606,727 | `6E739CE9F56B11A0FD5B824E460AB389A0C61216FEE2CCE8DAA30E1E27F48D4E` |
+| `build/nimbus-package-validation/cpack_artifacts/NimbusSetup.exe` | 25,885,696 | `3CAA664566F29D988C959F87C4DC1519DB409E8BDF84752EF26C1D9ADA453A52` |
+| `build/nimbus-package-validation/cpack_artifacts/Nimbus.msi` | 25,619,015 | `F7B04CE0922FECC823CC363B4794DACDD90E92E10F6F70B388965B33A28F4D01` |
 
 Before tagging `nimbus-v0.1.0-alpha.1`, either use these artifacts for fixture
 testing or rebuild the package from the final release-prep commit and replace
@@ -47,8 +47,8 @@ Current artifact metadata:
 | Field | Value |
 | --- | --- |
 | Bootstrapper product | `Nimbus Installer` |
-| File version | `0.0.0.44` |
-| Product version | `4f3411b2` |
+| File version | `0.0.0.53` |
+| Product version | `1.16.0-alpha.3-50-g10ed2c32` |
 | Company | `Kuno Labs` |
 | Signing | Unsigned; SignPath skipped because `SIGNPATH_API_TOKEN` is unset |
 
@@ -78,8 +78,8 @@ so user-facing version surfaces no longer look like an unversioned build.
 
 Date: 2026-05-21
 
-Current candidate artifact: `NimbusSetup.exe` from source commit `4f3411b2`
-(`0.0.0.44`). The observations below were gathered during the maintainer VM
+Current candidate artifact: `NimbusSetup.exe` from source commit `10ed2c32`
+(`0.0.0.53`). The observations below were gathered during the maintainer VM
 smoke loop on the immediately preceding candidate series. Screenshots and
 fixture handoff folders are local validation evidence and are not committed to
 the public repository.
@@ -93,7 +93,7 @@ Observed so far:
 | Windows service after install | Observed compatibility pass | Service is running. Internal service name remains `ApolloService`; visible service description is `Nimbus Service`. |
 | Web UI launch path | Observed pass | Tray context menu can open the local Web UI. Browser certificate warning is expected for the inherited local HTTPS flow. |
 | Uninstall confirmation modal | Observed pass | Modal copy correctly describes uninstall options and factory-reset behavior. |
-| Uninstaller quick tips | Fixed, retest pending | An older candidate reused install/upgrade tips in uninstall mode. Fixed in `0af1f3b8`; retest with the current `0.0.0.44` candidate. |
+| Uninstaller quick tips | Fixed, retest pending | An older candidate reused install/upgrade tips in uninstall mode. Fixed in `0af1f3b8`; retest with the current `0.0.0.53` candidate. |
 | Manual tray update check | Observed pass | Maintainer confirmed the `Check for Update` tray action shows visible feedback in the VM. |
 | Compatible-client pairing | Observed pass | Artemis on Shield TV paired with the Nimbus VM host. |
 | Compatible-client stream smoke | Observed pass | Artemis on Shield TV streamed from the Nimbus VM host and disconnected cleanly; no issues observed so far. |
@@ -104,7 +104,7 @@ Observed so far:
 
 Still blocking the alpha gate:
 
-- Confirm the `0.0.0.44` uninstaller quick tips show uninstall-specific copy.
+- Confirm the `0.0.0.53` uninstaller quick tips show uninstall-specific copy.
 - Confirm clicking the pairing notification scrolls directly to the Pair Client
   section in the next candidate.
 - Confirm the next candidate logs `NimbusDisplayRestore` and `Nimbus state file`

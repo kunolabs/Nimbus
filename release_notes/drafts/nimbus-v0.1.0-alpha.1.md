@@ -99,12 +99,12 @@ Current source validation has passed after the UI and status-message rebrand:
   portable binaries and the WiX ICE validation step runs outside the Codex
   sandbox.
 
-Current local package artifacts from commit `4f3411b2`:
+Current local package artifacts from commit `10ed2c32`:
 
 | Artifact | Size | SHA256 |
 | --- | ---: | --- |
-| `NimbusSetup.exe` | 25,871,872 | `EEAD1749BA88032AFD09E7FBB1917B50DDA88F425059CEEDC18775ADE3028328` |
-| `Nimbus.msi` | 25,606,727 | `6E739CE9F56B11A0FD5B824E460AB389A0C61216FEE2CCE8DAA30E1E27F48D4E` |
+| `NimbusSetup.exe` | 25,885,696 | `3CAA664566F29D988C959F87C4DC1519DB409E8BDF84752EF26C1D9ADA453A52` |
+| `Nimbus.msi` | 25,619,015 | `F7B04CE0922FECC823CC363B4794DACDD90E92E10F6F70B388965B33A28F4D01` |
 
 These are local validation artifacts, not release candidates, until the VM
 fixture checks below are completed and recorded.
@@ -118,7 +118,7 @@ Partial manual VM observations from the previous candidate loop:
   preserving the inherited internal `ApolloService` service name for this alpha.
 - No Microsoft Defender warning was observed during the manual install smoke.
 - The uninstaller quick-tip panel was fixed after VM feedback and still needs a
-  retest with the `0.0.0.44` candidate.
+  retest with the `0.0.0.53` candidate.
 - Manual tray update-check feedback is visible in the VM.
 - Artemis on Shield TV can pair with the Nimbus VM host.
 - Artemis on Shield TV can stream from the Nimbus VM host and disconnect
@@ -126,7 +126,7 @@ Partial manual VM observations from the previous candidate loop:
 
 Pending before release:
 
-- Retest the `0.0.0.44` uninstaller quick-tip copy.
+- Retest the `0.0.0.53` uninstaller quick-tip copy.
 - Uninstall and reinstall behavior.
 - Retest the pairing notification deep link and runtime log-branding cleanup in
   the next candidate build.
