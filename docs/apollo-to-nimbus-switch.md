@@ -108,6 +108,9 @@ Start-Service ApolloService
 be replaced. The script backs up existing Nimbus copies into the same switch
 bundle before replacement.
 
+During import, absolute Apollo cover paths in `apps.json` are rewritten to the
+target Nimbus `config\covers` directory.
+
 ## What To Check After Import
 
 - Web UI opens at `https://localhost:47990`.

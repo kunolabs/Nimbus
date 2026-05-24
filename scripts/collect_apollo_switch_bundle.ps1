@@ -201,6 +201,57 @@ function Repair-CredentialsAcl {
     & $icacls $credentialsDir "/grant:r" "*S-1-5-32-545:(R)" | Out-Null
 }
 
+function Rewrite-AppImagePathsForNimbus {
+    param(
+        [string]$AppsJsonPath,
+        [string]$NimbusConfigDir
+    )
+
+    if (-not (Test-Path -LiteralPath $AppsJsonPath -PathType Leaf)) {
+        return "missing"
+    }
+
+    $targetCoversDir = Join-Path $NimbusConfigDir "covers"
+    $appsDocument = Get-Content -LiteralPath $AppsJsonPath -Raw | ConvertFrom-Json
+    $rewritten = 0
+
+    foreach ($app in @($appsDocument.apps)) {
+        $imagePathProperty = $app.PSObject.Properties["image-path"]
+        if ($null -eq $imagePathProperty) {
+            continue
+        }
+
+        $imagePath = [string]$imagePathProperty.Value
+        if ([string]::IsNullOrWhiteSpace($imagePath) -or -not [System.IO.Path]::IsPathRooted($imagePath)) {
+            continue
+        }
+
+        $normalizedImagePath = $imagePath.Replace("/", "\")
+        $coversMarker = "\covers\"
+        $coversIndex = $normalizedImagePath.IndexOf($coversMarker, [StringComparison]::OrdinalIgnoreCase)
+        if ($coversIndex -lt 0) {
+            continue
+        }
+
+        $relativeCoverPath = $normalizedImagePath.Substring($coversIndex + $coversMarker.Length)
+        if ([string]::IsNullOrWhiteSpace($relativeCoverPath)) {
+            continue
+        }
+
+        $imagePathProperty.Value = Join-Path $targetCoversDir $relativeCoverPath
+        $rewritten++
+    }
+
+    if ($rewritten -gt 0) {
+        $appsDocument |
+            ConvertTo-Json -Depth 32 |
+            Set-Content -LiteralPath $AppsJsonPath -Encoding UTF8
+        return "rewritten-$rewritten"
+    }
+
+    return "unchanged"
+}
+
 $apolloFallbackRoots = @(
     "$env:ProgramFiles\Apollo",
     "${env:ProgramFiles(x86)}\Apollo",
@@ -326,6 +377,16 @@ if ($ImportToNimbus) {
             Status = $status
         })
     }
+
+    $appsJsonPath = Join-Path $nimbusConfig "apps.json"
+    $rewriteStatus = Rewrite-AppImagePathsForNimbus -AppsJsonPath $appsJsonPath -NimbusConfigDir $nimbusConfig
+    $actions.Add([PSCustomObject]@{
+        Phase = "import-postprocess"
+        Item = "apps.json image paths"
+        Source = $appsJsonPath
+        Destination = $appsJsonPath
+        Status = $rewriteStatus
+    })
 
     if (-not $SkipCredentials) {
         Repair-CredentialsAcl -ConfigDir $nimbusConfig
