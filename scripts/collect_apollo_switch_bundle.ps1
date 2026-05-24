@@ -58,17 +58,43 @@ function Get-InstallLocationsFromRegistry {
 function Test-ConfigCandidate {
     param([string]$Path)
 
-    if ([string]::IsNullOrWhiteSpace($Path) -or -not (Test-Path -LiteralPath $Path -PathType Container)) {
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return $false
+    }
+
+    try {
+        if (-not (Test-Path -LiteralPath $Path -PathType Container -ErrorAction Stop)) {
+            return $false
+        }
+    }
+    catch {
         return $false
     }
 
     foreach ($name in @("apps.json", "sunshine.conf", "sunshine_state.json", "credentials", "covers")) {
-        if (Test-Path -LiteralPath (Join-Path $Path $name)) {
-            return $true
+        try {
+            if (Test-Path -LiteralPath (Join-Path $Path $name) -ErrorAction Stop) {
+                return $true
+            }
+        }
+        catch {
+            continue
         }
     }
 
     return $false
+}
+
+function Get-DriveRootProductCandidates {
+    param([string[]]$ProductNames)
+
+    Get-PSDrive -PSProvider FileSystem |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_.Root) } |
+        ForEach-Object {
+            foreach ($productName in $ProductNames) {
+                Join-Path $_.Root $productName
+            }
+        }
 }
 
 function Resolve-ConfigDirectory {
@@ -182,6 +208,7 @@ $apolloFallbackRoots = @(
     "$env:LOCALAPPDATA\Apollo",
     "$env:APPDATA\Apollo"
 )
+$apolloFallbackRoots += Get-DriveRootProductCandidates -ProductNames @("Apollo")
 
 $sourceConfig = Resolve-ConfigDirectory `
     -ExplicitPath $SourceConfigDir `

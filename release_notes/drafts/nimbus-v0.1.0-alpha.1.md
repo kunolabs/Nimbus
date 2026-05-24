@@ -64,6 +64,8 @@ has wider testers.
 - Added an Apollo-to-Nimbus switch bundle script and switch guide so existing
   Apollo apps, host settings, credentials, paired clients, and covers can be
   backed up and imported deliberately during alpha testing.
+- Improved the switch bundle source detection so drive-root Apollo installs such
+  as `S:\Apollo\config` are found without requiring an explicit source path.
 
 ## Compatibility Notes
 

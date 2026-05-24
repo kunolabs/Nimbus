@@ -62,8 +62,9 @@ Run this from an elevated PowerShell window before uninstalling Apollo:
 powershell -ExecutionPolicy Bypass -File .\scripts\collect_apollo_switch_bundle.ps1
 ```
 
-The script looks for Apollo in the registry and common install/config paths. It
-writes a timestamped bundle under `nimbus-switch-bundles/` with:
+The script looks for Apollo in the registry, common install/config paths, and
+drive-root portable installs such as `S:\Apollo\config`. It writes a
+timestamped bundle under `nimbus-switch-bundles/` with:
 
 - `config/`: copied Apollo config files and folders.
 - `switch-bundle-summary.md`: human-readable summary.
@@ -73,8 +74,11 @@ If Apollo uses a non-standard config path, pass it explicitly:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\collect_apollo_switch_bundle.ps1 `
-  -SourceConfigDir "C:\Program Files\Apollo\config"
+  -SourceConfigDir "S:\Apollo\config"
 ```
+
+Keep old Sunshine backups, such as `S:\Sunshine`, separate from this Apollo
+switch bundle unless you are deliberately exporting Sunshine instead of Apollo.
 
 ## Import Into Nimbus
 
