@@ -64,7 +64,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\collect_apollo_switch_bundle.
 
 The script looks for Apollo in the registry, common install/config paths, and
 drive-root portable installs such as `S:\Apollo\config`. It writes a
-timestamped bundle under `nimbus-switch-bundles/` with:
+timestamped, gitignored bundle under `nimbus-switch-bundles/` with:
 
 - `config/`: copied Apollo config files and folders.
 - `switch-bundle-summary.md`: human-readable summary.
