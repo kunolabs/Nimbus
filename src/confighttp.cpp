@@ -1165,7 +1165,7 @@ namespace confighttp {
   void getFaviconImage(resp_https_t response, req_https_t request) {
     print_req(request);
 
-    std::ifstream in(WEB_DIR "images/apollo.ico", std::ios::binary);
+    std::ifstream in(WEB_DIR "images/nimbus.ico", std::ios::binary);
     SimpleWeb::CaseInsensitiveMultimap headers;
     headers.emplace("Content-Type", "image/x-icon");
     headers.emplace("X-Frame-Options", "DENY");
@@ -1174,17 +1174,17 @@ namespace confighttp {
   }
 
   /**
-   * @brief Get the Apollo logo image.
+   * @brief Get the Nimbus logo image.
    * @param response The HTTP response object.
    * @param request The HTTP request object.
    *
    * @todo combine function with getFaviconImage and possibly getNodeModules
    * @todo use mime_types map
    */
-  void getApolloLogoImage(resp_https_t response, req_https_t request) {
+  void getNimbusLogoImage(resp_https_t response, req_https_t request) {
     print_req(request);
 
-    std::ifstream in(WEB_DIR "images/logo-apollo-45.png", std::ios::binary);
+    std::ifstream in(WEB_DIR "images/logo-nimbus-45.png", std::ios::binary);
     SimpleWeb::CaseInsensitiveMultimap headers;
     headers.emplace("Content-Type", "image/png");
     headers.emplace("X-Frame-Options", "DENY");
@@ -4639,9 +4639,11 @@ namespace confighttp {
     register_api_route("^/api/logs/export_crash/manifest$", "GET", getCrashBundleManifest);
     register_api_route("^/api/logs/export_crash$", "GET", downloadCrashBundle);
 #endif
-    server.resource["^/images/sunshine.ico$"]["GET"] = getFaviconImage;
-    server.resource["^/images/logo-apollo-45.png$"]["GET"] = getApolloLogoImage;
-    server.resource["^/images/logo-sunshine-45.png$"]["GET"] = getApolloLogoImage;  // legacy alias
+    server.resource["^/images/nimbus.ico$"]["GET"] = getFaviconImage;
+    server.resource["^/images/sunshine.ico$"]["GET"] = getFaviconImage;  // legacy alias
+    server.resource["^/images/logo-nimbus-45.png$"]["GET"] = getNimbusLogoImage;
+    server.resource["^/images/logo-apollo-45.png$"]["GET"] = getNimbusLogoImage;  // legacy alias
+    server.resource["^/images/logo-sunshine-45.png$"]["GET"] = getNimbusLogoImage;  // legacy alias
     server.resource["^/assets\\/.+$"]["GET"] = getNodeModules;
     register_api_route("^/api/token$", "POST", generateApiToken);
     register_api_route("^/api/tokens$", "GET", listApiTokens);
