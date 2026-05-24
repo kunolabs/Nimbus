@@ -1261,7 +1261,7 @@ namespace VibepolloInstaller {
       return "Apollo" + versionSuffix + " was detected on this PC.\n\n"
         + "Nimbus replaces Apollo and cannot be installed while Apollo is installed.\n"
         + "Continuing will uninstall Apollo before installation.\n\n"
-        + "This alpha does not yet prove automatic Apollo settings import. Back up Apollo first if you want to carry apps, credentials, paired clients, or host settings into Nimbus.\n\n"
+        + "This alpha does not import Apollo settings during installation. If you already exported an Apollo-to-Nimbus switch bundle, keep it safe; import it after Nimbus installs. If you have not backed up Apollo yet, click Cancel first.\n\n"
         + "Click Uninstall Apollo to proceed.";
     }
 
@@ -1275,7 +1275,7 @@ namespace VibepolloInstaller {
 
       return "Legacy Sunshine" + versionSuffix + " was detected on this PC.\n\n"
         + "Nimbus replaces Sunshine. The bootstrapper will uninstall Sunshine first, then start the installation.\n"
-        + "No settings will be lost during this migration.\n\n"
+        + "Nimbus will install to its own directory and will not import Sunshine settings during installation. Back up anything you need before continuing.\n\n"
         + "Click Uninstall Sunshine to proceed.";
     }
 
@@ -1287,7 +1287,7 @@ namespace VibepolloInstaller {
 
       return "Legacy Apollo" + versionSuffix + " was detected on this PC.\n\n"
         + "Nimbus replaces legacy Apollo and will automatically uninstall it first, then install Nimbus.\n"
-        + "This alpha does not automatically import legacy Apollo settings. Back up Apollo first if you want to carry apps, credentials, paired clients, or host settings into Nimbus.\n\n"
+        + "This alpha does not import legacy Apollo settings during installation. If you already exported an Apollo-to-Nimbus switch bundle, keep it safe; import it after Nimbus installs. If you have not backed up Apollo yet, click Cancel first.\n\n"
         + "Click Uninstall Apollo to proceed.";
     }
 
@@ -1367,17 +1367,8 @@ namespace VibepolloInstaller {
     }
 
     private string ResolvePreferredInstallDirectory() {
-      var candidates = new[] {
-        _installedProduct == null ? null : _installedProduct.InstallLocation,
-        _legacySunshineProduct == null ? null : _legacySunshineProduct.InstallLocation,
-        _legacySunshineRegistration == null ? null : _legacySunshineRegistration.InstallLocation,
-        _legacyApolloRegistration == null ? null : _legacyApolloRegistration.InstallLocation
-      };
-
-      foreach (var candidate in candidates) {
-        if (!string.IsNullOrWhiteSpace(candidate)) {
-          return candidate;
-        }
+      if (_installedProduct != null && !string.IsNullOrWhiteSpace(_installedProduct.InstallLocation)) {
+        return _installedProduct.InstallLocation;
       }
 
       return InstallerRunner.DefaultInstallDirectory;

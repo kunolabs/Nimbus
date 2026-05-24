@@ -140,7 +140,8 @@ flow has been tested on a physical host:
 
 - Apollo installed and working.
 - Apollo switch bundle exported.
-- Nimbus installed over or after Apollo.
+- Nimbus installed to its own directory, such as `C:\Program Files\Nimbus` or
+  `S:\Nimbus`, not reused from Apollo or Sunshine.
 - Apollo bundle imported into Nimbus.
 - Apps, settings, credentials, pairing, stream start, and disconnect verified.
 - Rollback path recorded.
