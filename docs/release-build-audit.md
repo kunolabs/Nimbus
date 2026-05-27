@@ -283,8 +283,17 @@ Result:
 Follow-up on 2026-05-27: the bootstrapper gained a Nimbus-line
 upgrade-preservation guard for user-owned config, cover, credential, log,
 session, and script files. Compile-only validation passed for both
-`-UninstallOnly` and MSI-embedded setup builds, but VM upgrade execution is
-still required before release claims.
+`-UninstallOnly` and MSI-embedded setup builds. A full unsigned package rebuild
+also passed after rerunning WiX outside the sandbox so ICE validation could
+access Windows Installer services. VM upgrade execution is still required before
+release claims.
+
+Latest local fixture artifacts from `63daba19`:
+
+| Artifact | Size | SHA256 |
+| --- | ---: | --- |
+| `build/nimbus-package-validation/cpack_artifacts/NimbusSetup.exe` | 25,916,928 | `DB6FDAE221FA33E60C1E1569464B8D552A3C1215B2E69444E1C74B9A1BC063F0` |
+| `build/nimbus-package-validation/cpack_artifacts/Nimbus.msi` | 25,678,060 | `8B54FE46B7B424A315336B6F5978AAB2CF8DF2525B9EC0DE17DEB7607FEF54BD` |
 
 Artifacts:
 

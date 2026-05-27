@@ -104,6 +104,12 @@ Observed so far:
 | Upgrade user-file preservation | Code guard added, retest pending | Nimbus-line MSI uninstall now snapshots config/covers/credentials/log/session/script files before uninstall and restores only missing files afterward. |
 | Windows Defender prompt | Observed pass | Maintainer reported no Defender warning during the install smoke. |
 
+Latest local upgrade-preservation handoff:
+
+- `build/vm-fixture-handoff/<timestamp>-upgrade-preservation`
+- Includes `NimbusSetup.exe` and
+  `test_upgrade_preservation_fixture.ps1` for prepare/verify checks.
+
 Still blocking the alpha gate:
 
 - Confirm the `0.0.0.53` uninstaller quick tips show uninstall-specific copy.
