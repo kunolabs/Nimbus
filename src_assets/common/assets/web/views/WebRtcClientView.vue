@@ -32,6 +32,17 @@
         </div>
       </header>
 
+      <n-alert
+        v-if="localWebRtcDisplayRisk"
+        type="warning"
+        :show-icon="true"
+        class="local-display-risk-alert"
+      >
+        Browser streaming from this PC can blank the physical display with your current virtual
+        display settings. Use Shield TV / Artemis for native streaming, or switch the virtual
+        display layout to Extended before using WebRTC locally.
+      </n-alert>
+
       <!-- Game Library -->
       <section class="library-section">
         <div class="library-header">
@@ -527,6 +538,7 @@ import {
 } from '@/types/webrtc';
 import { http } from '@/http';
 import { useAppsStore } from '@/stores/apps';
+import { useConfigStore } from '@/stores/config';
 import { storeToRefs } from 'pinia';
 import type { App } from '@/stores/apps';
 
@@ -862,6 +874,7 @@ watch(
 const appsStore = useAppsStore();
 const { apps } = storeToRefs(appsStore);
 const appsList = computed(() => (apps.value || []).slice());
+const configStore = useConfigStore();
 
 // Search and filtering
 const searchQuery = ref('');
@@ -966,6 +979,26 @@ const resumeAvailable = computed(() => {
   if (selectedAppId.value) return false;
   if (!sessionStatus.value) return false;
   return sessionStatus.value.activeSessions > 0 || sessionStatus.value.paused;
+});
+
+function configString(key: string): string {
+  const value = (configStore.config as unknown as Record<string, unknown>)[key];
+  return value == null ? '' : String(value).trim().toLowerCase();
+}
+
+const localWebUiHost = computed(() => {
+  const host = window.location.hostname.trim().toLowerCase();
+  return host === '' || host === 'localhost' || host === '127.0.0.1' || host === '::1';
+});
+
+const localWebRtcDisplayRisk = computed(() => {
+  if (!localWebUiHost.value) return false;
+  const virtualDisplayMode = configString('virtual_display_mode');
+  const virtualDisplayLayout = configString('virtual_display_layout') || 'exclusive';
+  const displayConfiguration = configString('dd_configuration_option');
+  const usesVirtualDisplay = virtualDisplayMode !== '' && virtualDisplayMode !== 'disabled';
+  const exclusiveVirtualDisplay = usesVirtualDisplay && virtualDisplayLayout === 'exclusive';
+  return exclusiveVirtualDisplay || displayConfiguration === 'ensure_only_display';
 });
 
 const api = new WebRtcHttpApi();
@@ -2484,6 +2517,19 @@ async function confirmTerminateAndConnect(): Promise<void> {
   });
 }
 
+async function confirmLocalDisplayRiskAndConnect(): Promise<void> {
+  dialog.warning({
+    title: 'Local WebRTC can blank this display',
+    content:
+      'Your current virtual display settings can disable the physical display while browser streaming starts. Use Shield TV / Artemis for this profile, or continue only if you have a recovery path.',
+    positiveText: 'Start anyway',
+    negativeText: t('_common.cancel'),
+    onPositiveClick: async () => {
+      await connect({ skipLocalDisplayRisk: true });
+    },
+  });
+}
+
 async function waitForSpinnerFrame(): Promise<void> {
   await nextTick();
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
@@ -2614,8 +2660,12 @@ async function startConnect() {
   }
 }
 
-async function connect() {
+async function connect(options: { skipLocalDisplayRisk?: boolean } = {}) {
   if (isConnecting.value) return;
+  if (localWebRtcDisplayRisk.value && !options.skipLocalDisplayRisk) {
+    await confirmLocalDisplayRiskAndConnect();
+    return;
+  }
   // Always fetch session status to know if we can resume
   if (!sessionStatus.value) await fetchSessionStatus();
   if (selectedAppId.value && hasRunningSession.value) {
@@ -2860,6 +2910,11 @@ onMounted(async () => {
   window.addEventListener('keyup', onFullscreenEscapeUp, true);
   window.addEventListener('pagehide', onPageHide);
   try {
+    await configStore.fetchConfig?.();
+  } catch {
+    /* ignore */
+  }
+  try {
     await appsStore.loadApps(true);
   } catch {
     /* ignore */
@@ -2925,6 +2980,10 @@ watch(
   display: flex;
   flex-direction: column;
   min-width: 0;
+}
+
+.local-display-risk-alert {
+  margin: 1rem 1.5rem 0;
 }
 
 /* Header */
