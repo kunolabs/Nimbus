@@ -57,7 +57,11 @@
     <SessionHistoryCard />
 
     <!-- Pair New Client -->
-    <section ref="pairSectionRef" id="clients-pair-client">
+    <section
+      ref="pairSectionRef"
+      id="clients-pair-client"
+      :class="{ 'clients-deep-link-highlight': pairSectionHighlighted }"
+    >
       <n-card class="clients-card" :segmented="{ content: true, footer: false }">
         <template #header>
           <div class="clients-section-heading">
@@ -77,6 +81,7 @@
           >
             <n-form-item class="flex flex-col" :label="$t('navbar.pin')" label-placement="top">
               <n-input
+                ref="pinInputRef"
                 :value="pin"
                 :placeholder="$t('navbar.pin')"
                 clearable
@@ -1090,6 +1095,8 @@ const message = useMessage();
 const configStore = useConfigStore();
 const pairSectionRef = ref<HTMLElement | null>(null);
 const apiTokensSectionRef = ref<HTMLElement | null>(null);
+const pinInputRef = ref<{ focus?: () => void } | null>(null);
+const pairSectionHighlighted = ref<boolean>(false);
 const globalPrefer10BitSdr = computed<boolean>(() =>
   toBool(configValue('prefer_10bit_sdr'), false),
 );
@@ -1137,6 +1144,8 @@ const removing = ref<Record<string, boolean>>({});
 const saving = ref<Record<string, boolean>>({});
 const disconnecting = ref<Record<string, boolean>>({});
 let refreshIntervalId: ReturnType<typeof setInterval> | null = null;
+let pairFocusTimeoutId: ReturnType<typeof setTimeout> | null = null;
+let pairHighlightTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
 const showConfirmRemove = ref<boolean>(false);
 const pendingRemoveUuid = ref<string>('');
@@ -2034,12 +2043,45 @@ function scrollToPairSection(): void {
   pairSectionRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
+function clearPairDeepLinkTimers(): void {
+  if (pairFocusTimeoutId !== null) {
+    clearTimeout(pairFocusTimeoutId);
+    pairFocusTimeoutId = null;
+  }
+  if (pairHighlightTimeoutId !== null) {
+    clearTimeout(pairHighlightTimeoutId);
+    pairHighlightTimeoutId = null;
+  }
+}
+
+function focusPairPinInput(): void {
+  pinInputRef.value?.focus?.();
+}
+
+function activatePairDeepLink(): void {
+  clearPairDeepLinkTimers();
+  pairSectionHighlighted.value = true;
+  scrollToPairSection();
+  focusPairPinInput();
+
+  pairFocusTimeoutId = setTimeout(() => {
+    scrollToPairSection();
+    focusPairPinInput();
+    pairFocusTimeoutId = null;
+  }, 450);
+
+  pairHighlightTimeoutId = setTimeout(() => {
+    pairSectionHighlighted.value = false;
+    pairHighlightTimeoutId = null;
+  }, 2200);
+}
+
 async function scrollToRequestedSection(section: unknown): Promise<void> {
   await nextTick();
   if (section === 'tokens') {
     scrollToTokenSection();
   } else if (section === 'pair') {
-    scrollToPairSection();
+    activatePairDeepLink();
   }
 }
 
@@ -2057,8 +2099,8 @@ onMounted(async () => {
 });
 
 watch(
-  () => route.query['sec'],
-  async (section) => {
+  () => [route.query['sec'], route.query['focus']],
+  async ([section]) => {
     if (section !== 'tokens' && section !== 'pair') {
       return;
     }
@@ -2071,6 +2113,7 @@ onBeforeUnmount(() => {
     clearInterval(refreshIntervalId);
     refreshIntervalId = null;
   }
+  clearPairDeepLinkTimers();
 });
 </script>
 
@@ -2240,6 +2283,14 @@ onBeforeUnmount(() => {
   border-radius: 0.5rem;
   background: rgb(var(--color-primary) / 0.16);
   color: rgb(var(--color-primary));
+}
+
+.clients-deep-link-highlight :deep(.n-card) {
+  border-color: rgb(var(--color-primary) / 0.6);
+  box-shadow: 0 0 0 3px rgb(var(--color-primary) / 0.14);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .clients-toolbar {

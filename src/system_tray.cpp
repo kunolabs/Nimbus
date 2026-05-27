@@ -33,6 +33,7 @@
 
   // standard includes
   #include <atomic>
+  #include <chrono>
   #include <condition_variable>
   #include <csignal>
   #include <cstring>
@@ -535,7 +536,11 @@ namespace system_tray {
       tray.notification_icon = TRAY_ICON_LOCKED;
       tray.tooltip = PROJECT_NAME;
       tray.notification_cb = []() {
-        launch_ui("/clients?sec=pair");
+        const auto focus_id = std::chrono::duration_cast<std::chrono::milliseconds>(
+                                std::chrono::system_clock::now().time_since_epoch()
+                              )
+                                .count();
+        launch_ui("/clients?sec=pair&focus=" + std::to_string(focus_id));
       };
       tray_update(&tray);
     });
