@@ -70,6 +70,7 @@ so user-facing version surfaces no longer look like an unversioned build.
 | Uninstall | Yes | Pending | Add/Remove Programs entry removed and service stopped |
 | Reinstall after uninstall | Yes | Pending | Reinstall completes without manual cleanup |
 | Upgrade from Vibepollo | Strongly recommended | Pending | Config, credentials, and paired-client state checked |
+| Upgrade preserves user-owned files | Yes | Code guard added, fixture pending | Create custom root/config/scripts files before update; confirm they survive |
 | Upgrade from Apollo | Strongly recommended | Pending | Export/import bundle, config, credentials, and paired-client state checked |
 | Coexistence with Sunshine | Optional for alpha | Pending | Record whether install replaces or coexists |
 | Windows SmartScreen/AV behavior | Yes | Pending | Unsigned prompt or false-positive notes recorded |
@@ -100,6 +101,7 @@ Observed so far:
 | Pairing notification target | Fixed, retest pending | Pairing toast now opens `/clients?sec=pair` so the Clients page scrolls directly to the Pair Client section. |
 | Runtime log branding | Fixed, retest pending | Fixture logs still showed `VibeshineDisplayRestore` and `vibeshine state`; active runtime logs now use Nimbus wording while legacy cleanup still removes old Vibeshine tasks. |
 | Settings naming polish | Fixed, retest pending | General and Files settings no longer show `Vibeshine`, `sunshine_state.json`, `sunshine.log`, or `vibeshine_state.json` as low-risk visible placeholders. |
+| Upgrade user-file preservation | Code guard added, retest pending | Nimbus-line MSI uninstall now snapshots config/covers/credentials/log/session/script files before uninstall and restores only missing files afterward. |
 | Windows Defender prompt | Observed pass | Maintainer reported no Defender warning during the install smoke. |
 
 Still blocking the alpha gate:
@@ -114,6 +116,9 @@ Still blocking the alpha gate:
 - Confirm uninstall removes or stops the service and removes the Add/Remove
   Programs entry.
 - Confirm reinstall after uninstall completes without manual cleanup.
+- Before a Vibepollo-to-Nimbus or Nimbus-to-Nimbus upgrade, add sentinel custom
+  files such as `custom-root-note.txt`, `config\custom-settings.json`, and
+  `scripts\custom-hook.ps1`; confirm the update preserves them.
 - Record upgrade behavior from Apollo and/or Vibepollo where practical.
 - For Apollo upgrade testing, use
   [Apollo To Nimbus Switch Guide](apollo-to-nimbus-switch.md) and attach the

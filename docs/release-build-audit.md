@@ -280,6 +280,12 @@ Result:
 | Signing | Skipped | `SIGNPATH_API_TOKEN` was unset; output is unsigned. |
 | Installer execution | Partial | Manual VM smoke observed Nimbus default install path, visible Nimbus wording, service running with Nimbus description, Web UI launch path, manual update-check feedback, Artemis-on-Shield pairing, Artemis streaming/disconnect, and no Defender warning. Uninstall/reinstall and upgrade behavior still need fixture records. |
 
+Follow-up on 2026-05-27: the bootstrapper gained a Nimbus-line
+upgrade-preservation guard for user-owned config, cover, credential, log,
+session, and script files. Compile-only validation passed for both
+`-UninstallOnly` and MSI-embedded setup builds, but VM upgrade execution is
+still required before release claims.
+
 Artifacts:
 
 | Artifact | Size | SHA256 |

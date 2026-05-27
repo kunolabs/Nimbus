@@ -2228,6 +2228,68 @@ namespace VibepolloInstaller {
       "apollosvc",
       "vibepollo"
     };
+    private static readonly HashSet<string> UpgradePreservationRootDirectories = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+      "config",
+      "covers",
+      "credentials",
+      "logs",
+      "scripts",
+      "session_history"
+    };
+    private static readonly HashSet<string> UpgradePreservationBlockedDirectories = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+      ".git",
+      "assets",
+      "bin",
+      "drivers",
+      "node_modules",
+      "third-party",
+      "tools",
+      "web"
+    };
+    private static readonly HashSet<string> UpgradePreservationExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+      ".bat",
+      ".cmd",
+      ".conf",
+      ".ico",
+      ".ini",
+      ".jpeg",
+      ".jpg",
+      ".json",
+      ".lnk",
+      ".log",
+      ".md",
+      ".pem",
+      ".png",
+      ".ps1",
+      ".psd1",
+      ".psm1",
+      ".toml",
+      ".txt",
+      ".url",
+      ".webp",
+      ".xml",
+      ".yaml",
+      ".yml",
+      ".zip"
+    };
+    private static readonly HashSet<string> UpgradePreservationBlockedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+      ".cab",
+      ".cat",
+      ".com",
+      ".dll",
+      ".dylib",
+      ".exe",
+      ".exp",
+      ".inf",
+      ".lib",
+      ".msi",
+      ".msp",
+      ".obj",
+      ".pdb",
+      ".scr",
+      ".so",
+      ".sys"
+    };
 
     internal sealed class InstalledProductInfo {
       public string ProductCode { get; set; }
@@ -2247,6 +2309,14 @@ namespace VibepolloInstaller {
       public string UpgradeCode { get; set; }
       public string VersionText { get; set; }
       public Version Version { get; set; }
+    }
+
+    internal sealed class UpgradePreservationBundle {
+      public string SourceInstallLocation { get; set; }
+      public string BackupRoot { get; set; }
+      public int FileCount { get; set; }
+      public InstalledProductKind ProductKind { get; set; }
+      public string ProductDisplayName { get; set; }
     }
 
     internal sealed class LegacySunshineRegistration {
@@ -4950,6 +5020,7 @@ namespace VibepolloInstaller {
         if (product.IsWindowsInstaller && !string.IsNullOrWhiteSpace(product.ProductCode)) {
           logPath = BuildLogPath(logPhase + "_remove");
           lastLogPath = logPath;
+          var preservationBundle = CreateUpgradePreservationBundle(product, logPath);
           var args = new List<string> {
             "/x",
             product.ProductCode,
@@ -4965,6 +5036,7 @@ namespace VibepolloInstaller {
           CleanupStaleComponentClientsForInstallLocation(product.InstallLocation, logPath);
           code = RunMsiexec(args, hiddenWindow, requestElevationIfNeeded);
           if (code == 0 || code == 3010 || code == 1605) {
+            RestoreUpgradePreservationBundle(preservationBundle, logPath);
             CleanupCustomArpRegistration(product.InstallLocation, logPath);
             ScheduleSelfDeleteAndEmptyInstallRootCleanup(product.InstallLocation, logPath);
           }
@@ -5050,8 +5122,12 @@ namespace VibepolloInstaller {
         TryStopRelatedServicesAndProcesses(logPath);
         CleanupStaleComponentClientsForInstallLocation(product.InstallLocation, logPath);
 
+        var preservationBundle = factoryResetAppData
+          ? null
+          : CreateUpgradePreservationBundle(product, logPath);
         var code = RunMsiexec(args, hiddenWindow, requestElevationIfNeeded);
         if (code == 0 || code == 3010 || code == 1605) {
+          RestoreUpgradePreservationBundle(preservationBundle, logPath);
           CleanupCustomArpRegistration(product.InstallLocation, logPath);
           ScheduleSelfDeleteAndEmptyInstallRootCleanup(product.InstallLocation, logPath);
         }
@@ -5083,6 +5159,208 @@ namespace VibepolloInstaller {
         Message = BuildResultMessage("Uninstall", finalCode, lastLogPath),
         LogPath = lastLogPath
       };
+    }
+
+    private static UpgradePreservationBundle CreateUpgradePreservationBundle(InstalledProductInfo product, string logPath) {
+      if (product == null || !IsNimbusLineProduct(product.Kind)) {
+        return null;
+      }
+
+      var installLocation = NormalizePath(product.InstallLocation);
+      if (string.IsNullOrWhiteSpace(installLocation) || !Directory.Exists(installLocation)) {
+        return null;
+      }
+
+      var backupRoot = Path.Combine(
+        Path.GetTempPath(),
+        ProductIdentity.TempRootName,
+        "upgrade-preserve",
+        DateTime.UtcNow.ToString("yyyyMMdd_HHmmss") + "_" + Guid.NewGuid().ToString("N"));
+      var copied = 0;
+      var errors = 0;
+
+      foreach (var sourcePath in EnumerateFilesForUpgradePreservation(installLocation)) {
+        if (!ShouldPreserveUpgradeFile(installLocation, sourcePath)) {
+          continue;
+        }
+
+        var relativePath = GetRelativePathUnderDirectory(installLocation, sourcePath);
+        if (string.IsNullOrWhiteSpace(relativePath)) {
+          continue;
+        }
+
+        try {
+          var destinationPath = Path.Combine(backupRoot, relativePath);
+          var destinationDirectory = Path.GetDirectoryName(destinationPath);
+          if (!string.IsNullOrWhiteSpace(destinationDirectory)) {
+            Directory.CreateDirectory(destinationDirectory);
+          }
+          File.Copy(sourcePath, destinationPath, true);
+          copied++;
+        } catch (Exception ex) {
+          errors++;
+          AppendInstallerLogMessage(logPath, "Could not preserve upgrade file '" + sourcePath + "': " + ex.Message);
+        }
+      }
+
+      if (copied == 0) {
+        TryDeleteKnownPath(backupRoot);
+        return null;
+      }
+
+      AppendInstallerLogMessage(
+        logPath,
+        "Preserved " + copied + " user-owned file(s) from "
+          + (product.DisplayName ?? product.Kind.ToString())
+          + " before uninstall. Backup: " + backupRoot
+          + (errors > 0 ? " (" + errors + " file(s) skipped)." : "."));
+
+      return new UpgradePreservationBundle {
+        SourceInstallLocation = installLocation,
+        BackupRoot = backupRoot,
+        FileCount = copied,
+        ProductKind = product.Kind,
+        ProductDisplayName = product.DisplayName ?? product.Kind.ToString()
+      };
+    }
+
+    private static void RestoreUpgradePreservationBundle(UpgradePreservationBundle bundle, string logPath) {
+      if (bundle == null
+          || string.IsNullOrWhiteSpace(bundle.BackupRoot)
+          || string.IsNullOrWhiteSpace(bundle.SourceInstallLocation)
+          || !Directory.Exists(bundle.BackupRoot)) {
+        return;
+      }
+
+      var restored = 0;
+      var skippedExisting = 0;
+      var errors = 0;
+      try {
+        Directory.CreateDirectory(bundle.SourceInstallLocation);
+      } catch (Exception ex) {
+        AppendInstallerLogMessage(logPath, "Could not recreate install root for preserved files: " + ex.Message);
+        return;
+      }
+
+      foreach (var backupPath in EnumerateFilesForUpgradePreservation(bundle.BackupRoot)) {
+        var relativePath = GetRelativePathUnderDirectory(bundle.BackupRoot, backupPath);
+        if (string.IsNullOrWhiteSpace(relativePath)) {
+          continue;
+        }
+
+        var destinationPath = Path.Combine(bundle.SourceInstallLocation, relativePath);
+        try {
+          if (File.Exists(destinationPath)) {
+            skippedExisting++;
+            continue;
+          }
+
+          var destinationDirectory = Path.GetDirectoryName(destinationPath);
+          if (!string.IsNullOrWhiteSpace(destinationDirectory)) {
+            Directory.CreateDirectory(destinationDirectory);
+          }
+          File.Copy(backupPath, destinationPath, false);
+          restored++;
+        } catch (Exception ex) {
+          errors++;
+          AppendInstallerLogMessage(logPath, "Could not restore preserved file '" + destinationPath + "': " + ex.Message);
+        }
+      }
+
+      AppendInstallerLogMessage(
+        logPath,
+        "Restored " + restored + " preserved user-owned file(s)"
+          + (skippedExisting > 0 ? "; skipped " + skippedExisting + " existing package file(s)" : string.Empty)
+          + (errors > 0 ? "; " + errors + " restore error(s). Backup retained: " + bundle.BackupRoot : "."));
+
+      if (errors == 0) {
+        TryDeleteKnownPath(bundle.BackupRoot);
+      }
+    }
+
+    private static IEnumerable<string> EnumerateFilesForUpgradePreservation(string directory) {
+      string[] files;
+      try {
+        files = Directory.GetFiles(directory);
+      } catch {
+        yield break;
+      }
+
+      foreach (var file in files) {
+        yield return file;
+      }
+
+      string[] directories;
+      try {
+        directories = Directory.GetDirectories(directory);
+      } catch {
+        yield break;
+      }
+
+      foreach (var childDirectory in directories) {
+        var directoryName = Path.GetFileName(childDirectory);
+        if (UpgradePreservationBlockedDirectories.Contains(directoryName)
+            && !UpgradePreservationRootDirectories.Contains(directoryName)) {
+          continue;
+        }
+
+        foreach (var file in EnumerateFilesForUpgradePreservation(childDirectory)) {
+          yield return file;
+        }
+      }
+    }
+
+    private static bool ShouldPreserveUpgradeFile(string rootDirectory, string filePath) {
+      var relativePath = GetRelativePathUnderDirectory(rootDirectory, filePath);
+      if (string.IsNullOrWhiteSpace(relativePath)) {
+        return false;
+      }
+
+      var segments = relativePath.Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
+      if (segments.Length == 0) {
+        return false;
+      }
+
+      var extension = Path.GetExtension(filePath);
+      if (UpgradePreservationBlockedExtensions.Contains(extension)) {
+        return false;
+      }
+
+      for (var i = 0; i < segments.Length - 1; i++) {
+        if (UpgradePreservationBlockedDirectories.Contains(segments[i])
+            && !UpgradePreservationRootDirectories.Contains(segments[i])) {
+          return false;
+        }
+      }
+
+      if (UpgradePreservationRootDirectories.Contains(segments[0])) {
+        return string.IsNullOrWhiteSpace(extension)
+          ? false
+          : UpgradePreservationExtensions.Contains(extension);
+      }
+
+      return segments.Length == 1
+        && !string.IsNullOrWhiteSpace(extension)
+        && UpgradePreservationExtensions.Contains(extension);
+    }
+
+    private static string GetRelativePathUnderDirectory(string rootDirectory, string path) {
+      if (string.IsNullOrWhiteSpace(rootDirectory) || string.IsNullOrWhiteSpace(path)) {
+        return string.Empty;
+      }
+
+      try {
+        var normalizedRoot = Path.GetFullPath(rootDirectory)
+          .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+          + Path.DirectorySeparatorChar;
+        var normalizedPath = Path.GetFullPath(path);
+        if (!normalizedPath.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase)) {
+          return string.Empty;
+        }
+        return normalizedPath.Substring(normalizedRoot.Length);
+      } catch {
+        return string.Empty;
+      }
     }
 
     private static void CleanupCustomArpRegistration(string installLocation, string logPath) {
