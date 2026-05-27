@@ -247,6 +247,24 @@ permissions on the disk.
 ### Stuttering
 If you experience stuttering using NVIDIA, try disabling `vsync:fast` in the NVIDIA Control Panel.
 
+### Windows audio stays on Steam Streaming Speakers after a stream
+
+Nimbus normally restores the previous Windows default audio output when audio
+capture tears down. If a stream is disconnected while a desktop session, local
+WebRTC attempt, or virtual display session is left paused, Windows may keep
+`Steam Streaming Speakers` selected and refuse manual output changes until the
+service fully restarts.
+
+The quickest recovery is to restart the Nimbus service from an elevated
+PowerShell window:
+
+```powershell
+Restart-Service -Name ApolloService -Force
+```
+
+The service name is still `ApolloService` for legacy compatibility in current
+alpha builds, even though the displayed service description is `Nimbus Service`.
+
 <div class="section_buttons">
 
 | Previous      |                    Next |
