@@ -116,9 +116,10 @@ Still blocking the alpha gate:
 - Confirm uninstall removes or stops the service and removes the Add/Remove
   Programs entry.
 - Confirm reinstall after uninstall completes without manual cleanup.
-- Before a Vibepollo-to-Nimbus or Nimbus-to-Nimbus upgrade, add sentinel custom
-  files such as `custom-root-note.txt`, `config\custom-settings.json`, and
-  `scripts\custom-hook.ps1`; confirm the update preserves them.
+- Before a Vibepollo-to-Nimbus or Nimbus-to-Nimbus upgrade, run
+  `scripts\test_upgrade_preservation_fixture.ps1 -Stage prepare`; after the
+  upgrade, rerun it with `-Stage verify` to confirm custom root, config,
+  scripts, credentials, logs, and session-history files survived.
 - Record upgrade behavior from Apollo and/or Vibepollo where practical.
 - For Apollo upgrade testing, use
   [Apollo To Nimbus Switch Guide](apollo-to-nimbus-switch.md) and attach the
