@@ -127,8 +127,33 @@ should keep release notes honest and make rollback/update behavior predictable.
 | 6 | Audio Routing Wizard | High | Medium | Low | Show selected sink, channel mode, and common downmix checks. |
 | 7 | Controller Doctor | High | Medium | Low | Show ViGEm status, host controller warning, and multi-controller notes. |
 | 8 | Safe Update/Rollback Channel | Medium-high | Medium | Low | Release channel docs, rollback notes, and service/driver preservation checks. |
-| 9 | Game Discovery Inbox | Medium-high | Medium | Medium | Read-only candidate list before any import writes to `apps.json`. |
-| 10 | Community Fixture Matrix | Medium | Low-medium | Low | Public table of tested host/client/display/network combos. |
+| 9 | Launch Command Presets | Medium-high | Low-medium | Low | Preset picker for common detached-command and launcher flows. |
+| 10 | Game Discovery Inbox | Medium-high | Medium | Medium | Read-only candidate list before any import writes to `apps.json`. |
+| 11 | Community Fixture Matrix | Medium | Low-medium | Low | Public table of tested host/client/display/network combos. |
+
+## Launch Command Presets
+
+Community app entries often rely on detached commands instead of a primary
+process, especially for Steam library entries, launcher-owned games, Playnite
+flows, and stream keepalive setups. Nimbus currently exposes raw command fields,
+but that makes users copy/paste fragile snippets from forum posts.
+
+Nimbus should add a QoL preset layer before the raw fields:
+
+- `Steam game`: accept an AppID, `steam://rungameid/...`, or Steam store URL and
+  generate the detached command.
+- `Steam Big Picture`: launch Steam directly into the TV-oriented shell.
+- `Playnite`: launch Playnite fullscreen or a known Playnite game entry.
+- `Launcher URL`: keep URI-based Epic, Ubisoft Connect, EA App, and Battle.net
+  flows discoverable without hiding the generated command.
+- `Stream keepalive`: explain detached-only behavior and sensible exit-timeout
+  defaults.
+- `Power-user wrapper`: optional pre/post commands for RTSS, display/HDR setup,
+  and cleanup once those workflows have fixtures.
+
+The UI should always show the generated command before saving so experienced
+users can inspect or edit it. Presets are helpers, not a replacement for the raw
+command editor.
 
 ## Game Discovery Inbox
 
@@ -182,6 +207,8 @@ candidate scoring are reviewed.
    honest: it is a maintainer planning issue, not a user-reported issue.
 2. Keep the first implementation read-only wherever possible.
 3. Add a Troubleshooting page cursor card as the first visible Setup Doctor seed.
-4. Create a fixture matrix after the next VM build and Shield TV stream test.
-5. Treat upstream Vibepollo display/HDR/session fixes as sync candidates, not
+4. Add Launch Command Presets to the QoL backlog before broad app-discovery
+   work; it is lower risk and immediately helps migrated Apollo libraries.
+5. Create a fixture matrix after the next VM build and Shield TV stream test.
+6. Treat upstream Vibepollo display/HDR/session fixes as sync candidates, not
    automatic merges.

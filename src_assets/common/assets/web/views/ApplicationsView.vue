@@ -68,6 +68,18 @@
           @keydown.enter.prevent="openEdit(app, i)"
           @keydown.space.prevent="openEdit(app, i)"
         >
+          <div class="apps-row__cover" aria-hidden="true">
+            <img
+              v-if="appHasCover(app)"
+              :src="coverUrl(app)"
+              :alt="app.name || 'Application cover'"
+              loading="lazy"
+              @load="onCoverLoad(app)"
+              @error="onCoverError(app)"
+            />
+            <i v-else class="fas fa-window-maximize" />
+          </div>
+
           <div class="apps-row__main">
             <div class="apps-row__title-line">
               <span class="apps-row__title">{{ app.name || '(untitled)' }}</span>
@@ -162,7 +174,8 @@ const playniteEnabled = computed(() => playniteInstalled.value);
 const showModal = ref(false);
 const modalKey = ref(0);
 const currentApp = ref<App | null>(null);
-const currentIndex = ref<number | null>(-1);
+const currentIndex = ref<number>(-1);
+const appCoverStatus = ref<Map<string, boolean>>(new Map());
 
 async function reload(): Promise<void> {
   await appsStore.loadApps(true);
@@ -183,6 +196,26 @@ function openEdit(app: App, i: number): void {
 function appKey(app: App | null | undefined, index: number) {
   const id = app?.uuid || '';
   return `${app?.name || 'app'}|${id}|${index}`;
+}
+
+function coverUrl(app: App): string {
+  if (!app.uuid) return '';
+  return `/api/apps/${encodeURIComponent(app.uuid)}/cover`;
+}
+
+function appHasCover(app: App): boolean {
+  if (app.uuid && appCoverStatus.value.has(app.uuid)) {
+    return appCoverStatus.value.get(app.uuid) === true;
+  }
+  return !!app.uuid && !!(app['image-path'] || app['playnite-id']);
+}
+
+function onCoverLoad(app: App): void {
+  if (app.uuid) appCoverStatus.value.set(app.uuid, true);
+}
+
+function onCoverError(app: App): void {
+  if (app.uuid) appCoverStatus.value.set(app.uuid, false);
 }
 
 function appSubtitle(app: App): string {
@@ -387,7 +420,7 @@ auth.onLogin(() => {
 .apps-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.875rem;
   padding: 0.625rem 1rem;
   width: 100%;
   text-align: left;
@@ -430,6 +463,42 @@ auth.onLogin(() => {
   .apps-row {
     padding: 0.625rem 1.25rem;
   }
+}
+
+.apps-row__cover {
+  width: 3rem;
+  height: 4rem;
+  flex: 0 0 auto;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(var(--color-primary));
+  background:
+    linear-gradient(180deg, rgb(var(--color-primary) / 0.12), rgb(var(--color-primary) / 0.04)),
+    rgb(var(--color-dark) / 0.04);
+  border: 1px solid rgb(var(--color-dark) / 0.08);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+}
+
+.dark .apps-row__cover {
+  background:
+    linear-gradient(180deg, rgb(var(--color-primary) / 0.2), rgb(var(--color-primary) / 0.08)),
+    rgb(var(--color-light) / 0.04);
+  border-color: rgb(var(--color-light) / 0.1);
+}
+
+.apps-row__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.apps-row__cover i {
+  font-size: 1rem;
+  opacity: 0.8;
 }
 
 /* Main text column */
