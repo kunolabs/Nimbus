@@ -1647,6 +1647,17 @@ namespace platf {
     return control;
   }
 
+  void restore_default_audio_device() {
+    audio::co_init_t co_init;
+    audio::audio_control_t audio_ctrl;
+    if (audio_ctrl.init() != 0) {
+      BOOST_LOG(warning) << "Unable to initialize Windows audio control for default output restore"sv;
+      return;
+    }
+
+    audio_ctrl.reset_default_device();
+  }
+
   std::unique_ptr<deinit_t> init() {
     if (dxgi::init()) {
       return nullptr;

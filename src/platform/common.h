@@ -573,6 +573,10 @@ namespace platf {
 
   std::unique_ptr<audio_control_t> audio_control();
 
+#ifdef _WIN32
+  void restore_default_audio_device();
+#endif
+
   /**
    * @brief Get the display_t instance for the given hwdevice_type.
    * If display_name is empty, use the first monitor that's compatible you can find

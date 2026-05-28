@@ -44,7 +44,9 @@ Related areas to inspect:
 
 ## Current workaround
 
-Restart the Nimbus service from an elevated PowerShell window:
+Use the tray menu's `Restore Audio Output` action in alpha builds that include
+it. On older builds, restart the Nimbus service from an elevated PowerShell
+window:
 
 ```powershell
 Restart-Service -Name ApolloService -Force

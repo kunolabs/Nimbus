@@ -115,6 +115,13 @@ namespace system_tray {
     platf::restart();
   }
 
+#ifdef _WIN32
+  void tray_restore_audio_cb([[maybe_unused]] struct tray_menu *item) {
+    BOOST_LOG(info) << "Restoring default audio output from system tray"sv;
+    platf::restore_default_audio_device();
+  }
+#endif
+
   void tray_quit_cb([[maybe_unused]] struct tray_menu *item) {
     BOOST_LOG(info) << "Quitting from system tray"sv;
 
@@ -157,6 +164,9 @@ namespace system_tray {
            update::trigger_check(true, true);
          }},
 
+#ifdef _WIN32
+        {.text = "Restore Audio Output", .cb = tray_restore_audio_cb},
+#endif
         {.text = "Restart", .cb = tray_restart_cb},
         {.text = "Quit", .cb = tray_quit_cb},
         {.text = nullptr}

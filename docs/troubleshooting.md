@@ -256,7 +256,8 @@ WebRTC attempt, or virtual display session is left paused, Windows may keep
 service fully restarts.
 
 The quickest recovery is to restart the Nimbus service from an elevated
-PowerShell window:
+PowerShell window, or use the tray menu's `Restore Audio Output` action in
+alpha builds that include it.
 
 ```powershell
 Restart-Service -Name ApolloService -Force
