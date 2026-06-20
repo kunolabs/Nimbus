@@ -259,7 +259,7 @@
     "app_display_physical_label": "Select physical display",
     "app_display_physical_hint": "Pick the monitor to use when launching this app. Physical dummy plugs show up here even if they are inactive.",
     "app_display_physical_placeholder": "Choose a display",
-    "app_display_physical_status_hint": "Clear the selection to follow the global display setting for this app.",
+    "app_display_physical_status_hint": "Clear the selection to use the primary display while keeping physical display preparation enabled for this app.",
     "app_display_status_active": "active",
     "app_display_status_inactive": "inactive",
     "dd_pre_stream_setup": "Pre-stream setup",

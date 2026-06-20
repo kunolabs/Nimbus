@@ -191,7 +191,10 @@
                 <template #option="{ option }">
                   <div class="leading-tight">
                     <div class="">{{ option?.displayName || option?.label }}</div>
-                    <div class="text-[12px] opacity-60 font-mono">
+                    <div
+                      v-if="option?.value !== PHYSICAL_DEFAULT_OUTPUT_SELECTION"
+                      class="text-[12px] opacity-60 font-mono"
+                    >
                       {{ option?.id || option?.value }}
                       <span
                         v-if="option?.active === true"
@@ -208,7 +211,10 @@
                 <template #value="{ option }">
                   <div class="leading-tight">
                     <div class="">{{ option?.displayName || option?.label }}</div>
-                    <div class="text-[12px] opacity-60 font-mono">
+                    <div
+                      v-if="option?.value !== PHYSICAL_DEFAULT_OUTPUT_SELECTION"
+                      class="text-[12px] opacity-60 font-mono"
+                    >
                       {{ option?.id || option?.value }}
                       <span
                         v-if="option?.active === true"
@@ -1532,6 +1538,7 @@ const ddConfigOption = computed(
 );
 const captureMethod = computed(() => (configStore.config as any)?.capture ?? '');
 const VIRTUAL_DISPLAY_SELECTION = 'sunshine:sudovda_virtual_display';
+const PHYSICAL_DEFAULT_OUTPUT_SELECTION = '__nimbus_physical_default__';
 const globalOutputName = computed(() => {
   const name = (configStore.config as any)?.output_name;
   return typeof name === 'string' ? name : '';
@@ -1609,6 +1616,9 @@ const displaySelection = computed<DisplaySelection>({
     if (appMode === 'disabled') {
       return 'physical';
     }
+    if (form.value.ddConfigurationOption) {
+      return 'physical';
+    }
     if (appMode !== null && appMode !== globalMode) {
       return 'virtual';
     }
@@ -1633,8 +1643,8 @@ const displaySelection = computed<DisplaySelection>({
       if (!current || current === VIRTUAL_DISPLAY_SELECTION) {
         if (lastPhysicalOutput.value) {
           form.value.output = lastPhysicalOutput.value;
-        } else if (globalOutputName.value && globalOutputName.value !== VIRTUAL_DISPLAY_SELECTION) {
-          form.value.output = globalOutputName.value;
+        } else {
+          form.value.output = '';
         }
       }
     } else {
@@ -1710,13 +1720,16 @@ const displayNameCache = ref<Record<string, string>>({});
 const physicalOutputModel = computed<string | null>({
   get: () => {
     const value = typeof form.value.output === 'string' ? form.value.output.trim() : '';
-    return value || null;
+    return value || (displaySelection.value === 'physical' ? PHYSICAL_DEFAULT_OUTPUT_SELECTION : null);
   },
   set: (value) => {
     const normalized = typeof value === 'string' ? value.trim() : '';
-    if (!normalized) {
-      displaySelection.value = 'global';
-      displayOverrideEnabled.value = false;
+    if (!normalized || normalized === PHYSICAL_DEFAULT_OUTPUT_SELECTION) {
+      form.value.output = '';
+      form.value.virtualScreen = false;
+      form.value.virtualDisplayMode = 'disabled';
+      displaySelection.value = 'physical';
+      displayOverrideEnabled.value = true;
       return;
     }
     form.value.output = normalized;
@@ -1777,9 +1790,16 @@ const displayDeviceOptions = computed(() => {
     value: string;
     displayName?: string;
     id?: string;
-    active?: boolean;
+    active?: boolean | null;
   }> = [];
-  const seen = new Set<string>();
+  const seen = new Set<string>([PHYSICAL_DEFAULT_OUTPUT_SELECTION]);
+  opts.push({
+    label: t('config.output_name_default') as string,
+    value: PHYSICAL_DEFAULT_OUTPUT_SELECTION,
+    displayName: t('config.output_name_default') as string,
+    id: '',
+    active: null,
+  });
   for (const d of displayDevices.value) {
     const value = d.device_id || d.display_name || '';
     if (!value || seen.has(value)) continue;
@@ -1856,16 +1876,6 @@ let frameGenHealthPromise: Promise<void> | null = null;
 watch(open, (o) => {
   if (o) {
     form.value = fromServerApp(props.app ?? undefined, props.index ?? -1);
-    if (displaySelection.value === 'physical') {
-      const currentOutput = typeof form.value.output === 'string' ? form.value.output.trim() : '';
-      if (
-        !currentOutput &&
-        globalOutputName.value &&
-        globalOutputName.value !== VIRTUAL_DISPLAY_SELECTION
-      ) {
-        form.value.output = globalOutputName.value;
-      }
-    }
     selectedPlayniteId.value = '';
     lockPlaynite.value = false;
     newAppSource.value = 'custom';
