@@ -491,6 +491,16 @@ namespace display_helper_integration::helpers {
     }
     BOOST_LOG(info) << "Display helper topology: default device_id=" << default_device_id;
 
+    if (!session_.virtual_display) {
+      // Physical capture target: applySettings() derives topology from the device
+      // preparation option, so only pin a single-display topology when requested.
+      if (effective_video_config_.dd.configuration_option == config::video_t::dd_t::config_option_e::ensure_only_display &&
+          topology.topology.empty() && !default_device_id.empty()) {
+        topology.topology = {{default_device_id}};
+      }
+      return;
+    }
+
     BOOST_LOG(debug) << "session_.virtual_display_layout_override has_value: " << session_.virtual_display_layout_override.has_value();
     if (session_.virtual_display_layout_override) {
       BOOST_LOG(debug) << "session_.virtual_display_layout_override value: " << static_cast<int>(*session_.virtual_display_layout_override);
