@@ -1985,15 +1985,13 @@ namespace VDISPLAY {
         return std::nullopt;
       }
 
-      try {
-        pt::ptree tree;
-        pt::read_json(path.string(), tree);
+      pt::ptree tree;
+      if (statefile::read_json_with_recovery(path.string(), tree)) {
         if (auto guid_str = tree.get_optional<std::string>("root.virtual_display_guid")) {
           if (auto parsed = parse_uuid_string(*guid_str)) {
             return parsed;
           }
         }
-      } catch (...) {
       }
       return std::nullopt;
     }
@@ -2033,11 +2031,7 @@ namespace VDISPLAY {
       std::lock_guard<std::mutex> lock(statefile::state_mutex());
       const fs::path path(path_str);
       pt::ptree tree;
-      try {
-        if (fs::exists(path)) {
-          pt::read_json(path.string(), tree);
-        }
-      } catch (...) {
+      if (fs::exists(path) && !statefile::read_json_with_recovery(path.string(), tree)) {
         tree = pt::ptree {};
       }
 

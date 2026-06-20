@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <chrono>
 #include <cwctype>
 #include <filesystem>
 #include <mutex>
@@ -32,6 +33,66 @@ namespace statefile {
 
     std::once_flag migration_once;
 
+    fs::path backup_path_for(const fs::path &path) {
+      fs::path backup = path;
+      backup += ".bak";
+      return backup;
+    }
+
+    fs::path corrupt_path_for(const fs::path &path) {
+      const auto seconds = std::chrono::duration_cast<std::chrono::seconds>(
+        std::chrono::system_clock::now().time_since_epoch()
+      ).count();
+      fs::path corrupt = path;
+      corrupt += ".corrupt." + std::to_string(seconds);
+      return corrupt;
+    }
+
+    void preserve_corrupt_file(const fs::path &path) {
+      std::error_code ec;
+      if (!fs::exists(path, ec) || ec) {
+        return;
+      }
+
+      auto corrupt = corrupt_path_for(path);
+      for (int i = 1; fs::exists(corrupt, ec) && !ec && i < 100; ++i) {
+        corrupt = corrupt_path_for(path);
+        corrupt += "." + std::to_string(i);
+      }
+
+      fs::copy_file(path, corrupt, fs::copy_options::skip_existing, ec);
+      if (ec) {
+        BOOST_LOG(warning) << "statefile: failed to preserve corrupt JSON "sv << path.string()
+                           << " as "sv << corrupt.string() << ": "sv << ec.message();
+      } else {
+        BOOST_LOG(warning) << "statefile: preserved corrupt JSON "sv << path.string()
+                           << " as "sv << corrupt.string();
+      }
+    }
+
+    void refresh_json_backup_if_parseable(const fs::path &path) {
+      std::error_code ec;
+      if (!fs::exists(path, ec) || ec) {
+        return;
+      }
+
+      pt::ptree existing;
+      try {
+        pt::read_json(path.string(), existing);
+      } catch (const std::exception &e) {
+        BOOST_LOG(warning) << "statefile: leaving previous backup in place because current JSON is not parseable: "
+                           << path.string() << ": " << e.what();
+        return;
+      }
+
+      const auto backup = backup_path_for(path);
+      fs::copy_file(path, backup, fs::copy_options::overwrite_existing, ec);
+      if (ec) {
+        BOOST_LOG(warning) << "statefile: failed to refresh backup "sv << backup.string()
+                           << ": "sv << ec.message();
+      }
+    }
+
     pt::ptree &ensure_root(pt::ptree &tree) {
       auto it = tree.find("root");
       if (it == tree.not_found()) {
@@ -45,13 +106,7 @@ namespace statefile {
       if (!fs::exists(path)) {
         return false;
       }
-      try {
-        pt::read_json(path.string(), out);
-        return true;
-      } catch (const std::exception &e) {
-        BOOST_LOG(warning) << "statefile: failed to read "sv << path.string() << ": "sv << e.what();
-        return false;
-      }
+      return read_json_with_recovery(path.string(), out);
     }
 
     void write_tree(const fs::path &path, const pt::ptree &tree) {
@@ -234,6 +289,58 @@ namespace statefile {
     if (file_handler::write_file(path.c_str(), out.str()) != 0) {
       throw std::runtime_error("atomic JSON write failed");
     }
+    refresh_json_backup_if_parseable(fs::path(path));
+  }
+
+  bool read_json_with_recovery(const std::string &path, pt::ptree &tree) {
+    const fs::path primary(path);
+    if (primary.empty()) {
+      tree = pt::ptree {};
+      return false;
+    }
+
+    std::error_code ec;
+    if (!fs::exists(primary, ec) || ec) {
+      tree = pt::ptree {};
+      return false;
+    }
+
+    try {
+      pt::read_json(primary.string(), tree);
+      return true;
+    } catch (const std::exception &primary_error) {
+      BOOST_LOG(warning) << "statefile: failed to read "sv << primary.string()
+                         << ", attempting backup recovery: "sv << primary_error.what();
+    }
+
+    preserve_corrupt_file(primary);
+
+    const auto backup = backup_path_for(primary);
+    if (!fs::exists(backup, ec) || ec) {
+      tree = pt::ptree {};
+      BOOST_LOG(warning) << "statefile: no parseable backup available for "sv << primary.string();
+      return false;
+    }
+
+    pt::ptree recovered;
+    try {
+      pt::read_json(backup.string(), recovered);
+    } catch (const std::exception &backup_error) {
+      tree = pt::ptree {};
+      BOOST_LOG(warning) << "statefile: backup recovery failed for "sv << primary.string()
+                         << " from "sv << backup.string() << ": "sv << backup_error.what();
+      return false;
+    }
+
+    tree = recovered;
+    try {
+      write_json_atomic(primary.string(), recovered);
+      BOOST_LOG(info) << "statefile: restored "sv << primary.string() << " from backup "sv << backup.string();
+    } catch (const std::exception &restore_error) {
+      BOOST_LOG(warning) << "statefile: loaded backup for "sv << primary.string()
+                         << " but failed to restore primary: "sv << restore_error.what();
+    }
+    return true;
   }
 
   const std::string &sunshine_state_path() {
