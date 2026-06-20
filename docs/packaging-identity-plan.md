@@ -6,6 +6,8 @@ This plan separates public Nimbus branding from runtime identifiers that affect
 installs, upgrades, shortcuts, services, config paths, and platform packages.
 The fork inherited names from Vibepollo, Apollo, Sunshine, and Vibeshine. Some
 of those names are user-facing strings. Others are compatibility anchors.
+See `docs/naming-identity-audit.md` for the current inherited-name scan and
+Lucent client naming policy.
 
 Do not rename every inherited identifier in one broad sweep. Each package or
 runtime identity change should have a migration note, a rollback expectation,
@@ -108,12 +110,13 @@ Do not change these until there is a tested migration plan.
 | CPack package name | `Nimbus` | Changed in Phase C. Local package build generated `Nimbus.msi` and `NimbusSetup.exe`. |
 | CPack vendor | `Kuno Labs` | Changed in Phase C. |
 | CPack contact | `https://github.com/kunolabs/Nimbus/issues` | Changed in Phase C. |
-| Windows install directory | `Apollo` | Defer or migrate with explicit install-path behavior. |
+| Windows install directory | `Nimbus` for fresh installs; inherited Apollo paths are still detected for upgrade/migration compatibility | Changed for fresh install defaults. Validate upgrade and uninstall cleanup before release. |
 | WiX upgrade GUID | `{E3FA501A-85F8-4187-85A7-D6E6BDC7EDA1}` | Preserve unless we intentionally break upgrade lineage. |
 | WiX product-line seed | `Vibepollo-<major>.<minor>` | Treat as high-risk. Change only with upgrade testing. |
 | Bootstrapper namespace | `VibepolloInstaller` | Split cosmetic UI naming from installer detection logic. |
 | Bootstrapper output | `NimbusSetup.exe` | Changed in Phase C. Local Windows package build passed. |
 | Start menu folder | `Nimbus` | Changed in Phase C. Validate shortcut cleanup tests. |
+| Display restore scheduled task | `NimbusDisplayRestore`; legacy `VibeshineDisplayRestore` is still deleted during cleanup | Active runtime task name changed after VM log feedback. Keep legacy deletion until upgrade/uninstall fixtures prove it is safe to remove. |
 | Service names | `ApolloService`, `SunshineService`, `VibeshineService`, `sunshinesvc` | Preserve detection and cleanup paths until migration logic is explicit. |
 | Config/state files | `sunshine.conf`, `sunshine_state.json` | Preserve for first branded release unless migration is built and tested. |
 | WebRTC release scripts | Nimbus wording and fallback repo | Publishing remains manual and confirmation-gated. |
@@ -185,6 +188,8 @@ flowchart LR
 - Change user-facing package metadata to Nimbus.
 - Rename generated release artifacts to Nimbus.
 - Update bootstrapper UI strings and support links.
+- Update fresh-install defaults to Nimbus while preserving inherited Apollo and
+  Vibepollo detection paths for compatibility.
 - Keep service names, config paths, and upgrade GUIDs unchanged unless the test
   plan proves a migration is safe.
 - Build on Windows and inspect the installer, generated filenames, Start menu
@@ -196,6 +201,8 @@ Acceptance criteria:
 - The installer does not publish or sign using upstream destinations. Status:
   passed for local unsigned validation artifacts.
 - Upgrade behavior from an existing Vibepollo/Apollo install is recorded.
+- Apollo-to-Nimbus config carry-over is validated with an explicit backup/import
+  bundle before any release note claims seamless migration.
 - Fresh install and uninstall behavior is recorded.
 - Release notes disclose inherited runtime ids that remain in place.
 
@@ -239,3 +246,8 @@ Run the installer in a Windows VM or snapshot fixture. Record fresh install,
 upgrade from Apollo/Vibepollo where practical, uninstall, reinstall, generated
 shortcuts, Add/Remove Programs text, services, and config behavior before
 creating any `nimbus-v*` tag.
+
+For Apollo upgrade testing, use `docs/apollo-to-nimbus-switch.md` first. The
+current alpha-prep installer detects and removes Apollo, but Apollo config
+carry-over into the Nimbus install directory must be backed up and verified
+explicitly.

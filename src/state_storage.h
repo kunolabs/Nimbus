@@ -25,6 +25,16 @@ namespace statefile {
   void write_json_atomic(const std::string &path, const boost::property_tree::ptree &tree);
 
   /**
+   * @brief Read JSON with best-effort recovery from a sibling `.bak` file.
+   *
+   * If the primary file is malformed, the malformed copy is preserved as
+   * `.corrupt.<timestamp>` and a parseable `.bak` is restored in memory and on disk.
+   *
+   * @return `true` when either the primary file or backup was loaded; `false` otherwise.
+   */
+  bool read_json_with_recovery(const std::string &path, boost::property_tree::ptree &tree);
+
+  /**
    * @brief Best-effort repair for Windows config ACL inheritance.
    *
    * A previous session history build could protect the shared config directory

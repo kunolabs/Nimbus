@@ -116,11 +116,10 @@ if(NOT EXISTS "${CMAKE_BINARY_DIR}/assets/shaders")
     execute_process(COMMAND cmd.exe /c mklink /J "${shaders_in_build_dest_native}" "${shaders_in_build_src_native}")
 endif()
 
-set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\apollo.ico")
+set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}\\\\nimbus.ico")
 
 # The name of the directory that will be created in C:/Program Files/
-# Match the legacy NSIS layout by installing under Apollo
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "Apollo")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "Nimbus")
 
 # Setting components groups and dependencies
 set(CPACK_COMPONENT_GROUP_CORE_EXPANDED true)

@@ -4,6 +4,7 @@
 #include "../tests_common.h"
 
 #ifdef _WIN32
+  #include <src/platform/windows/lossless_scaling_paths.h>
   #include <tools/playnite_launcher/lossless_scaling.h>
   #include <filesystem>
   #include <fstream>
@@ -69,6 +70,45 @@ namespace {
 
     auto filter = playnite_launcher::lossless::build_executable_filter_for_tests(temp_dir, explicit_exe);
     EXPECT_EQ(filter, "re9.exe");
+
+    std::error_code ec;
+    fs::remove_all(temp_dir, ec);
+  }
+
+  TEST(LosslessScalingStatusPaths, ResolvesExplicitExecutableAndDirectory) {
+    auto temp_dir = fs::temp_directory_path() / ("sunshine-lossless-status-" + std::to_string(GetCurrentProcessId()));
+    fs::create_directories(temp_dir);
+
+    auto explicit_exe = temp_dir / "LosslessScaling.exe";
+    std::ofstream(explicit_exe).put('\n');
+
+    auto resolved_explicit = lossless_paths::resolve_lossless_candidate(explicit_exe);
+    ASSERT_TRUE(resolved_explicit.has_value());
+    EXPECT_EQ(resolved_explicit->filename().wstring(), L"LosslessScaling.exe");
+
+    auto resolved_directory = lossless_paths::resolve_lossless_candidate(temp_dir);
+    ASSERT_TRUE(resolved_directory.has_value());
+    EXPECT_EQ(resolved_directory->filename().wstring(), L"LosslessScaling.exe");
+
+    std::error_code ec;
+    fs::remove_all(temp_dir, ec);
+  }
+
+  TEST(LosslessScalingStatusPaths, RejectsMissingDirectoryAndWrongExecutableWithoutThrowing) {
+    auto temp_dir = fs::temp_directory_path() / ("sunshine-lossless-status-missing-" + std::to_string(GetCurrentProcessId()));
+    fs::create_directories(temp_dir);
+
+    auto wrong_exe = temp_dir / "LosslessScalingUpdater.exe";
+    std::ofstream(wrong_exe).put('\n');
+
+    EXPECT_NO_THROW({
+      EXPECT_FALSE(lossless_paths::resolve_lossless_candidate(wrong_exe).has_value());
+      EXPECT_FALSE(lossless_paths::resolve_lossless_candidate(temp_dir / "missing").has_value());
+      auto candidates = lossless_paths::discover_lossless_candidates(temp_dir / "missing", wrong_exe, std::nullopt);
+      for (const auto &candidate : candidates) {
+        EXPECT_NE(candidate, wrong_exe.lexically_normal());
+      }
+    });
 
     std::error_code ec;
     fs::remove_all(temp_dir, ec);

@@ -5,8 +5,8 @@ import { useConfigStore } from '@/stores/config';
 
 const store = useConfigStore();
 const config = store.config;
-const defaultMoonlightPort = 47989;
-const effectivePort = computed(() => Number(config.port ?? defaultMoonlightPort));
+const defaultStreamPort = 47989;
+const effectivePort = computed(() => Number(config.port ?? defaultStreamPort));
 </script>
 
 <template>
@@ -71,7 +71,7 @@ const effectivePort = computed(() => Number(config.port ?? defaultMoonlightPort)
         </div>
         <div class="col-span-4">
           <div
-            v-if="+effectivePort !== defaultMoonlightPort"
+            v-if="+effectivePort !== defaultStreamPort"
             class="mt-1 alert alert-info p-2 rounded-md"
           >
             <i class="fa-solid fa-xl fa-circle-info" /> {{ $t('config.port_http_port_note') }}

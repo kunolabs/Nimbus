@@ -50,7 +50,7 @@ namespace update {
     struct curl_slist *headers = nullptr;
     headers = curl_slist_append(headers, "Accept: application/vnd.github+json");
     headers = curl_slist_append(headers, "X-GitHub-Api-Version: 2022-11-28");
-    headers = curl_slist_append(headers, "User-Agent: Sunshine-Updater/1.0");
+    headers = curl_slist_append(headers, "User-Agent: Nimbus-Updater/1.0");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     bool tls_configured = http::configure_curl_tls(curl);
@@ -113,7 +113,16 @@ namespace update {
     // We intentionally allow repeated notifications; do not persist last_notified_version
   }
 
-  static void perform_check() {
+  static void notify_manual_update_check(const std::string &title, const std::string &body) {
+#if defined SUNSHINE_TRAY && SUNSHINE_TRAY >= 1
+    system_tray::tray_notify(title.c_str(), body.c_str());
+#else
+    (void) title;
+    (void) body;
+#endif
+  }
+
+  static void perform_check(bool notify_manual_result) {
     state.check_in_progress = true;
     auto fg = util::fail_guard([]() {
       state.check_in_progress = false;
@@ -125,7 +134,9 @@ namespace update {
       BOOST_LOG(info) << "Update check: querying GitHub releases from repo "sv
                       << SUNSHINE_REPO_OWNER << '/' << SUNSHINE_REPO_NAME;
       std::string releases_json;
+      bool release_query_ok = false;
       if (download_github_release_data(SUNSHINE_REPO_OWNER, SUNSHINE_REPO_NAME, releases_json)) {
+        release_query_ok = true;
         auto j = nlohmann::json::parse(releases_json);
         // Reset release info
         state.latest_release = release_info_t {};
@@ -193,6 +204,9 @@ namespace update {
         if (!state.latest_prerelease.version.empty()) {
           BOOST_LOG(info) << "Update check: latest prerelease tag="sv << state.latest_prerelease.version;
         }
+      } else {
+        state.latest_release = release_info_t {};
+        state.latest_prerelease = release_info_t {};
       }
       state.last_check_time = std::chrono::steady_clock::now();
 
@@ -220,16 +234,41 @@ namespace update {
         BOOST_LOG(info) << "Update check (tag-based): up-to-date. installed="sv << installed_version_tag
                         << ", stable="sv << latest_stable_tag
                         << ", prerelease="sv << latest_pre_tag;
+        if (notify_manual_result) {
+          if (!release_query_ok) {
+            notify_manual_update_check(
+              "Nimbus update check failed",
+              "Could not reach the Nimbus releases feed. See the Nimbus logs for details.");
+          } else if (latest_stable_tag.empty() && latest_pre_tag.empty()) {
+            notify_manual_update_check(
+              "Nimbus update check complete",
+              "No Nimbus releases are published yet.");
+          } else {
+            notify_manual_update_check(
+              "Nimbus update check complete",
+              "No newer Nimbus release was found.");
+          }
+        }
       }
     } catch (std::exception &e) {
       BOOST_LOG(warning) << "Update check failed: "sv << e.what();
+      if (notify_manual_result) {
+        notify_manual_update_check(
+          "Nimbus update check failed",
+          "Could not check Nimbus releases. See the Nimbus logs for details.");
+      }
     }
   }
 
-  void trigger_check(bool force) {
+  void trigger_check(bool force, bool notify_manual_result) {
     const bool in_progress = state.check_in_progress.load();
     if (in_progress) {
       BOOST_LOG(info) << "Update check trigger skipped: another check is in progress (force="sv << (force ? "true"sv : "false"sv) << ')';
+      if (notify_manual_result) {
+        notify_manual_update_check(
+          "Nimbus update check",
+          "An update check is already running.");
+      }
       return;
     }
     if (!force && config::sunshine.update_check_interval_seconds == 0) {
@@ -245,8 +284,13 @@ namespace update {
       }
     }
     BOOST_LOG(info) << "Update check trigger accepted (force="sv << (force ? "true"sv : "false"sv) << ')';
-    std::thread([]() {
-      perform_check();
+    if (notify_manual_result) {
+      notify_manual_update_check(
+        "Nimbus update check",
+        "Checking for Nimbus releases...");
+    }
+    std::thread([notify_manual_result]() {
+      perform_check(notify_manual_result);
     }).detach();
   }
 

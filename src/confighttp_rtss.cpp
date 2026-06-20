@@ -42,6 +42,27 @@ namespace confighttp {
   using lossless_paths::discover_lossless_candidates;
   using lossless_paths::resolve_lossless_candidate;
 
+  namespace {
+    constexpr auto k_lossless_default_hint = "C:\\\\Program Files (x86)\\\\Steam\\\\steamapps\\\\common\\\\Lossless Scaling\\\\LosslessScaling.exe";
+
+    nlohmann::json make_lossless_status_unavailable_response() {
+      return {
+        {"configured_path", config::lossless_scaling.exe_path},
+        {"checked_path", config::lossless_scaling.exe_path},
+        {"configured_exists", false},
+        {"checked_exists", false},
+        {"configured_is_directory", false},
+        {"checked_is_directory", false},
+        {"default_path", k_lossless_default_hint},
+        {"default_exists", false},
+        {"default_is_directory", false},
+        {"suggested_path", k_lossless_default_hint},
+        {"candidates", nlohmann::json::array()},
+        {"message", "Lossless Scaling status unavailable. Check the Nimbus logs for details."}
+      };
+    }
+  }  // namespace
+
   void getRtssStatus(resp_https_t response, req_https_t request) {
     if (!authenticate(response, request)) {
       return;
@@ -127,7 +148,7 @@ namespace confighttp {
           } else if (!fl.nvcp_ready) {
             add_segment(provider_message, "NVIDIA Control Panel integration unavailable (NvAPI not ready).");
           } else {
-            add_segment(provider_message, "NVIDIA Control Panel limiter selected (not recommended). Sunshine recommends RTSS for smoother pacing.");
+            add_segment(provider_message, "NVIDIA Control Panel limiter selected (not recommended). Nimbus recommends RTSS for smoother pacing.");
           }
         } else if (prefer_rtss) {
           if (!rtss.path_exists) {
@@ -137,10 +158,10 @@ namespace confighttp {
           } else {
             add_segment(provider_message, std::string("Frame limiter configured for ") + describe_provider(configured_id) + "; awaiting next stream.");
             if (!rtss.process_running) {
-              add_segment(provider_message, "Sunshine will launch RTSS automatically when streaming starts.");
+              add_segment(provider_message, "Nimbus will launch RTSS automatically when streaming starts.");
             }
             if (rtss_bootstrap_pending) {
-              add_segment(provider_message, "Sunshine will refresh RTSS configuration automatically on the next stream.");
+              add_segment(provider_message, "Nimbus will refresh RTSS configuration automatically on the next stream.");
             }
           }
         } else {
@@ -154,17 +175,17 @@ namespace confighttp {
     if (prefer_rtss) {
       add_segment(provider_message, "RTSS provides the smoothest pacing; NVIDIA's limiter is not recommended because it cannot guarantee perfect frame pacing.");
     } else if (fl.configured_provider == platf::frame_limiter_provider::nvidia_control_panel) {
-      add_segment(provider_message, "Sunshine recommends installing RTSS for the smoothest streaming experience; NVIDIA's limiter is not recommended because it cannot guarantee perfect frame pacing.");
+      add_segment(provider_message, "Nimbus recommends installing RTSS for the smoothest streaming experience; NVIDIA's limiter is not recommended because it cannot guarantee perfect frame pacing.");
     }
 
     std::string override_message;
     if (fl.disable_vsync) {
       if (fl.nv_overrides_supported) {
-        override_message = "NVIDIA overrides ready: Sunshine will force VSYNC off during streams.";
+        override_message = "NVIDIA overrides ready: Nimbus will force VSYNC off during streams.";
       } else if (fl.nvidia_available && !fl.nvcp_ready) {
-        override_message = "NvAPI unavailable; Sunshine will fall back to forcing the highest available refresh rate during streams.";
+        override_message = "NvAPI unavailable; Nimbus will fall back to forcing the highest available refresh rate during streams.";
       } else if (!fl.nvidia_available) {
-        override_message = "No NVIDIA GPU detected; Sunshine will force the highest available refresh rate during streams as a best-effort VSYNC workaround.";
+        override_message = "No NVIDIA GPU detected; Nimbus will force the highest available refresh rate during streams as a best-effort VSYNC workaround.";
       }
     }
 
@@ -180,7 +201,7 @@ namespace confighttp {
     send_response(response, out);
   }
 
-  void getLosslessScalingStatus(resp_https_t response, req_https_t request) {
+  void getLosslessScalingStatus(resp_https_t response, req_https_t request) try {
     if (!authenticate(response, request)) {
       return;
     }
@@ -236,6 +257,8 @@ namespace confighttp {
     const bool checked_is_directory = checked_path && std::filesystem::is_directory(*checked_path, checked_ec);
     std::error_code default_ec;
     const bool default_is_directory = default_path && std::filesystem::is_directory(*default_path, default_ec);
+    std::error_code default_exists_ec;
+    const bool default_exists = default_path && std::filesystem::exists(*default_path, default_exists_ec);
 
     nlohmann::json out;
     out["configured_path"] = configured_utf8;
@@ -245,7 +268,7 @@ namespace confighttp {
     out["configured_is_directory"] = configured_is_directory;
     out["checked_is_directory"] = checked_is_directory;
     out["default_path"] = default_hint;
-    out["default_exists"] = resolved_default.has_value() || (default_path && std::filesystem::exists(*default_path));
+    out["default_exists"] = resolved_default.has_value() || default_exists;
     out["default_is_directory"] = default_is_directory;
 
     std::string suggested_utf8 = configured_utf8;
@@ -294,6 +317,12 @@ namespace confighttp {
     out["message"] = message;
 
     send_response(response, out);
+  } catch (const std::exception &e) {
+    BOOST_LOG(warning) << "Lossless Scaling status check failed: " << e.what();
+    send_response(response, make_lossless_status_unavailable_response());
+  } catch (...) {
+    BOOST_LOG(warning) << "Lossless Scaling status check failed with an unknown exception";
+    send_response(response, make_lossless_status_unavailable_response());
   }
 
 }  // namespace confighttp

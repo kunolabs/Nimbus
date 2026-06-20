@@ -56,11 +56,11 @@ export function useNaiveThemeOverrides() {
     return toCss(r * (1 - amt), g * (1 - amt), b * (1 - amt));
   };
   const compute = () => {
-    const primary = cssVarRgb('--color-primary', '77, 163, 255');
-    const info = cssVarRgb('--color-info', '2, 136, 209');
-    const success = cssVarRgb('--color-success', '76, 175, 80');
-    const warning = cssVarRgb('--color-warning', '245, 124, 0');
-    const danger = cssVarRgb('--color-danger', '220, 38, 38');
+    const primary = cssVarRgb('--color-primary', '37, 99, 235');
+    const info = cssVarRgb('--color-info', '14, 165, 233');
+    const success = cssVarRgb('--color-success', '34, 197, 94');
+    const warning = cssVarRgb('--color-warning', '245, 158, 11');
+    const danger = cssVarRgb('--color-danger', '244, 63, 94');
     overrides.value = {
       common: {
         primaryColor: primary,

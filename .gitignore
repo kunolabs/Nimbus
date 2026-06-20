@@ -37,6 +37,9 @@
 # VSCode IDE
 .vscode/
 
+# Local switch/export bundles may contain credentials, certificates, and keys.
+nimbus-switch-bundles/
+
 # build directories
 build/
 cmake-*/

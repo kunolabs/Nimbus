@@ -26,10 +26,10 @@ to understand inherited automation before changing release behavior.
 | `.github/workflows/ci.yml` | push, pull request, manual | High | Builds Windows and can create GitHub releases from `nimbus-v*` tags. Release creation remains blocked on package-output validation. |
 | `.github/workflows/ci-windows.yml` | reusable workflow | High | Builds Windows artifacts, downloads pinned WebRTC artifacts, optionally signs artifacts, and optionally publishes symbols. |
 | `.github/workflows/webrtc-release.yml` | manual | High | Can publish pinned WebRTC release assets with `contents: write`. Publishing defaults to off and requires an explicit Nimbus confirmation string. |
-| `.github/workflows/fixed-issue-follow-up.yml` | issue label, release published | Medium | Comments on and closes issues labeled `fixed`. Useful later, but should be reworded and checked before relying on it publicly. |
+| `.github/workflows/fixed-issue-follow-up.yml` | issue label, release published | Medium | Can comment when issues are labeled `fixed`; release-time closure is disabled during Nimbus bootstrap. |
 | `.github/workflows/logs-needed-reminder.yml` | issue/comment events | Medium | Uses inherited Vibeshine/Sunshine log filename detection for compatibility. Instructions now use Nimbus wording. |
-| `.github/workflows/logs-needed-closure.yml` | scheduled or issue state flow | Medium | Can close issues for missing logs. Needs maintainer policy review before use. |
-| `.github/workflows/environment-specific-closure.yml` | issue label | Medium | Closes issues as not planned when labeled `environment-specific`. Wording now says Nimbus. |
+| `.github/workflows/logs-needed-closure.yml` | scheduled or issue state flow | Medium | Disabled during Nimbus bootstrap. Re-enable only after maintainer support policy is defined. |
+| `.github/workflows/environment-specific-closure.yml` | issue label | Medium | Disabled during Nimbus bootstrap. Re-enable only after environment-specific closure policy is defined. |
 
 ## Release Automation Findings
 
@@ -68,11 +68,13 @@ Applied hardening:
   string.
 - Main release creation no longer closes `fixed` issues directly.
 - The separate fixed-issue release closer is disabled.
+- Stale logs-needed closure and environment-specific closure jobs are disabled
+  until Nimbus has a public support policy.
 
-Remaining release blocker: package branding now emits Nimbus-named artifacts and
-the local Windows package build has verified the final installer output. A
-release tag is still blocked until installer execution is tested in a VM or
-snapshot fixture and release notes are prepared.
+Remaining release blocker: the current release-prep commit now builds
+Nimbus-named Windows artifacts locally, but a release tag is still blocked until
+installer execution is tested in a VM or snapshot fixture and release notes are
+prepared.
 
 Decision: CI is safer for normal branch work and manual investigation, but do
 not intentionally create a Nimbus release tag until package install, upgrade,
@@ -87,7 +89,7 @@ identity:
 - `PROJECT_FQDN` is still `dev.lizardbyte.app.Sunshine`.
 - `WINDOWS_APP_USER_MODEL_ID` is still `Nonary.Vibepollo`.
 - CPack package name is now `Nimbus`.
-- Windows install directory is still `Apollo`.
+- Fresh Windows installs default to `Nimbus`.
 - Windows WiX product family is seeded with `Vibepollo`.
 - Bootstrapper text, support links, and output names now use Nimbus.
 - Several installer paths intentionally detect or migrate Apollo and Sunshine.
@@ -173,6 +175,137 @@ Caveats:
 - Signing and symbol publishing remain disabled until Nimbus-owned destinations
   and secrets exist.
 
+## Local Windows Package Revalidation
+
+Validation date: 2026-05-21
+
+Validated commits: `ce9ec7aa`, `fe7b7422`, `f14d443b`
+
+Scope: revalidate the Nimbus release-safety, visible web branding, visible
+Windows branding, and CMake web packaging fixes after VM fixture feedback.
+
+Result:
+
+| Check | Result | Notes |
+| --- | --- | --- |
+| Web UI production build | Pass | `npm run build` passes after restoring dependencies. Vite still reports inherited large vendor chunk warnings. |
+| English locale JSON parse | Pass | `en.json`, `en_GB.json`, and repaired `en_US.json` parse successfully. |
+| Native Windows host build | Pass | `cmake --build build/nimbus-package-validation --target sunshine --config Release -j 6` passes when `C:\msys64\ucrt64\bin` is on `PATH`. |
+| Bootstrapper C# compile | Pass | `build_bootstrapper.ps1 -UninstallOnly` compiles the shared installer source. |
+| CMake package web step | Pass | Windows CMake now prefers `C:/Program Files/nodejs/npm.cmd` and uses a build-local npm cache. |
+| CPack WiX MSI | Blocked | Current host does not expose WiX v3 `candle.exe` / `light.exe`, so `package_installer` stops at CPack WiX. |
+
+Useful command shape:
+
+```powershell
+$env:PATH = 'C:\msys64\ucrt64\bin;' + $env:PATH
+cmake -S . -B build\nimbus-package-validation -UNPM
+cmake --build build\nimbus-package-validation --target package_installer --config Release -j 6
+```
+
+Historical package blocker:
+
+```text
+Could not find the WiX candle executable.
+```
+
+This blocker was resolved by making WiX Toolset v3.14.1 portable binaries
+discoverable through `WIX`. The old `82fa5cdd` artifacts above are historical
+validation evidence only; do not promote them as the current release candidate.
+
+## Local UI And Status Revalidation
+
+Validation date: 2026-05-21
+
+Validated commits: `2ab4bf99`, `5bdc0784`, `3d8197ae`, `79de18b6`
+
+Scope: revalidate the additional Nimbus visible web copy sweep, first app-shell
+identity token pass, Windows status/log message rebrand, and static
+onboarding/header branding pass.
+
+Result:
+
+| Check | Result | Notes |
+| --- | --- | --- |
+| Web UI production build | Pass | `npm run build` passes. Vite still reports inherited large vendor chunk warnings. |
+| Targeted visible-name scan | Pass | Targeted Vue shell, app-edit, troubleshooting, Playnite, and English locale surfaces no longer contain `Vibepollo`. |
+| Static onboarding scan | Pass | `welcome.html`, `login.html`, and `template_header.html` no longer reference the Apollo logo, `sunshine.ico`, or the `apollo` default first username. |
+| English locale JSON parse | Pass | `en.json`, `en_GB.json`, and `en_US.json` parse successfully after the broader Nimbus copy sweep. |
+| Native Windows host build | Pass | `cmake --build build\nimbus-package-validation --target sunshine --config Release -j 6` passes when `C:\msys64\ucrt64\bin` is on `PATH`. |
+| Figma UI kit automation | Blocked | Existing Figma Starter-plan MCP call limit still blocks automated UI kit population. `docs/ui-identity-plan.md` remains the implementation source of truth. |
+
+Current visual-design state:
+
+- The Vue app shell and login/logout surfaces no longer depend on the inherited
+  Apollo logo image.
+- Legacy first-run and login HTML use the Nimbus mark and `nimbus` as the
+  default first username.
+- Tailwind semantic tokens now use the Nimbus blue, Lucent mint, neutral host
+  console, amber, green, and red token direction from `docs/ui-identity-plan.md`.
+- RTSS and Windows troubleshooting status text now uses Nimbus wording for
+  user-visible guidance.
+- Tray menu text, launcher export headers, default discovery fallback, service
+  display text, and in-app client-control help links now use Nimbus-owned
+  wording and docs.
+- The uninstaller quick-tip panel now uses uninstall-specific copy instead of
+  reusing install/upgrade guidance.
+
+## Current Full Package Revalidation
+
+Validation date: 2026-05-21
+
+Validated source commit: `4f3411b2`
+
+Scope: rebuild the full Windows package after the visible Nimbus web shell,
+static onboarding, Windows status copy, remaining visible host-branding cleanup,
+uninstaller quick-tip copy, manual update-check feedback, English session
+tooltip polish, release-note, and release-safety passes. This validates
+generated package artifacts, not installer execution on a target machine.
+
+Command shape:
+
+```powershell
+$env:PATH = 'C:\msys64\ucrt64\bin;' + $env:PATH
+$env:WIX = 'K:\CODEX\game-dev\game-streaming\Nimbus\build\nimbus-package-validation\tools\wix314'
+cmake --build build\nimbus-package-validation --target package_installer --config Release -j 6
+```
+
+Result:
+
+| Check | Result | Notes |
+| --- | --- | --- |
+| Web UI production build | Pass | Vite still reports inherited large vendor chunk warnings only. |
+| CPack WiX MSI | Pass | Initial sandbox run reached WiX but failed ICE validation because Windows Installer service access was unavailable; rerunning outside the sandbox with the same `WIX` path passed. |
+| Bootstrapper | Pass | Final file metadata resolves to `Nimbus Installer`, `0.0.0.44`, `4f3411b2`, `Kuno Labs`. |
+| Signing | Skipped | `SIGNPATH_API_TOKEN` was unset; output is unsigned. |
+| Installer execution | Partial | Manual VM smoke observed Nimbus default install path, visible Nimbus wording, service running with Nimbus description, Web UI launch path, manual update-check feedback, Artemis-on-Shield pairing, Artemis streaming/disconnect, and no Defender warning. Uninstall/reinstall and upgrade behavior still need fixture records. |
+
+Follow-up on 2026-05-27: the bootstrapper gained a Nimbus-line
+upgrade-preservation guard for user-owned config, cover, credential, log,
+session, and script files. Compile-only validation passed for both
+`-UninstallOnly` and MSI-embedded setup builds. A full unsigned package rebuild
+also passed after rerunning WiX outside the sandbox so ICE validation could
+access Windows Installer services. VM upgrade execution is still required before
+release claims.
+
+Latest local fixture artifacts from `63daba19`:
+
+| Artifact | Size | SHA256 |
+| --- | ---: | --- |
+| `build/nimbus-package-validation/cpack_artifacts/NimbusSetup.exe` | 25,916,928 | `DB6FDAE221FA33E60C1E1569464B8D552A3C1215B2E69444E1C74B9A1BC063F0` |
+| `build/nimbus-package-validation/cpack_artifacts/Nimbus.msi` | 25,678,060 | `8B54FE46B7B424A315336B6F5978AAB2CF8DF2525B9EC0DE17DEB7607FEF54BD` |
+
+Artifacts:
+
+| Artifact | Size | SHA256 |
+| --- | ---: | --- |
+| `build/nimbus-package-validation/cpack_artifacts/NimbusSetup.exe` | 25,871,872 | `EEAD1749BA88032AFD09E7FBB1917B50DDA88F425059CEEDC18775ADE3028328` |
+| `build/nimbus-package-validation/cpack_artifacts/Nimbus.msi` | 25,606,727 | `6E739CE9F56B11A0FD5B824E460AB389A0C61216FEE2CCE8DAA30E1E27F48D4E` |
+
+Current caveat: these artifacts are newer and better branded than the earlier
+`82fa5cdd` validation artifacts, but they are still local validation artifacts
+until the remaining VM uninstall, reinstall, and upgrade evidence is recorded.
+
 ## Required Secrets Before Release CI
 
 | Secret | Purpose | Current Risk |
@@ -183,7 +316,9 @@ Caveats:
 
 ## Recommended Next Actions
 
-1. Run installer dry-runs in a Windows VM or snapshot fixture.
+1. Finish the Windows VM fixture: uninstaller quick-tip retest, uninstall,
+   reinstall, compatible-client pairing, short stream smoke, and upgrade checks
+   where practical.
 2. Prepare the first alpha release notes for `nimbus-v0.1.0-alpha.1`.
 3. Review issue automation policy before enabling automatic issue closures.
 4. Create a Nimbus symbol publishing plan before enabling `publish_symbols`.
@@ -192,5 +327,6 @@ Caveats:
 ## Current Verdict
 
 Nimbus is ready for documentation, issue triage work, and first-alpha release
-planning. It is not yet ready for public release-tag publication because
-installer execution and upgrade behavior still need fixture validation.
+planning. The current Windows package build now completes locally, but Nimbus is
+not yet ready for public release-tag publication because installer execution and
+upgrade behavior still need fixture validation.

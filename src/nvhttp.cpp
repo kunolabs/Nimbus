@@ -898,10 +898,8 @@ namespace nvhttp {
 
         pt::ptree vibeshine_tree;
         if (fs::exists(vibeshine_path)) {
-          try {
-            pt::read_json(vibeshine_path, vibeshine_tree);
-          } catch (const std::exception &e) {
-            BOOST_LOG(error) << "Couldn't read "sv << vibeshine_path << ": "sv << e.what();
+          if (!statefile::read_json_with_recovery(vibeshine_path, vibeshine_tree)) {
+            BOOST_LOG(error) << "Couldn't read "sv << vibeshine_path;
             vibeshine_tree = {};
           }
         }
@@ -952,15 +950,14 @@ namespace nvhttp {
       if (share_state_file) {
         update::state.last_notified_version = root.value("last_notified_version", "");
       } else if (fs::exists(vibeshine_path)) {
-        try {
-          pt::ptree vibeshine_tree;
-          pt::read_json(vibeshine_path, vibeshine_tree);
+        pt::ptree vibeshine_tree;
+        if (statefile::read_json_with_recovery(vibeshine_path, vibeshine_tree)) {
           update::state.last_notified_version = vibeshine_tree.get("root.last_notified_version", "");
 #ifdef _WIN32
           http::shared_virtual_display_guid = vibeshine_tree.get("root.shared_virtual_display_guid", "");
 #endif
-        } catch (const std::exception &e) {
-          BOOST_LOG(warning) << "Couldn't read "sv << vibeshine_path << " for notification state: "sv << e.what();
+        } else {
+          BOOST_LOG(warning) << "Couldn't read "sv << vibeshine_path << " for notification state";
           update::state.last_notified_version.clear();
 #ifdef _WIN32
           http::shared_virtual_display_guid.clear();
@@ -2596,6 +2593,15 @@ namespace nvhttp {
         }
 
         if (request) {
+          if (!allow_display_changes &&
+              launch_session->virtual_display_recreated_on_demand &&
+              launch_session->virtual_display &&
+              request->configuration &&
+              request->configuration->m_hdr_state) {
+            request->configuration->m_hdr_state.reset();
+            BOOST_LOG(info) << "Display helper: suppressing HDR state change during retained resume virtual-display recreation.";
+          }
+
           if (!display_helper_integration::apply(*request)) {
             if (helper_session_available) {
               BOOST_LOG(warning) << "Display helper: failed to apply display configuration; continuing with existing display.";

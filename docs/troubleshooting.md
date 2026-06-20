@@ -32,6 +32,18 @@ Can't access the web UI?
 
 1. Check firewall rules.
 
+### WebRTC Stream Tab Blanks The Host Display
+
+The Stream tab is an experimental browser client. If you open it from the host
+PC itself while virtual display is configured to use an exclusive Nimbus virtual
+screen, Windows may disable the physical display that contains the browser.
+
+For TV/console-style setups, prefer a Moonlight-compatible native client such as
+Artemis on Shield TV. If you want to use WebRTC locally, switch the virtual
+display layout to an extended mode first, or make sure you have a recovery path
+such as a paired native client, Remote Desktop, RustDesk, or a display restore
+hotkey.
+
 ### Controller works on Steam but not in games
 One trick might be to change Steam settings and check or uncheck the configuration to support Xbox/PlayStation
 controllers and leave only support for Generic controllers.
@@ -234,6 +246,25 @@ permissions on the disk.
 
 ### Stuttering
 If you experience stuttering using NVIDIA, try disabling `vsync:fast` in the NVIDIA Control Panel.
+
+### Windows audio stays on Steam Streaming Speakers after a stream
+
+Nimbus normally restores the previous Windows default audio output when audio
+capture tears down. If a stream is disconnected while a desktop session, local
+WebRTC attempt, or virtual display session is left paused, Windows may keep
+`Steam Streaming Speakers` selected and refuse manual output changes until the
+service fully restarts.
+
+The quickest recovery is to restart the Nimbus service from an elevated
+PowerShell window, or use the tray menu's `Restore Audio Output` action in
+alpha builds that include it.
+
+```powershell
+Restart-Service -Name ApolloService -Force
+```
+
+The service name is still `ApolloService` for legacy compatibility in current
+alpha builds, even though the displayed service description is `Nimbus Service`.
 
 <div class="section_buttons">
 

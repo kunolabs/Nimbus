@@ -9,6 +9,8 @@
 #include <iomanip>
 #include <iterator>
 #include <limits>
+#include <mutex>
+#include <optional>
 #include <set>
 #include <sstream>
 #include <vector>
@@ -112,6 +114,8 @@ namespace platf {
 
   bool enabled_mouse_keys = false;
   MOUSEKEYS previous_mouse_keys_state;
+  std::mutex screen_saver_state_mutex;
+  std::optional<BOOL> previous_screen_saver_active;
 
   HANDLE qos_handle = nullptr;
 
@@ -369,7 +373,7 @@ namespace platf {
     if (elevated && (elevationType == TokenElevationTypeDefault && !IsUserAdmin(userToken))) {
       // We don't have to strip the token or do anything here, but let's give the user a warning so they're aware what is happening.
       BOOST_LOG(warning) << "This command requires elevation and the current user account logged in does not have administrator rights. "
-                         << "For security reasons Sunshine will retain the same access level as the current user and will not elevate it.";
+                         << "For security reasons Nimbus will retain the same access level as the current user and will not elevate it.";
     }
 
     // User has a limited token, this means they have UAC enabled and is an Administrator
@@ -1267,7 +1271,48 @@ namespace platf {
     }
   }
 
+  void capture_screen_saver_active_state() {
+    std::lock_guard<std::mutex> lock(screen_saver_state_mutex);
+    if (previous_screen_saver_active) {
+      return;
+    }
+
+    BOOL active = FALSE;
+    if (!SystemParametersInfoW(SPI_GETSCREENSAVEACTIVE, 0, &active, 0)) {
+      const auto winerr = GetLastError();
+      BOOST_LOG(warning) << "Unable to get Windows screen saver active state: "sv << winerr;
+      return;
+    }
+
+    previous_screen_saver_active = active ? TRUE : FALSE;
+    BOOST_LOG(debug) << "Windows screen saver active state saved: "sv << (active ? "enabled"sv : "disabled"sv);
+  }
+
+  void restore_screen_saver_active_state() {
+    std::optional<BOOL> desired_state;
+    {
+      std::lock_guard<std::mutex> lock(screen_saver_state_mutex);
+      desired_state = previous_screen_saver_active;
+      previous_screen_saver_active.reset();
+    }
+
+    if (!desired_state) {
+      return;
+    }
+
+    const BOOL desired_active = *desired_state ? TRUE : FALSE;
+    if (!SystemParametersInfoW(SPI_SETSCREENSAVEACTIVE, desired_active, nullptr, SPIF_SENDCHANGE)) {
+      const auto winerr = GetLastError();
+      BOOST_LOG(warning) << "Unable to restore Windows screen saver active state: "sv << winerr;
+      return;
+    }
+
+    BOOST_LOG(info) << "Windows screen saver active state restored to "sv << (desired_active ? "enabled"sv : "disabled"sv);
+  }
+
   void streaming_will_start() {
+    capture_screen_saver_active_state();
+
     static std::once_flag load_wlanapi_once_flag;
     std::call_once(load_wlanapi_once_flag, []() {
       // wlanapi.dll is not installed by default on Windows Server, so we load it dynamically
@@ -1358,7 +1403,7 @@ namespace platf {
 
     // If there is no mouse connected, enable Mouse Keys to force the cursor to appear
     if (!GetSystemMetrics(SM_MOUSEPRESENT)) {
-      BOOST_LOG(info) << "A mouse was not detected. Sunshine will enable Mouse Keys while streaming to force the mouse cursor to appear.";
+      BOOST_LOG(info) << "A mouse was not detected. Nimbus will enable Mouse Keys while streaming to force the mouse cursor to appear.";
 
       // Get the current state of Mouse Keys so we can restore it when streaming is over
       previous_mouse_keys_state.cbSize = sizeof(previous_mouse_keys_state);
@@ -1424,6 +1469,8 @@ namespace platf {
         BOOST_LOG(warning) << "Unable to restore original state of Mouse Keys: "sv << winerr;
       }
     }
+
+    restore_screen_saver_active_state();
   }
 
   void restart_on_exit() {
@@ -1433,14 +1480,14 @@ namespace platf {
     WCHAR executable[MAX_PATH];
     if (GetModuleFileNameW(nullptr, executable, ARRAYSIZE(executable)) == 0) {
       auto winerr = GetLastError();
-      BOOST_LOG(fatal) << "Failed to get Sunshine path: "sv << winerr;
+      BOOST_LOG(fatal) << "Failed to get Nimbus path: "sv << winerr;
       return;
     }
 
     PROCESS_INFORMATION process_info;
     if (!CreateProcessW(executable, GetCommandLineW(), nullptr, nullptr, false, CREATE_UNICODE_ENVIRONMENT | EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, (LPSTARTUPINFOW) &startup_info, &process_info)) {
       auto winerr = GetLastError();
-      BOOST_LOG(fatal) << "Unable to restart Sunshine: "sv << winerr;
+      BOOST_LOG(fatal) << "Unable to restart Nimbus: "sv << winerr;
       return;
     }
 
@@ -1992,7 +2039,7 @@ namespace platf {
     WCHAR hostname[256];
     if (GetHostNameW(hostname, ARRAYSIZE(hostname)) == SOCKET_ERROR) {
       BOOST_LOG(error) << "GetHostNameW() failed: "sv << WSAGetLastError();
-      return "Sunshine"s;
+      return "Nimbus"s;
     }
     return to_utf8(std::wstring_view {hostname});
   }

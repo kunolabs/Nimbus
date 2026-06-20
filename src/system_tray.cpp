@@ -12,20 +12,20 @@
     #include <Windows.h>
     #include <accctrl.h>
     #include <aclapi.h>
-    #define TRAY_ICON WEB_DIR "images/apollo.ico"
-    #define TRAY_ICON_PLAYING WEB_DIR "images/apollo-playing.ico"
-    #define TRAY_ICON_PAUSING WEB_DIR "images/apollo-pausing.ico"
-    #define TRAY_ICON_LOCKED WEB_DIR "images/apollo-locked.ico"
+    #define TRAY_ICON WEB_DIR "images/nimbus.ico"
+    #define TRAY_ICON_PLAYING WEB_DIR "images/nimbus-playing.ico"
+    #define TRAY_ICON_PAUSING WEB_DIR "images/nimbus-pausing.ico"
+    #define TRAY_ICON_LOCKED WEB_DIR "images/nimbus-locked.ico"
   #elif defined(__linux__) || defined(linux) || defined(__linux)
     #define TRAY_ICON SUNSHINE_TRAY_PREFIX "-tray"
     #define TRAY_ICON_PLAYING SUNSHINE_TRAY_PREFIX "-playing"
     #define TRAY_ICON_PAUSING SUNSHINE_TRAY_PREFIX "-pausing"
     #define TRAY_ICON_LOCKED SUNSHINE_TRAY_PREFIX "-locked"
   #elif defined(__APPLE__) || defined(__MACH__)
-    #define TRAY_ICON WEB_DIR "images/logo-apollo-16.png"
-    #define TRAY_ICON_PLAYING WEB_DIR "images/apollo-playing-16.png"
-    #define TRAY_ICON_PAUSING WEB_DIR "images/apollo-pausing-16.png"
-    #define TRAY_ICON_LOCKED WEB_DIR "images/apollo-locked-16.png"
+    #define TRAY_ICON WEB_DIR "images/logo-nimbus-16.png"
+    #define TRAY_ICON_PLAYING WEB_DIR "images/nimbus-playing-16.png"
+    #define TRAY_ICON_PAUSING WEB_DIR "images/nimbus-pausing-16.png"
+    #define TRAY_ICON_LOCKED WEB_DIR "images/nimbus-locked-16.png"
     #include <dispatch/dispatch.h>
   #endif
 
@@ -33,6 +33,7 @@
 
   // standard includes
   #include <atomic>
+  #include <chrono>
   #include <condition_variable>
   #include <csignal>
   #include <cstring>
@@ -114,6 +115,13 @@ namespace system_tray {
     platf::restart();
   }
 
+#ifdef _WIN32
+  void tray_restore_audio_cb([[maybe_unused]] struct tray_menu *item) {
+    BOOST_LOG(info) << "Restoring default audio output from system tray"sv;
+    platf::restore_default_audio_device();
+  }
+#endif
+
   void tray_quit_cb([[maybe_unused]] struct tray_menu *item) {
     BOOST_LOG(info) << "Quitting from system tray"sv;
 
@@ -138,7 +146,7 @@ namespace system_tray {
     .menu =
       (struct tray_menu[]) {
         // todo - use boost/locale to translate menu strings
-        {.text = "Open Apollo", .cb = tray_open_ui_cb},
+        {.text = "Open Nimbus", .cb = tray_open_ui_cb},
         {.text = "-"},
         // { .text = "-" },
         // { .text = "Donate",
@@ -153,9 +161,12 @@ namespace system_tray {
         {.text = TRAY_MSG_NO_APP_RUNNING, .cb = tray_force_stop_cb},
         {.text = "Check for Update", .cb = [](tray_menu *) {
            BOOST_LOG(info) << "Manual update check requested from tray"sv;
-           update::trigger_check(true);
+           update::trigger_check(true, true);
          }},
 
+#ifdef _WIN32
+        {.text = "Restore Audio Output", .cb = tray_restore_audio_cb},
+#endif
         {.text = "Restart", .cb = tray_restart_cb},
         {.text = "Quit", .cb = tray_quit_cb},
         {.text = nullptr}
@@ -535,7 +546,11 @@ namespace system_tray {
       tray.notification_icon = TRAY_ICON_LOCKED;
       tray.tooltip = PROJECT_NAME;
       tray.notification_cb = []() {
-        launch_ui("/clients");
+        const auto focus_id = std::chrono::duration_cast<std::chrono::milliseconds>(
+                                std::chrono::system_clock::now().time_since_epoch()
+                              )
+                                .count();
+        launch_ui("/clients?sec=pair&focus=" + std::to_string(focus_id));
       };
       tray_update(&tray);
     });
@@ -643,10 +658,10 @@ namespace system_tray {
     }
 
   #ifdef _WIN32
-    std::string tmp_str = "Open Apollo (" + config::nvhttp.sunshine_name + ":" + std::to_string(net::map_port(confighttp::PORT_HTTPS)) + ")";
+    std::string tmp_str = "Open Nimbus (" + config::nvhttp.sunshine_name + ":" + std::to_string(net::map_port(confighttp::PORT_HTTPS)) + ")";
     static const std::string title_str = utf8ToAcp(tmp_str);
   #else
-    static const std::string title_str = "Open Apollo (" + config::nvhttp.sunshine_name + ":" + std::to_string(net::map_port(confighttp::PORT_HTTPS)) + ")";
+    static const std::string title_str = "Open Nimbus (" + config::nvhttp.sunshine_name + ":" + std::to_string(net::map_port(confighttp::PORT_HTTPS)) + ")";
   #endif
     tray.menu[0].text = title_str.c_str();
 

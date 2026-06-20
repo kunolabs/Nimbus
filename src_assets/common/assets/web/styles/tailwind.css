@@ -11,6 +11,36 @@
 
 /* Naive UI button overrides to ensure solid variants across the app */
 @layer components {
+  .nimbus-app-shell {
+    @apply min-h-screen flex flex-col bg-light text-dark dark:bg-dark dark:text-light;
+  }
+
+  .nimbus-topbar {
+    @apply sticky top-0 z-30 h-14 flex items-center gap-4 px-4 border-b border-dark/10 bg-surface/90 text-dark shadow-sm backdrop-blur dark:border-light/10 dark:bg-dark/90 dark:text-light;
+  }
+
+  .nimbus-brand-mark {
+    @apply grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-primary/25 text-sm font-bold text-onPrimary shadow-sm;
+    background:
+      linear-gradient(135deg, rgb(var(--color-primary)) 0%, rgb(var(--color-primary)) 62%, rgb(var(--color-secondary)) 100%);
+  }
+
+  .nimbus-brand-mark--large {
+    @apply h-16 w-16 text-2xl;
+  }
+
+  .nimbus-nav-link {
+    @apply inline-flex items-center gap-2 rounded-md border border-transparent px-3 py-1.5 text-sm font-medium text-dark/75 transition-colors hover:border-primary/20 hover:bg-primary/10 hover:text-brand dark:text-light/75 dark:hover:text-light;
+  }
+
+  .nimbus-nav-link-active {
+    @apply border-primary/25 bg-primary/10 text-brand shadow-sm dark:bg-primary/15 dark:text-light;
+  }
+
+  .nimbus-page-container {
+    @apply mx-auto px-4 py-4 sm:px-6 md:py-6 lg:px-8;
+  }
+
   :root .n-button {
     @apply shadow-sm;
   }

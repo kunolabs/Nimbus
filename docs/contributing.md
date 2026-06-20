@@ -51,6 +51,9 @@ The Web UI lives under `src_assets/common/assets/web`.
   UI work toward first-class Tailwind utilities.
 - If you add files outside the existing Web UI tree, update `tailwind.config.js`
   so classes are not purged.
+- For visible redesign work, start with
+  [ui-identity-plan.md](ui-identity-plan.md) and keep changes in small,
+  screenshot-backed slices.
 
 ### Documentation
 

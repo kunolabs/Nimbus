@@ -1,5 +1,5 @@
 {
-  "name": "sunshine",
+  "name": "nimbus-web",
   "version": "0.0.0",
   "scripts": {
     "build": "vite build --mode prod",

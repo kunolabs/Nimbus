@@ -135,7 +135,7 @@
                     {{
                       crashDumpMessage ||
                       $t('config.crash_dump_desc') ||
-                      'Vibepollo detected a recent crash dump. Please export a crash bundle and include it when filing an issue.'
+                      'Nimbus detected a recent crash dump. Please export a crash bundle and include it when filing an issue.'
                     }}
                   </p>
                   <p v-if="crashDumpDetails" class="text-xs opacity-60 m-0">
@@ -149,7 +149,7 @@
                     strong
                     size="small"
                     class="w-full justify-center sm:w-auto"
-                    href="https://github.com/Nonary/vibeshine/issues/new?template=bug_report.yml"
+                    :href="NIMBUS_ISSUE_REPORT_URL"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -199,7 +199,7 @@
                   <p class="text-xs opacity-80 m-0">
                     {{
                       $t('config.vigem_missing_desc') ||
-                      'Vibepollo requires the ViGEmBus driver to emulate controllers on Windows. It is no longer bundled. Please download and install it manually:'
+                      'Nimbus requires the ViGEmBus driver to emulate controllers on Windows. It is no longer bundled. Please download and install it manually:'
                     }}
                     <span v-if="vigemVersion" class="ml-2 opacity-60">
                       ({{ $t('config.vigem_detected_version') || 'Detected' }}: {{ vigemVersion }})
@@ -223,7 +223,7 @@
               </div>
             </n-alert>
             <n-alert
-              v-if="showGoldenLayoutUpgradeBanner"
+              v-if="showGoldenSnapshotOutOfDateBanner"
               type="warning"
               :show-icon="true"
               class="rounded-xl"
@@ -235,16 +235,16 @@
                   <p class="text-sm m-0 font-medium">
                     {{
                       translate(
-                        'config.golden_layout_upgrade_title',
-                        'Golden display snapshot needs an update',
+                        'config.golden_snapshot_outdated_title',
+                        'Display snapshot may be out of date',
                       )
                     }}
                   </p>
                   <p class="text-xs opacity-80 m-0">
                     {{
                       translate(
-                        'config.golden_layout_upgrade_desc',
-                        'Your saved snapshot predates display layout support. Recreate it to restore portrait and landscape monitor layouts correctly.',
+                        'config.golden_snapshot_outdated_desc',
+                        'Your saved snapshot may no longer match your display setup. Recreate it when possible to reduce the chance of display recovery issues.',
                       )
                     }}
                   </p>
@@ -268,7 +268,7 @@
                       >
                         <i class="fas fa-rotate-right" />
                         <span>{{
-                          translate('config.golden_layout_upgrade_action', 'Open Display Settings')
+                          translate('config.golden_snapshot_outdated_action', 'Open Display Settings')
                         }}</span>
                       </n-button>
                     </a>
@@ -487,6 +487,13 @@ import { useAppsStore } from '@/stores/apps';
 import { http } from '@/http';
 import type { CrashDumpStatus } from '@/utils/crashDump';
 import { isCrashDumpEligible, sanitizeCrashDumpStatus } from '@/utils/crashDump';
+import {
+  NIMBUS_ISSUE_REPORT_URL,
+  NIMBUS_RELEASES_API_URL,
+  isNimbusReleaseTag,
+  normalizeReleaseTag,
+  normalizeReleaseTagKey,
+} from '@/utils/releaseRepository';
 
 const installedVersion = ref<VibepolloVersion>(new VibepolloVersion('0.0.0'));
 const githubRelease = ref<GitHubRelease | null>(null);
@@ -528,6 +535,9 @@ type GoldenStatus = {
   latest_snapshot_version?: number;
   has_layout?: boolean;
   needs_layout_upgrade?: boolean;
+  out_of_date?: boolean;
+  comparison_available?: boolean;
+  out_of_date_reason?: string;
 };
 const playnite = ref<PlayniteStatus | null>(null);
 
@@ -552,6 +562,25 @@ const translate = (key: string, fallback: string) => {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object';
+}
+
+function isDashboardRelease(value: unknown): value is GitHubRelease {
+  if (!isRecord(value)) return false;
+  const tagName = value['tag_name'];
+  return (
+    value['draft'] !== true &&
+    typeof tagName === 'string' &&
+    isNimbusReleaseTag(tagName)
+  );
+}
+
+function latestReleaseByVersion(releases: GitHubRelease[]): GitHubRelease | null {
+  return releases.reduce<GitHubRelease | null>((best, candidate) => {
+    if (!best) return candidate;
+    return VibepolloVersion.fromRelease(candidate).isGreater(VibepolloVersion.fromRelease(best))
+      ? candidate
+      : best;
+  }, null);
 }
 
 function isPlayniteFullscreenEntry(app: Record<string, unknown>): boolean {
@@ -637,47 +666,27 @@ async function runVersionChecks() {
     branch.value = cfg.branch || '';
     commit.value = cfg.commit || '';
 
-    // Remote release checks (GitHub)
+    githubRelease.value = null;
+    preReleaseRelease.value = null;
+    installedIsPrerelease.value = false;
+
+    // Fetch Nimbus-owned releases only; inherited upstream tags must not drive update banners.
     try {
-      githubRelease.value = await fetch(
-        'https://api.github.com/repos/Nonary/Vibepollo/releases/latest',
-      ).then((r) => r.json());
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn('[Dashboard] latest release fetch failed', e);
-    }
-    // Fetch list of releases to locate prereleases and determine installed stability
-    try {
-      const releases = await fetch('https://api.github.com/repos/Nonary/Vibepollo/releases').then(
-        (r) => r.json(),
-      );
+      const releases = await fetch(NIMBUS_RELEASES_API_URL, {
+        headers: { Accept: 'application/vnd.github+json' },
+      }).then((r) => r.json());
       if (Array.isArray(releases)) {
-        // Pick the latest prerelease by semver (not just the first one)
-        const prereleases = releases.filter((r: any) => r && r.prerelease && !r.draft);
-        if (prereleases.length > 0) {
-          let best = prereleases[0];
-          let bestV = VibepolloVersion.fromRelease(best);
-          for (let i = 1; i < prereleases.length; i++) {
-            const cand = prereleases[i];
-            const candV = VibepolloVersion.fromRelease(cand);
-            if (candV.isGreater(bestV)) {
-              best = cand;
-              bestV = candV;
-            }
-          }
-          preReleaseRelease.value = best as GitHubRelease;
-        }
+        const nimbusReleases = releases.filter(isDashboardRelease);
+        githubRelease.value = latestReleaseByVersion(
+          nimbusReleases.filter((release) => release.prerelease !== true),
+        );
+        preReleaseRelease.value = latestReleaseByVersion(
+          nimbusReleases.filter((release) => release.prerelease === true),
+        );
         // Determine if installed tag corresponds to a prerelease on GitHub
-        const installedTag = installedVersion.value?.version || '';
-        const installedTagV = installedTag.toLowerCase().startsWith('v')
-          ? installedTag
-          : 'v' + installedTag;
-        const match = releases.find(
-          (r: any) =>
-            r &&
-            !r.draft &&
-            typeof r.tag_name === 'string' &&
-            (r.tag_name === installedTag || r.tag_name === installedTagV),
+        const installedTagKey = normalizeReleaseTagKey(installedVersion.value?.version || '');
+        const match = nimbusReleases.find(
+          (release) => normalizeReleaseTagKey(release.tag_name) === installedTagKey,
         );
         installedIsPrerelease.value = !!(match && match.prerelease === true);
       }
@@ -966,19 +975,19 @@ const displayVersion = computed(() => {
   const v = installedVersion.value?.version || '0.0.0';
   if (!v || v === '0.0.0') {
     const pre = preReleaseRelease.value?.tag_name || '';
-    if (pre) return pre.replace(/^v/i, '');
+    if (pre) return normalizeReleaseTag(pre);
   }
-  return v;
+  return normalizeReleaseTag(v);
 });
 const stableBuildAvailable = computed(() => {
   if (!githubRelease.value) return false;
   return githubVersion.value.isGreater(installedVersion.value);
 });
 const preReleaseBuildAvailable = computed(() => {
-  if (!preReleaseRelease.value || !githubRelease.value) return false;
+  if (!preReleaseRelease.value) return false;
   return (
     preReleaseVersion.value.isGreater(installedVersion.value) &&
-    preReleaseVersion.value.isGreater(githubVersion.value)
+    (!githubRelease.value || preReleaseVersion.value.isGreater(githubVersion.value))
   );
 });
 const buildVersionIsDirty = computed(() => {
@@ -1017,10 +1026,14 @@ const showVigemBanner = computed(() => {
   return plat === 'windows' && controllerEnabled && vigemInstalled.value === false;
 });
 
-const showGoldenLayoutUpgradeBanner = computed(() => {
+const showGoldenSnapshotOutOfDateBanner = computed(() => {
   const plat = (configStore.metadata?.platform || '').toLowerCase();
   if (plat !== 'windows') return false;
-  return goldenStatus.value?.exists === true && goldenStatus.value?.needs_layout_upgrade === true;
+  return (
+    goldenStatus.value?.exists === true &&
+    (goldenStatus.value?.needs_layout_upgrade === true ||
+      goldenStatus.value?.out_of_date === true)
+  );
 });
 
 const playniteUpdateAvailable = computed(() => {
@@ -1052,7 +1065,7 @@ const playniteMissingPluginBannerText = computed(() => {
   }
   const detected =
     details.length > 1 ? `${details[0]} and ${details[1]}` : (details[0] ?? 'Playnite entries');
-  return `Detected ${detected}, but the Playnite plugin is no longer installed. Reinstall the plugin to restore integration, or purge Playnite games to remove all Playnite entries from Vibeshine.`;
+  return `Detected ${detected}, but the Playnite plugin is no longer installed. Reinstall the plugin to restore integration, or purge Playnite games to remove all Playnite entries from Nimbus.`;
 });
 
 async function resolvePlaynitePluginIssue() {
@@ -1123,7 +1136,7 @@ function openPurgePlayniteGamesConfirm() {
   dialog.warning({
     title: 'Purge Playnite games?',
     content:
-      'This removes all Playnite entries from Vibeshine, including auto-synced games and the Playnite (Fullscreen) launcher.',
+      'This removes all Playnite entries from Nimbus, including auto-synced games and the Playnite (Fullscreen) launcher.',
     positiveText: 'Purge',
     negativeText: 'Cancel',
     onPositiveClick: async () => {

@@ -4,12 +4,10 @@
       <n-dialog-provider>
         <n-notification-provider>
           <n-message-provider>
-            <div class="min-h-screen flex flex-col bg-light dark:bg-dark text-dark dark:text-light">
-              <header
-                class="sticky top-0 z-30 h-14 flex items-center gap-4 px-4 border-b border-dark/10 dark:border-light/10 bg-light/70 dark:bg-dark/60 backdrop-blur supports-[backdrop-filter]:bg-light/40 supports-[backdrop-filter]:dark:bg-dark/40"
-              >
+            <div class="nimbus-app-shell">
+              <header class="nimbus-topbar">
                 <div class="flex items-center gap-3 min-w-0">
-                  <img src="/images/logo-apollo-45.png" alt="Vibepollo" class="h-8 w-8" />
+                  <div class="nimbus-brand-mark" aria-hidden="true">N</div>
                   <h1 class="text-base md:text-lg font-semibold tracking-tight truncate">
                     {{
                       displayTitle && displayTitle.includes('.') ? $t(displayTitle) : displayTitle
@@ -91,11 +89,9 @@
                     class="relative flex-1 flex flex-col items-center justify-center p-6 overflow-y-auto"
                   >
                     <div class="w-full max-w-md mx-auto text-center space-y-6">
-                      <img
-                        src="/images/logo-apollo-45.png"
-                        alt="Vibepollo"
-                        class="h-24 w-24 opacity-80 mx-auto select-none"
-                      />
+                      <div class="nimbus-brand-mark nimbus-brand-mark--large mx-auto" aria-hidden="true">
+                        N
+                      </div>
                       <div class="space-y-2">
                         <h2 class="text-2xl font-semibold tracking-tight">
                           {{ $t('auth.logout_success') }}
@@ -111,7 +107,7 @@
                         </n-button>
                       </div>
                       <p class="mt-8 text-[10px] tracking-wider uppercase opacity-60 select-none">
-                        Vibepollo
+                        Nimbus
                       </p>
                     </div>
                   </div>
@@ -161,10 +157,10 @@ const cfgStore = useConfigStore();
 const { metadata } = storeToRefs(cfgStore);
 
 const linkClass = (path: string) => {
-  const base = 'inline-flex items-center gap-2 px-3 py-1 rounded-md text-brand';
+  const base = 'nimbus-nav-link';
   const active = route.path === path;
-  if (active) return base + ' font-semibold bg-primary/20 text-brand';
-  return base + ' hover:bg-primary/10';
+  if (active) return base + ' nimbus-nav-link-active';
+  return base;
 };
 const pageTitle = ref('Dashboard');
 const displayTitle = computed(() => {
@@ -186,7 +182,7 @@ watch(
       '/clients': 'clients.nav',
       '/webrtc': 'webrtc.nav',
     };
-    const v = map[p] || 'Vibepollo';
+    const v = map[p] || 'Nimbus';
     pageTitle.value = v;
   },
   { immediate: true },
@@ -257,7 +253,7 @@ function onMobileSelect(key: string | number): void {
 }
 
 // Layout container sizing via route meta: { container: 'sm'|'md'|'lg'|'xl'|'full' }
-const base = 'mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6';
+const base = 'nimbus-page-container';
 const sizes: Record<string, string> = {
   sm: 'max-w-2xl',
   md: 'max-w-3xl',

@@ -13,6 +13,9 @@ concurrency:
 
 jobs:
   close:
+    # Disabled during Nimbus bootstrap. Re-enable only after the issue-support
+    # policy, labels, and maintainer response expectations are Nimbus-owned.
+    if: false
     runs-on: ubuntu-latest
     permissions:
       issues: write

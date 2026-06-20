@@ -19,14 +19,14 @@ const config = store.config;
       setting-key="credentials_file"
       v-model="config.credentials_file"
       class="mb-6"
-      placeholder="sunshine_state.json"
+      placeholder="Automatic"
     />
 
     <ConfigFieldRenderer
       setting-key="log_path"
       v-model="config.log_path"
       class="mb-6"
-      placeholder="sunshine.log"
+      placeholder="Automatic"
     />
 
     <ConfigFieldRenderer
@@ -47,14 +47,14 @@ const config = store.config;
       setting-key="file_state"
       v-model="config.file_state"
       class="mb-6"
-      placeholder="sunshine_state.json"
+      placeholder="Automatic"
     />
 
     <ConfigFieldRenderer
       setting-key="vibeshine_file_state"
       v-model="config.vibeshine_file_state"
       class="mb-6"
-      placeholder="vibeshine_state.json"
+      placeholder="Automatic"
     />
   </div>
 </template>

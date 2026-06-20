@@ -57,8 +57,18 @@ endif()
 # Default layout: ${CMAKE_SOURCE_DIR}/src_assets/common/assets/web
 set(WEB_UI_DIR "${SUNSHINE_SOURCE_ASSETS_DIR}/common/assets/web")
 
-#WebUI build
-find_program(NPM npm REQUIRED)
+# WebUI build. On Windows prefer the Node.js launcher from the standard
+# installer; MSYS npm can fail when invoked through cmd.exe during packaging.
+if(WIN32)
+    find_program(NPM npm.cmd
+            HINTS "$ENV{ProgramFiles}/nodejs"
+            NO_DEFAULT_PATH)
+    if(NOT NPM)
+        find_program(NPM NAMES npm.cmd npm REQUIRED)
+    endif()
+else()
+    find_program(NPM npm REQUIRED)
+endif()
 
 set(NPM_INSTALL_FLAGS
     --ignore-scripts
@@ -69,6 +79,7 @@ set(NPM_INSTALL_FLAGS
 if (NPM_OFFLINE)
     list(APPEND NPM_INSTALL_FLAGS --offline)
 endif()
+set(NPM_CACHE_DIR "${CMAKE_BINARY_DIR}/npm-cache")
 
 # Choose web UI build mode based on active CMake configuration.
 # In Debug config, build Vite in "debug" mode to enable Vue devtools.
@@ -83,8 +94,11 @@ set(NPM_BUILD_NODE_OPTIONS "")
 add_custom_target(web-ui ALL
     WORKING_DIRECTORY "${WEB_UI_DIR}"
     COMMENT "Installing NPM dependencies and building the Web UI"
-    COMMAND "$<$<BOOL:${WIN32}>:cmd;/C>" "${NPM}" ci ${NPM_INSTALL_FLAGS}
     COMMAND "${CMAKE_COMMAND}" -E env
+            "NPM_CONFIG_CACHE=${NPM_CACHE_DIR}"
+            "$<$<BOOL:${WIN32}>:cmd;/C>" "${NPM}" ci ${NPM_INSTALL_FLAGS}
+    COMMAND "${CMAKE_COMMAND}" -E env
+            "NPM_CONFIG_CACHE=${NPM_CACHE_DIR}"
             "SUNSHINE_BUILD_HOMEBREW=${NPM_BUILD_HOMEBREW}"
             "SUNSHINE_SOURCE_ASSETS_DIR=${NPM_SOURCE_ASSETS_DIR}"
             "SUNSHINE_ASSETS_DIR=${NPM_ASSETS_DIR}"

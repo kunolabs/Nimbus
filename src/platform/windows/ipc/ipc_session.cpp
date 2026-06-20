@@ -34,6 +34,8 @@
 namespace platf::dxgi {
   namespace {
     constexpr auto kRecentDesktopSwitchGrace = std::chrono::seconds(3);
+    constexpr auto kHelperHandleWaitTimeout = std::chrono::seconds(15);
+    constexpr auto kHelperHandleProgressInterval = std::chrono::seconds(3);
     constexpr std::int64_t kWgcMinUpdateInterval100ns = 10000;  // 1 ms
     constexpr uint32_t kWgcLatencyInitialBufferSize = 2;
     std::atomic<std::int64_t> g_last_wgc_desktop_switch_us {0};
@@ -174,11 +176,12 @@ namespace platf::dxgi {
     }
   }
 
-  int ipc_session_t::init(const ::video::config_t &config, std::string_view display_name, ID3D11Device *device) {
+  int ipc_session_t::init(const ::video::config_t &config, std::string_view display_name, ID3D11Device *device, bool advanced_color_capture) {
     _process_helper = std::make_unique<ProcessHandler>();
     _config = config;
     _display_name = display_name;
     _device.copy_from(device);
+    _advanced_color_capture = advanced_color_capture;
     return 0;
   }
 
@@ -258,16 +261,6 @@ namespace platf::dxgi {
     std::filesystem::path mainExeDir = std::filesystem::path(exePathBuffer).parent_path();
     std::string pipe_guid = generate_guid();
 
-    std::filesystem::path exe_path = mainExeDir / L"tools" / L"sunshine_wgc_capture.exe";
-    std::wstring arguments = platf::from_utf8(pipe_guid);
-
-    if (!_process_helper->start(exe_path.wstring(), arguments)) {
-      auto err = GetLastError();
-      BOOST_LOG(error) << "Failed to start sunshine_wgc_capture executable at: " << exe_path.wstring()
-                       << " (error code: " << err << ")";
-      return;
-    }
-
     auto on_message = [this](std::span<const uint8_t> msg) {
       if (msg.size() == 1) {
         handle_desktop_switch_message(msg);
@@ -291,6 +284,16 @@ namespace platf::dxgi {
       return;
     }
 
+    std::filesystem::path exe_path = mainExeDir / L"tools" / L"sunshine_wgc_capture.exe";
+    std::wstring arguments = platf::from_utf8(pipe_guid);
+
+    if (!_process_helper->start(exe_path.wstring(), arguments)) {
+      auto err = GetLastError();
+      BOOST_LOG(error) << "Failed to start sunshine_wgc_capture executable at: " << exe_path.wstring()
+                       << " (error code: " << err << ")";
+      return;
+    }
+
     control_pipe->wait_for_client_connection(5000);
 
     if (!control_pipe->is_connected()) {
@@ -302,6 +305,7 @@ namespace platf::dxgi {
     // Send config data to helper process
     config_data_t config_data = {};
     config_data.dynamic_range = _config.dynamicRange;
+    config_data.advanced_color_capture = _advanced_color_capture ? 1u : 0u;
     config_data.log_level = config::sunshine.min_log_level;
     config_data.min_update_interval_100ns = wgc_min_update_interval_100ns(_config);
     config_data.target_fps = wgc_target_fps(_config);
@@ -335,11 +339,14 @@ namespace platf::dxgi {
       return;
     }
 
-    constexpr auto handle_wait_timeout = std::chrono::seconds(3);
-    auto deadline = std::chrono::steady_clock::now() + handle_wait_timeout;
+    const auto handle_wait_start = std::chrono::steady_clock::now();
+    auto deadline = handle_wait_start + kHelperHandleWaitTimeout;
+    auto next_progress_log = handle_wait_start + kHelperHandleProgressInterval;
     std::array<uint8_t, sizeof(shared_handle_data_t)> control_buffer {};
     bool handle_received = false;
     bool timed_out_waiting = false;
+    bool helper_exited = false;
+    DWORD helper_exit_code = 0;
 
     while (!handle_received) {
       auto now = std::chrono::steady_clock::now();
@@ -348,11 +355,31 @@ namespace platf::dxgi {
         break;
       }
 
+      if (HANDLE helper_process = _process_helper ? _process_helper->get_process_handle() : nullptr) {
+        const DWORD wait_result = WaitForSingleObject(helper_process, 0);
+        if (wait_result == WAIT_OBJECT_0) {
+          helper_exited = true;
+          GetExitCodeProcess(helper_process, &helper_exit_code);
+          break;
+        }
+      }
+
+      if (now >= next_progress_log) {
+        const auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - handle_wait_start).count();
+        BOOST_LOG(warning) << "Still waiting for WGC helper shared handles after " << elapsed_ms
+                           << "ms; helper startup may be delayed by system load.";
+        next_progress_log = now + kHelperHandleProgressInterval;
+      }
+
       const auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(deadline - now);
       const int wait_ms = std::max(1, static_cast<int>(remaining.count()));
 
       size_t bytes_read = 0;
-      auto result = control_pipe->receive(std::span<uint8_t>(control_buffer.data(), control_buffer.size()), bytes_read, wait_ms);
+      auto result = control_pipe->receive(
+        std::span<uint8_t>(control_buffer.data(), control_buffer.size()),
+        bytes_read,
+        std::min(wait_ms, 250)
+      );
 
       if (result == PipeResult::Success) {
         if (bytes_read == sizeof(shared_handle_data_t)) {
@@ -380,10 +407,14 @@ namespace platf::dxgi {
     }
 
     if (!handle_received) {
-      if (timed_out_waiting) {
-        BOOST_LOG(error) << "Timed out waiting for handle data from helper process (3s)";
+      if (helper_exited) {
+        BOOST_LOG(error) << "WGC helper exited before sending shared handle data (exit_code=" << helper_exit_code << ')';
       }
-      BOOST_LOG(error) << "Failed to receive handle data from helper process! Helper is likely deadlocked!";
+      if (timed_out_waiting) {
+        BOOST_LOG(error) << "Timed out waiting for handle data from helper process ("
+                         << std::chrono::duration_cast<std::chrono::seconds>(kHelperHandleWaitTimeout).count() << "s)";
+      }
+      BOOST_LOG(error) << "Failed to receive handle data from WGC helper process.";
       _process_helper->terminate();
       return;
     }
@@ -573,9 +604,9 @@ namespace platf::dxgi {
       return capture_e::reinit;
     }
 
-    // The helper signals the frame-ready event only after publishing metadata
-    // and releasing this keyed mutex. After acquiring the mutex here, the
-    // metadata snapshot and shared texture contents refer to the latest frame.
+    // The helper publishes metadata while holding the keyed mutex, then signals
+    // the frame-ready event after releasing it. After acquiring the mutex here,
+    // the metadata snapshot and shared texture contents refer to the latest frame.
     frame_metadata_snapshot_t snapshot;
     if (!read_frame_metadata_snapshot(_frame_metadata, snapshot)) {
       (void) _keyed_mutex->ReleaseSync(0);
@@ -745,7 +776,10 @@ namespace platf::dxgi {
 
     DWORD exit_code = 0;
     _process_helper->terminate();  // best effort
-    _process_helper->wait(exit_code);
+    if (!_process_helper->wait_for(exit_code, 3000)) {
+      BOOST_LOG(warning) << "Timed out waiting for WGC helper process teardown; resetting process owner.";
+      _process_helper = std::make_unique<ProcessHandler>();
+    }
     _last_helper_stop = std::chrono::steady_clock::now();
   }
 

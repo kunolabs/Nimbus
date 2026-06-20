@@ -602,10 +602,8 @@ namespace confighttp {
         return std::nullopt;
       }
       pt::ptree tree;
-      try {
-        pt::read_json(path.string(), tree);
-      } catch (const std::exception &e) {
-        BOOST_LOG(warning) << "Crash dismissal: failed to read state file: " << e.what();
+      if (!statefile::read_json_with_recovery(path.string(), tree)) {
+        BOOST_LOG(warning) << "Crash dismissal: failed to read state file";
         return std::nullopt;
       }
       auto root_it = tree.find("root");
@@ -636,10 +634,8 @@ namespace confighttp {
       fs::path path(path_str);
       pt::ptree tree;
       if (fs::exists(path)) {
-        try {
-          pt::read_json(path.string(), tree);
-        } catch (const std::exception &e) {
-          BOOST_LOG(warning) << "Crash dismissal: failed to read existing state file: " << e.what();
+        if (!statefile::read_json_with_recovery(path.string(), tree)) {
+          BOOST_LOG(warning) << "Crash dismissal: failed to read existing state file";
           tree = {};
         }
       }

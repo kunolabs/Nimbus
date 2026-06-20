@@ -26,6 +26,7 @@
 #include <optional>
 #include <ranges>
 #include <set>
+#include <stdexcept>
 #include <Simple-Web-Server/crypto.hpp>
 #include <Simple-Web-Server/server_https.hpp>
 #include <string>
@@ -425,7 +426,9 @@ namespace confighttp {
       return fs::exists(path);
     };
     dependencies.read_json = [](const std::string &path, pt::ptree &tree) {
-      boost::property_tree::json_parser::read_json(path, tree);
+      if (!statefile::read_json_with_recovery(path, tree)) {
+        throw std::runtime_error("state JSON read failed");
+      }
     };
     dependencies.write_json = [](const std::string &path, const pt::ptree &tree) {
       statefile::write_json_atomic(path, tree);
@@ -465,7 +468,9 @@ namespace confighttp {
       return fs::exists(path);
     };
     deps.read_json = [](const std::string &path, pt::ptree &tree) {
-      boost::property_tree::json_parser::read_json(path, tree);
+      if (!statefile::read_json_with_recovery(path, tree)) {
+        throw std::runtime_error("state JSON read failed");
+      }
     };
     deps.write_json = [](const std::string &path, const pt::ptree &tree) {
       statefile::write_json_atomic(path, tree);

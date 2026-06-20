@@ -1,3 +1,5 @@
+import { isNimbusReleaseTag, normalizeReleaseTag } from './releaseRepository';
+
 export type ChangelogSource = 'bundled' | 'github';
 export type ChangelogChannel = 'stable' | 'alpha' | 'beta' | 'rc' | 'other';
 
@@ -47,8 +49,7 @@ interface VersionInfo {
 }
 
 function stripTagPrefix(tag: string): string {
-  const trimmed = (tag || '').trim();
-  return trimmed.startsWith('v') || trimmed.startsWith('V') ? trimmed.slice(1) : trimmed;
+  return normalizeReleaseTag(tag);
 }
 
 export function normalizeChangelogTag(tag: string): string {
@@ -210,13 +211,14 @@ export function parseBundledReleaseNote(filename: string, content: string): Chan
 
 export function githubReleaseToChangelogEntry(release: GitHubReleaseLike): ChangelogEntry | null {
   if (!release || release.draft || !release.tag_name) return null;
+  if (!isNimbusReleaseTag(release.tag_name)) return null;
   const tag = normalizeChangelogTag(release.tag_name);
   if (!/^\d+\.\d+(?:\.\d+)?(?:[-+].*)?$/i.test(tag)) return null;
   const info = parseChangelogVersion(tag);
   const body = (release.body ?? '').trim();
   const entry: ChangelogEntry = {
     tag,
-    name: (release.name || `Vibepollo ${tag}`).trim(),
+    name: (release.name || `Nimbus ${tag}`).trim(),
     date: (release.published_at || release.created_at || '').slice(0, 10),
     body,
     sections: parseMarkdownSections(body),
