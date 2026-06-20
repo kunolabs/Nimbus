@@ -2596,6 +2596,15 @@ namespace nvhttp {
         }
 
         if (request) {
+          if (!allow_display_changes &&
+              launch_session->virtual_display_recreated_on_demand &&
+              launch_session->virtual_display &&
+              request->configuration &&
+              request->configuration->m_hdr_state) {
+            request->configuration->m_hdr_state.reset();
+            BOOST_LOG(info) << "Display helper: suppressing HDR state change during retained resume virtual-display recreation.";
+          }
+
           if (!display_helper_integration::apply(*request)) {
             if (helper_session_available) {
               BOOST_LOG(warning) << "Display helper: failed to apply display configuration; continuing with existing display.";

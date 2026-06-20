@@ -9,6 +9,8 @@
 #include <iomanip>
 #include <iterator>
 #include <limits>
+#include <mutex>
+#include <optional>
 #include <set>
 #include <sstream>
 #include <vector>
@@ -112,6 +114,8 @@ namespace platf {
 
   bool enabled_mouse_keys = false;
   MOUSEKEYS previous_mouse_keys_state;
+  std::mutex screen_saver_state_mutex;
+  std::optional<BOOL> previous_screen_saver_active;
 
   HANDLE qos_handle = nullptr;
 
@@ -1267,7 +1271,48 @@ namespace platf {
     }
   }
 
+  void capture_screen_saver_active_state() {
+    std::lock_guard<std::mutex> lock(screen_saver_state_mutex);
+    if (previous_screen_saver_active) {
+      return;
+    }
+
+    BOOL active = FALSE;
+    if (!SystemParametersInfoW(SPI_GETSCREENSAVEACTIVE, 0, &active, 0)) {
+      const auto winerr = GetLastError();
+      BOOST_LOG(warning) << "Unable to get Windows screen saver active state: "sv << winerr;
+      return;
+    }
+
+    previous_screen_saver_active = active ? TRUE : FALSE;
+    BOOST_LOG(debug) << "Windows screen saver active state saved: "sv << (active ? "enabled"sv : "disabled"sv);
+  }
+
+  void restore_screen_saver_active_state() {
+    std::optional<BOOL> desired_state;
+    {
+      std::lock_guard<std::mutex> lock(screen_saver_state_mutex);
+      desired_state = previous_screen_saver_active;
+      previous_screen_saver_active.reset();
+    }
+
+    if (!desired_state) {
+      return;
+    }
+
+    const BOOL desired_active = *desired_state ? TRUE : FALSE;
+    if (!SystemParametersInfoW(SPI_SETSCREENSAVEACTIVE, desired_active, nullptr, SPIF_SENDCHANGE)) {
+      const auto winerr = GetLastError();
+      BOOST_LOG(warning) << "Unable to restore Windows screen saver active state: "sv << winerr;
+      return;
+    }
+
+    BOOST_LOG(info) << "Windows screen saver active state restored to "sv << (desired_active ? "enabled"sv : "disabled"sv);
+  }
+
   void streaming_will_start() {
+    capture_screen_saver_active_state();
+
     static std::once_flag load_wlanapi_once_flag;
     std::call_once(load_wlanapi_once_flag, []() {
       // wlanapi.dll is not installed by default on Windows Server, so we load it dynamically
@@ -1424,6 +1469,8 @@ namespace platf {
         BOOST_LOG(warning) << "Unable to restore original state of Mouse Keys: "sv << winerr;
       }
     }
+
+    restore_screen_saver_active_state();
   }
 
   void restart_on_exit() {
