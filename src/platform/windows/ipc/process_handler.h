@@ -57,6 +57,14 @@ public:
   bool wait(DWORD &exit_code);
 
   /**
+   * @brief Wait up to timeout_ms for the process to exit and obtain its exit code.
+   * @param exit_code Receives process exit code on success.
+   * @param timeout_ms Maximum wait time in milliseconds.
+   * @return `true` if the process exited before the timeout; `false` otherwise.
+   */
+  bool wait_for(DWORD &exit_code, DWORD timeout_ms);
+
+  /**
    * @brief Terminate the process if still running (best-effort).
    */
   void terminate();

@@ -1055,8 +1055,10 @@ namespace platf::dxgi {
     DWORD err = GetLastError();
     if (err == ERROR_IO_PENDING) {
       return handle_pending_receive_operation(ctx, timeout_ms, dst, bytesRead);
-    } else if (err == ERROR_BROKEN_PIPE) {
-      BOOST_LOG(warning) << "Pipe broken during ReadFile (ERROR_BROKEN_PIPE)";
+    } else if (err == ERROR_BROKEN_PIPE ||
+               err == ERROR_PIPE_NOT_CONNECTED ||
+               err == ERROR_NO_DATA) {
+      BOOST_LOG(warning) << "Pipe disconnected during ReadFile (error=" << err << ")";
       // Reflect disconnected state immediately so higher layers don't think we're still connected
       _connected.store(false, std::memory_order_release);
       return PipeResult::BrokenPipe;
@@ -1077,7 +1079,9 @@ namespace platf::dxgi {
         return Success;
       } else {
         DWORD overlappedErr = GetLastError();
-        if (overlappedErr == ERROR_BROKEN_PIPE) {
+        if (overlappedErr == ERROR_BROKEN_PIPE ||
+            overlappedErr == ERROR_PIPE_NOT_CONNECTED ||
+            overlappedErr == ERROR_NO_DATA) {
           BOOST_LOG(warning) << "IPC pipe connection to helper process was lost.";
           _connected.store(false, std::memory_order_release);
           return BrokenPipe;
